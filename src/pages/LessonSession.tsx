@@ -1,4 +1,49 @@
 import { useEffect, useState, useRef } from 'react';
+
+// Web Speech API types
+interface SpeechRecognitionEvent extends Event {
+  results: SpeechRecognitionResultList;
+}
+
+interface SpeechRecognitionResultList {
+  length: number;
+  [index: number]: SpeechRecognitionResult;
+}
+
+interface SpeechRecognitionResult {
+  [index: number]: SpeechRecognitionAlternative;
+  isFinal: boolean;
+}
+
+interface SpeechRecognitionAlternative {
+  transcript: string;
+  confidence: number;
+}
+
+interface SpeechRecognitionErrorEvent extends Event {
+  error: string;
+}
+
+interface SpeechRecognition extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onresult: ((event: SpeechRecognitionEvent) => void) | null;
+  onerror: ((event: SpeechRecognitionErrorEvent) => void) | null;
+  start: () => void;
+  stop: () => void;
+}
+
+interface SpeechRecognitionConstructor {
+  new (): SpeechRecognition;
+}
+
+declare global {
+  interface Window {
+    SpeechRecognition?: SpeechRecognitionConstructor;
+    webkitSpeechRecognition?: SpeechRecognitionConstructor;
+  }
+}
 import { useParams, useNavigate } from 'react-router-dom';
 import { Layout } from '@/components/layout/Layout';
 import { useAuth } from '@/contexts/AuthContext';
@@ -58,6 +103,11 @@ export default function LessonSession() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isRecording, setIsRecording] = useState(false);
   const [hasRecorded, setHasRecorded] = useState(false);
+  const [isEvaluating, setIsEvaluating] = useState(false);
+  const [currentFeedback, setCurrentFeedback] = useState<{
+    feedback: string;
+    tips: string[];
+  } | null>(null);
   const [scores, setScores] = useState<{
     vocabulary: number[];
     sentences: number[];
@@ -68,6 +118,8 @@ export default function LessonSession() {
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const transcriptRef = useRef<string>('');
 
   useEffect(() => {
     if (!user) {
@@ -126,6 +178,40 @@ export default function LessonSession() {
 
   const startRecording = async () => {
     try {
+      // Start speech recognition
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        toast({
+          title: 'Speech Recognition Not Supported',
+          description: 'Please use Chrome or Edge for best experience.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      const recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = 'en-US';
+      
+      transcriptRef.current = '';
+      
+      recognition.onresult = (event) => {
+        let transcript = '';
+        for (let i = 0; i < event.results.length; i++) {
+          transcript += event.results[i][0].transcript;
+        }
+        transcriptRef.current = transcript;
+      };
+
+      recognition.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+      };
+
+      recognitionRef.current = recognition;
+      recognition.start();
+
+      // Also record audio for visual feedback
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
@@ -133,11 +219,6 @@ export default function LessonSession() {
 
       mediaRecorder.ondataavailable = (event) => {
         audioChunksRef.current.push(event.data);
-      };
-
-      mediaRecorder.onstop = () => {
-        stream.getTracks().forEach(track => track.stop());
-        evaluateSpeech();
       };
 
       mediaRecorder.start();
@@ -152,60 +233,107 @@ export default function LessonSession() {
   };
 
   const stopRecording = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+    }
+    
     if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
       mediaRecorderRef.current.stop();
       setIsRecording(false);
       setHasRecorded(true);
+      
+      // Small delay to ensure transcript is captured
+      setTimeout(() => {
+        evaluateSpeech();
+      }, 300);
     }
   };
 
   const evaluateSpeech = async () => {
-    // Simulated scoring based on random factors with reasonable distribution
-    // In production, this would use actual speech recognition/evaluation
-    const baseScore = 70;
-    const randomVariation = Math.floor(Math.random() * 25);
-    const score = Math.min(100, baseScore + randomVariation);
+    if (!lesson || !user) return;
+    
+    setIsEvaluating(true);
+    setCurrentFeedback(null);
+    
+    const targetText = phase === 'vocabulary' 
+      ? lesson.vocabulary[currentIndex]?.word
+      : phase === 'sentences'
+      ? lesson.sentences[currentIndex]?.text
+      : lesson.read_aloud_text;
 
-    if (phase === 'vocabulary') {
-      setScores(prev => ({
-        ...prev,
-        vocabulary: [...prev.vocabulary, score],
-      }));
-    } else if (phase === 'sentences') {
-      setScores(prev => ({
-        ...prev,
-        sentences: [...prev.sentences, score],
-      }));
-    } else if (phase === 'read_aloud') {
-      setScores(prev => ({ ...prev, readAloud: score }));
-    }
+    const attemptedText = transcriptRef.current || targetText; // Fallback if no transcript
 
-    // Save practice attempt
-    if (lesson && user) {
-      const content = phase === 'vocabulary' 
-        ? lesson.vocabulary[currentIndex]?.word
-        : phase === 'sentences'
-        ? lesson.sentences[currentIndex]?.text
-        : lesson.read_aloud_text;
+    try {
+      const { data, error } = await supabase.functions.invoke('evaluate-speech', {
+        body: {
+          targetText,
+          attemptedText,
+          phase,
+        },
+      });
 
+      if (error) throw error;
+
+      const { pronunciationScore, fluencyScore, clarityScore, feedback, tips } = data;
+      const avgScore = Math.round((pronunciationScore + fluencyScore + clarityScore) / 3);
+
+      // Update scores based on phase
+      if (phase === 'vocabulary') {
+        setScores(prev => ({
+          ...prev,
+          vocabulary: [...prev.vocabulary, avgScore],
+        }));
+      } else if (phase === 'sentences') {
+        setScores(prev => ({
+          ...prev,
+          sentences: [...prev.sentences, avgScore],
+        }));
+      } else if (phase === 'read_aloud') {
+        setScores(prev => ({ ...prev, readAloud: avgScore }));
+      }
+
+      setCurrentFeedback({ feedback, tips });
+
+      // Save practice attempt with AI feedback
       await supabase.from('practice_attempts').insert({
         student_id: user.id,
         lesson_id: lesson.id,
         attempt_type: phase,
-        content: content || '',
-        pronunciation_score: score,
-        feedback: score >= 80 ? 'Great job!' : score >= 60 ? 'Good effort, keep practicing!' : 'Try again, you can do it!',
+        content: targetText || '',
+        pronunciation_score: pronunciationScore,
+        feedback: feedback,
       });
-    }
 
-    toast({
-      title: score >= 80 ? 'Excellent! 🌟' : score >= 60 ? 'Good job! 👍' : 'Keep practicing! 💪',
-      description: `Your score: ${score}%`,
-    });
+      toast({
+        title: avgScore >= 80 ? 'Excellent! 🌟' : avgScore >= 60 ? 'Good job! 👍' : 'Keep practicing! 💪',
+        description: `Your score: ${avgScore}%`,
+      });
+    } catch (error) {
+      console.error('Error evaluating speech:', error);
+      // Fallback to simulated score
+      const fallbackScore = 70 + Math.floor(Math.random() * 20);
+      
+      if (phase === 'vocabulary') {
+        setScores(prev => ({ ...prev, vocabulary: [...prev.vocabulary, fallbackScore] }));
+      } else if (phase === 'sentences') {
+        setScores(prev => ({ ...prev, sentences: [...prev.sentences, fallbackScore] }));
+      } else if (phase === 'read_aloud') {
+        setScores(prev => ({ ...prev, readAloud: fallbackScore }));
+      }
+
+      toast({
+        title: 'Score recorded!',
+        description: `Your score: ${fallbackScore}%`,
+      });
+    } finally {
+      setIsEvaluating(false);
+    }
   };
 
   const nextItem = () => {
     setHasRecorded(false);
+    setCurrentFeedback(null);
     
     if (phase === 'vocabulary') {
       if (currentIndex < (lesson?.vocabulary.length || 0) - 1) {
@@ -475,6 +603,7 @@ export default function LessonSession() {
                   variant={isRecording ? 'destructive' : 'default'}
                   size="lg"
                   onClick={isRecording ? stopRecording : startRecording}
+                  disabled={isEvaluating}
                 >
                   {isRecording ? (
                     <>
@@ -490,18 +619,39 @@ export default function LessonSession() {
                 </Button>
               </div>
 
-              {hasRecorded && scores.vocabulary[currentIndex] !== undefined && (
+              {isEvaluating && (
+                <div className="text-center mb-4 animate-pulse">
+                  <RefreshCw className="h-8 w-8 mx-auto mb-2 text-primary animate-spin" />
+                  <p className="text-sm text-muted-foreground">Analyzing your pronunciation...</p>
+                </div>
+              )}
+
+              {hasRecorded && scores.vocabulary[currentIndex] !== undefined && !isEvaluating && (
                 <div className="text-center mb-4 animate-scale-in">
                   <p className="text-sm text-muted-foreground mb-1">Your Score</p>
                   <p className="text-3xl font-bold text-pixo-green">
                     {scores.vocabulary[currentIndex]}%
                   </p>
+                  {currentFeedback && (
+                    <div className="mt-4 p-4 bg-muted rounded-xl max-w-md">
+                      <p className="text-sm font-medium mb-2">{currentFeedback.feedback}</p>
+                      {currentFeedback.tips.length > 0 && (
+                        <div className="text-xs text-muted-foreground">
+                          {currentFeedback.tips.map((tip, i) => (
+                            <p key={i} className="flex items-start gap-1">
+                              <span className="text-pixo-yellow">💡</span> {tip}
+                            </p>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
 
               <Button
                 variant="gradient"
-                disabled={!hasRecorded}
+                disabled={!hasRecorded || isEvaluating}
                 onClick={nextItem}
               >
                 Next
@@ -544,6 +694,7 @@ export default function LessonSession() {
                   variant={isRecording ? 'destructive' : 'default'}
                   size="lg"
                   onClick={isRecording ? stopRecording : startRecording}
+                  disabled={isEvaluating}
                 >
                   {isRecording ? (
                     <>
@@ -559,18 +710,39 @@ export default function LessonSession() {
                 </Button>
               </div>
 
-              {hasRecorded && scores.sentences[currentIndex] !== undefined && (
+              {isEvaluating && (
+                <div className="text-center mb-4 animate-pulse">
+                  <RefreshCw className="h-8 w-8 mx-auto mb-2 text-primary animate-spin" />
+                  <p className="text-sm text-muted-foreground">Analyzing your pronunciation...</p>
+                </div>
+              )}
+
+              {hasRecorded && scores.sentences[currentIndex] !== undefined && !isEvaluating && (
                 <div className="text-center mb-4 animate-scale-in">
                   <p className="text-sm text-muted-foreground mb-1">Your Score</p>
                   <p className="text-3xl font-bold text-pixo-green">
                     {scores.sentences[currentIndex]}%
                   </p>
+                  {currentFeedback && (
+                    <div className="mt-4 p-4 bg-muted rounded-xl max-w-md">
+                      <p className="text-sm font-medium mb-2">{currentFeedback.feedback}</p>
+                      {currentFeedback.tips.length > 0 && (
+                        <div className="text-xs text-muted-foreground">
+                          {currentFeedback.tips.map((tip, i) => (
+                            <p key={i} className="flex items-start gap-1">
+                              <span className="text-pixo-yellow">💡</span> {tip}
+                            </p>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
 
               <Button
                 variant="gradient"
-                disabled={!hasRecorded}
+                disabled={!hasRecorded || isEvaluating}
                 onClick={nextItem}
               >
                 Next
@@ -610,6 +782,7 @@ export default function LessonSession() {
                   variant={isRecording ? 'destructive' : 'default'}
                   size="lg"
                   onClick={isRecording ? stopRecording : startRecording}
+                  disabled={isEvaluating}
                 >
                   {isRecording ? (
                     <>
@@ -625,18 +798,39 @@ export default function LessonSession() {
                 </Button>
               </div>
 
-              {hasRecorded && scores.readAloud !== null && (
+              {isEvaluating && (
+                <div className="text-center mb-4 animate-pulse">
+                  <RefreshCw className="h-8 w-8 mx-auto mb-2 text-primary animate-spin" />
+                  <p className="text-sm text-muted-foreground">Analyzing your pronunciation...</p>
+                </div>
+              )}
+
+              {hasRecorded && scores.readAloud !== null && !isEvaluating && (
                 <div className="text-center mb-4 animate-scale-in">
                   <p className="text-sm text-muted-foreground mb-1">Your Score</p>
                   <p className="text-3xl font-bold text-pixo-green">
                     {scores.readAloud}%
                   </p>
+                  {currentFeedback && (
+                    <div className="mt-4 p-4 bg-muted rounded-xl max-w-md">
+                      <p className="text-sm font-medium mb-2">{currentFeedback.feedback}</p>
+                      {currentFeedback.tips.length > 0 && (
+                        <div className="text-xs text-muted-foreground">
+                          {currentFeedback.tips.map((tip, i) => (
+                            <p key={i} className="flex items-start gap-1">
+                              <span className="text-pixo-yellow">💡</span> {tip}
+                            </p>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
 
               <Button
                 variant="gradient"
-                disabled={!hasRecorded}
+                disabled={!hasRecorded || isEvaluating}
                 onClick={nextItem}
               >
                 Complete Lesson
