@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Layout } from '@/components/layout/Layout';
+import { supabase } from '@/integrations/supabase/client';
 import pixoLogo from '@/assets/pixo-logo.png';
 import { Eye, EyeOff, GraduationCap, Users, Loader2 } from 'lucide-react';
 import { z } from 'zod';
@@ -36,14 +37,35 @@ export default function Auth() {
 
   useEffect(() => {
     if (user && profile) {
-      const redirectPath = profile.role === 'admin' 
-        ? '/admin' 
-        : profile.role === 'parent' 
-        ? '/parent' 
-        : '/student';
-      navigate(redirectPath);
+      // For new students, redirect to level selection
+      // For returning users, go to their dashboard
+      if (profile.role === 'student') {
+        // Check if they've selected a level by looking at their progress
+        checkStudentProgress();
+      } else {
+        const redirectPath = profile.role === 'admin' ? '/admin' : '/parent';
+        navigate(redirectPath);
+      }
     }
   }, [user, profile, navigate]);
+
+  const checkStudentProgress = async () => {
+    if (!user) return;
+    
+    const { data: progress } = await supabase
+      .from('student_progress')
+      .select('current_day')
+      .eq('student_id', user.id)
+      .single();
+    
+    // If current_day is 1 and this is a new signup, go to level selection
+    // Otherwise go to dashboard
+    if (progress?.current_day === 1 && isSignUp) {
+      navigate('/level-selection');
+    } else {
+      navigate('/student');
+    }
+  };
 
   const validateForm = () => {
     try {

@@ -17,7 +17,8 @@ import {
   CheckCircle2,
   Sparkles,
   Target,
-  TrendingUp
+  TrendingUp,
+  MessageCircle
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -309,6 +310,33 @@ export default function StudentDashboard() {
             </div>
           </div>
         )}
+
+        {/* AI Practice Section */}
+        <div className="mb-8 animate-fade-in" style={{ animationDelay: '0.55s' }}>
+          <div className="pixo-card bg-gradient-to-r from-accent/20 to-secondary/20 border-accent/30">
+            <div className="flex flex-col md:flex-row md:items-center gap-4">
+              <div className="flex items-center gap-4 flex-1">
+                <div className="w-14 h-14 rounded-xl bg-accent/20 flex items-center justify-center">
+                  <MessageCircle className="h-7 w-7 text-accent" />
+                </div>
+                <div>
+                  <h3 className="font-display font-bold text-lg">AI Practice Simulations</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Practice real conversations with AI in restaurants, shops, interviews & more
+                  </p>
+                </div>
+              </div>
+              <Button 
+                variant="gradient" 
+                size="lg"
+                onClick={() => navigate('/practice')}
+              >
+                <MessageCircle className="h-5 w-5 mr-2" />
+                Start Practicing
+              </Button>
+            </div>
+          </div>
+        </div>
 
         {/* Lesson List */}
         <div className="animate-fade-in" style={{ animationDelay: '0.6s' }}>
