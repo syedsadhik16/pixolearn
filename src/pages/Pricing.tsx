@@ -9,6 +9,8 @@ import pixoLogo from '@/assets/pixo-logo.png';
 import { Check, ArrowRight, Star, Sparkles, ArrowLeft, Loader2, Shield } from 'lucide-react';
 import { ComparisonTable } from '@/components/pricing/ComparisonTable';
 import { PricingFAQ } from '@/components/pricing/PricingFAQ';
+import { Testimonials } from '@/components/pricing/Testimonials';
+import { ScrollReveal } from '@/components/shared/ScrollReveal';
 
 declare global {
   interface Window {
@@ -347,10 +349,18 @@ export default function Pricing() {
         </section>
 
         {/* Comparison Table */}
-        <ComparisonTable />
+        <ScrollReveal>
+          <ComparisonTable />
+        </ScrollReveal>
+
+        {/* Testimonials */}
+        <Testimonials />
 
         {/* FAQ */}
-        <PricingFAQ />
+        <ScrollReveal>
+          <PricingFAQ />
+        </ScrollReveal>
+
 
         <section className="py-12 border-t border-border">
           <div className="container mx-auto px-4 text-center">
