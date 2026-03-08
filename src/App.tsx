@@ -13,6 +13,12 @@ import AIPractice from "./pages/AIPractice";
 import ParentDashboard from "./pages/ParentDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
+import Journey from "./pages/Journey";
+import Chat from "./pages/Chat";
+import Live from "./pages/Live";
+import Roleplay from "./pages/Roleplay";
+import Dictionary from "./pages/Dictionary";
+import Studio from "./pages/Studio";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +36,12 @@ const App = () => (
             <Route path="/student" element={<StudentDashboard />} />
             <Route path="/lesson/:lessonId" element={<LessonSession />} />
             <Route path="/practice" element={<AIPractice />} />
+            <Route path="/journey" element={<Journey />} />
+            <Route path="/chat" element={<Chat />} />
+            <Route path="/live" element={<Live />} />
+            <Route path="/roleplay" element={<Roleplay />} />
+            <Route path="/dictionary" element={<Dictionary />} />
+            <Route path="/studio" element={<Studio />} />
             <Route path="/parent" element={<ParentDashboard />} />
             <Route path="/admin" element={<AdminDashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
