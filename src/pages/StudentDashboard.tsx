@@ -248,6 +248,7 @@ export default function StudentDashboard() {
               )}
               <StreakDisplay streak={streak} />
             </div>
+          </div>
         </div>
 
         {/* Stats Grid */}
