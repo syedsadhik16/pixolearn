@@ -349,7 +349,9 @@ export default function Pricing() {
         {/* Comparison Table */}
         <ComparisonTable />
 
-        {/* Trust */}
+        {/* FAQ */}
+        <PricingFAQ />
+
         <section className="py-12 border-t border-border">
           <div className="container mx-auto px-4 text-center">
             <div className="flex items-center justify-center gap-6 flex-wrap text-sm text-muted-foreground">
