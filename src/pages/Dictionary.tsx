@@ -43,7 +43,7 @@ export default function Dictionary() {
 
   const loadSavedWords = async () => {
     const { data } = await supabase
-      .from('saved_words')
+      .from('saved_words' as any)
       .select('*')
       .eq('student_id', user!.id)
       .order('created_at', { ascending: false });
