@@ -522,6 +522,20 @@ export default function ParentDashboard() {
                 </div>
               </div>
 
+              {/* Weekly Report Link */}
+              <div className="mb-6 p-4 bg-gradient-to-r from-pixo-blue/10 to-pixo-purple/10 rounded-xl flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-pixo-blue/10 flex items-center justify-center">
+                  <BarChart3 className="h-5 w-5 text-pixo-blue" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold">Weekly Progress Report</p>
+                  <p className="text-xs text-muted-foreground">View detailed XP, lessons & streak charts</p>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => navigate('/weekly-report')}>
+                  View
+                </Button>
+              </div>
+
               {/* 7-Day Attendance */}
               <div className="mb-6">
                 <h3 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
