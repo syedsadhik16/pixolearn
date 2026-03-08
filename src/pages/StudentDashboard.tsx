@@ -502,8 +502,8 @@ export default function StudentDashboard() {
                     Get access to all lessons, unlimited practice sessions, and advanced progress tracking.
                   </p>
                 </div>
-                <Button variant="gradient">
-                  Upgrade to Premium
+                <Button variant="gradient" onClick={() => navigate('/pricing')}>
+                  <Crown className="h-4 w-4 mr-2" /> Upgrade to Premium
                 </Button>
               </div>
             </div>
