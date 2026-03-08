@@ -68,6 +68,7 @@ import {
   Star,
   Sparkles,
 } from 'lucide-react';
+import { useCompanion } from '@/hooks/useCompanion';
 
 interface Lesson {
   id: string;
