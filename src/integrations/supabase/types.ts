@@ -305,7 +305,7 @@ export type Database = {
       }
     }
     Enums: {
-      lesson_level: "beginner" | "intermediate"
+      lesson_level: "beginner" | "intermediate" | "advanced"
       subscription_type: "free" | "premium"
       user_role: "student" | "parent" | "admin"
     }
@@ -435,7 +435,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      lesson_level: ["beginner", "intermediate"],
+      lesson_level: ["beginner", "intermediate", "advanced"],
       subscription_type: ["free", "premium"],
       user_role: ["student", "parent", "admin"],
     },

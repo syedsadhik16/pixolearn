@@ -1,0 +1,1 @@
+ALTER TYPE public.lesson_level ADD VALUE IF NOT EXISTS 'advanced';
