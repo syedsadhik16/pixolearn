@@ -19,7 +19,8 @@ import {
   Sparkles,
   Target,
   TrendingUp,
-  MessageCircle
+  MessageCircle,
+  BarChart3
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { GamificationPanel } from '@/components/shared/GamificationPanel';
@@ -321,6 +322,24 @@ export default function StudentDashboard() {
             </div>
           </div>
         )}
+
+        {/* Weekly Report Link */}
+        <div className="mb-8 animate-fade-in" style={{ animationDelay: '0.52s' }}>
+          <div className="pixo-card bg-gradient-to-r from-pixo-blue/10 to-pixo-purple/10 border-pixo-blue/20">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-pixo-blue/10 flex items-center justify-center">
+                <BarChart3 className="h-6 w-6 text-pixo-blue" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-display font-bold">Weekly Progress Report</h3>
+                <p className="text-sm text-muted-foreground">View your lessons, XP, and streak charts</p>
+              </div>
+              <Button variant="outline" size="sm" onClick={() => navigate('/weekly-report')}>
+                View
+              </Button>
+            </div>
+          </div>
+        </div>
 
         {/* AI Practice Section */}
         <div className="mb-8 animate-fade-in" style={{ animationDelay: '0.55s' }}>
