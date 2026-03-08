@@ -573,9 +573,7 @@ export default function LessonSession() {
           {/* Intro Phase */}
           {phase === 'intro' && (
             <div className="flex-1 flex flex-col items-center justify-center text-center p-8 animate-fade-in">
-              <div className="w-20 h-20 rounded-full gradient-bg flex items-center justify-center mb-6">
-                <Sparkles className="h-10 w-10 text-white" />
-              </div>
+              <img src={companion.image} alt={companion.name} className="w-24 h-24 object-contain animate-float mb-6" />
               <h2 className="text-2xl font-display font-bold mb-4">{lesson.title}</h2>
               <p className="text-muted-foreground mb-8 max-w-md">{lesson.description}</p>
               
