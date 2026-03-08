@@ -79,12 +79,25 @@ interface Lesson {
   read_aloud_text: string | null;
 }
 
+interface VocabItem {
+  word: string;
+  phonetic: string;
+  meaning: string;
+}
+
+interface SentenceItem {
+  text: string;
+}
+
 interface LessonForm {
   title: string;
   level: string;
   day_number: number;
   description: string;
   is_active: boolean;
+  vocabulary: VocabItem[];
+  sentences: SentenceItem[];
+  read_aloud_text: string;
 }
 
 const CHART_COLORS = [
