@@ -90,11 +90,6 @@ export default function Pricing() {
   };
 
   const handleSelectPlan = async (plan: typeof plans[0]) => {
-    if (plan.id === 'free') {
-      navigate('/student');
-      return;
-    }
-
     if (!user) {
       navigate('/auth?signup=true');
       return;
