@@ -336,6 +336,12 @@ export default function ParentDashboard() {
               </p>
             </div>
             <div className="flex items-center gap-2">
+              {isNotificationSupported() && !pushEnabled && (
+                <Button variant="outline" size="sm" onClick={handleEnablePush}>
+                  <Bell className="h-4 w-4 mr-1.5" />
+                  Enable Alerts
+                </Button>
+              )}
               {user && <NotificationPreferences userId={user.id} />}
               {user && <NotificationBell userId={user.id} />}
               <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

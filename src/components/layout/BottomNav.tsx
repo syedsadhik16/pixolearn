@@ -6,7 +6,8 @@ import {
   Radio, 
   Theater, 
   BookOpenText, 
-  Mic2 
+  Mic2,
+  Trophy
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -18,6 +19,7 @@ const navItems = [
   { path: '/roleplay', label: 'Roleplay', icon: Theater },
   { path: '/dictionary', label: 'Dictionary', icon: BookOpenText },
   { path: '/studio', label: 'Studio', icon: Mic2 },
+  { path: '/leaderboard', label: 'Ranks', icon: Trophy },
 ];
 
 export function BottomNav() {

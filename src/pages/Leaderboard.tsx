@@ -122,9 +122,9 @@ export default function Leaderboard() {
   };
 
   const getRankIcon = (rank: number) => {
-    if (rank === 1) return <Crown className="h-5 w-5 text-amber-400" />;
-    if (rank === 2) return <Medal className="h-5 w-5 text-gray-400" />;
-    if (rank === 3) return <Medal className="h-5 w-5 text-amber-600" />;
+    if (rank === 1) return <Crown className="h-5 w-5 text-accent" />;
+    if (rank === 2) return <Medal className="h-5 w-5 text-muted-foreground" />;
+    if (rank === 3) return <Medal className="h-5 w-5 text-primary" />;
     return <span className="text-sm font-bold text-muted-foreground w-5 text-center">{rank}</span>;
   };
 
