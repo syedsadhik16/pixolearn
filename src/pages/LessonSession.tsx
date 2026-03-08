@@ -331,11 +331,18 @@ export default function LessonSession() {
     }
   };
 
-  const nextItem = () => {
+  const nextItem = (skipped = false) => {
     setHasRecorded(false);
     setCurrentFeedback(null);
     
     if (phase === 'vocabulary') {
+      if (skipped) {
+        setScores(prev => {
+          const newVocab = [...prev.vocabulary];
+          newVocab[currentIndex] = newVocab[currentIndex] ?? 0;
+          return { ...prev, vocabulary: newVocab };
+        });
+      }
       if (currentIndex < (lesson?.vocabulary.length || 0) - 1) {
         setCurrentIndex(currentIndex + 1);
       } else {
@@ -343,6 +350,13 @@ export default function LessonSession() {
         setCurrentIndex(0);
       }
     } else if (phase === 'sentences') {
+      if (skipped) {
+        setScores(prev => {
+          const newSentences = [...prev.sentences];
+          newSentences[currentIndex] = newSentences[currentIndex] ?? 0;
+          return { ...prev, sentences: newSentences };
+        });
+      }
       if (currentIndex < (lesson?.sentences.length || 0) - 1) {
         setCurrentIndex(currentIndex + 1);
       } else {
@@ -350,6 +364,9 @@ export default function LessonSession() {
         setCurrentIndex(0);
       }
     } else if (phase === 'read_aloud') {
+      if (skipped) {
+        setScores(prev => ({ ...prev, readAloud: prev.readAloud ?? 0 }));
+      }
       completeLesson();
     }
   };
@@ -410,14 +427,28 @@ export default function LessonSession() {
           .eq('student_id', user.id);
       }
 
-      // Mark attendance
+      // Mark attendance - use insert with conflict handling
       const today = new Date().toISOString().split('T')[0];
-      await supabase.from('attendance').upsert({
-        student_id: user.id,
-        date: today,
-        is_present: true,
-        lesson_completed: true,
-      }, { onConflict: 'student_id,date' });
+      const { data: existingAttendance } = await supabase
+        .from('attendance')
+        .select('id')
+        .eq('student_id', user.id)
+        .eq('date', today)
+        .maybeSingle();
+
+      if (existingAttendance) {
+        await supabase
+          .from('attendance')
+          .update({ lesson_completed: true, is_present: true })
+          .eq('id', existingAttendance.id);
+      } else {
+        await supabase.from('attendance').insert({
+          student_id: user.id,
+          date: today,
+          is_present: true,
+          lesson_completed: true,
+        });
+      }
 
       setPhase('complete');
     } catch (error) {
@@ -653,14 +684,14 @@ export default function LessonSession() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => { setHasRecorded(true); nextItem(); }}
+                  onClick={() => { setHasRecorded(true); nextItem(true); }}
                 >
                   Skip Recording
                 </Button>
                 <Button
                   variant="gradient"
                   disabled={!hasRecorded || isEvaluating}
-                  onClick={nextItem}
+                  onClick={() => nextItem()}
                 >
                   Next
                   <ArrowRight className="h-4 w-4 ml-2" />
@@ -753,14 +784,14 @@ export default function LessonSession() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => { setHasRecorded(true); nextItem(); }}
+                  onClick={() => { setHasRecorded(true); nextItem(true); }}
                 >
                   Skip Recording
                 </Button>
                 <Button
                   variant="gradient"
                   disabled={!hasRecorded || isEvaluating}
-                  onClick={nextItem}
+                  onClick={() => nextItem()}
                 >
                   Next
                   <ArrowRight className="h-4 w-4 ml-2" />
@@ -850,14 +881,14 @@ export default function LessonSession() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => { setHasRecorded(true); nextItem(); }}
+                  onClick={() => { setHasRecorded(true); nextItem(true); }}
                 >
                   Skip Recording
                 </Button>
                 <Button
                   variant="gradient"
                   disabled={!hasRecorded || isEvaluating}
-                  onClick={nextItem}
+                  onClick={() => nextItem()}
                 >
                   Complete Lesson
                   <CheckCircle2 className="h-4 w-4 ml-2" />
