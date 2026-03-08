@@ -53,6 +53,9 @@ export function GamificationPanel() {
   const [challenges, setChallenges] = useState<DailyChallenge[]>([]);
   const [studentChallenges, setStudentChallenges] = useState<StudentChallenge[]>([]);
   const [loading, setLoading] = useState(true);
+  const [celebration, setCelebration] = useState<{ show: boolean; type: 'level_up' | 'badge'; title: string; subtitle?: string; icon?: string }>({ show: false, type: 'level_up', title: '' });
+  const prevLevelRef = useRef<number>(0);
+  const prevBadgeCountRef = useRef<number>(0);
 
   useEffect(() => {
     if (user) fetchAll();
