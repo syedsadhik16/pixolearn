@@ -19,6 +19,7 @@ import Live from "./pages/Live";
 import Roleplay from "./pages/Roleplay";
 import Dictionary from "./pages/Dictionary";
 import Studio from "./pages/Studio";
+import Leaderboard from "./pages/Leaderboard";
 
 const queryClient = new QueryClient();
 
