@@ -173,6 +173,10 @@
 }
 
 @layer utilities {
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
   .animate-float {
     animation: float 6s ease-in-out infinite;
   }
