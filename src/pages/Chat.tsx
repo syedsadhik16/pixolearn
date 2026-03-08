@@ -90,6 +90,9 @@ export default function Chat() {
     setInputText('');
     setIsLoading(true);
 
+    // Track chat challenge
+    if (user) trackChallengeProgress(user.id, 'chat');
+
     try {
       const { data, error } = await supabase.functions.invoke('ai-practice', {
         body: {
