@@ -26,6 +26,7 @@ import { useToast } from '@/hooks/use-toast';
 import { GamificationPanel } from '@/components/shared/GamificationPanel';
 import { DailyLoginReward } from '@/components/shared/DailyLoginReward';
 import { checkAndAwardBadges } from '@/lib/gamification';
+import { useCompanion } from '@/hooks/useCompanion';
 
 interface Lesson {
   id: string;
