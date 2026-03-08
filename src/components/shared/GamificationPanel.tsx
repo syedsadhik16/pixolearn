@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Trophy, Zap, Target, Star, Gift } from 'lucide-react';
@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { CelebrationOverlay } from './CelebrationOverlay';
 
 interface XPData {
   total_xp: number;
@@ -52,6 +53,9 @@ export function GamificationPanel() {
   const [challenges, setChallenges] = useState<DailyChallenge[]>([]);
   const [studentChallenges, setStudentChallenges] = useState<StudentChallenge[]>([]);
   const [loading, setLoading] = useState(true);
+  const [celebration, setCelebration] = useState<{ show: boolean; type: 'level_up' | 'badge'; title: string; subtitle?: string; icon?: string }>({ show: false, type: 'level_up', title: '' });
+  const prevLevelRef = useRef<number>(0);
+  const prevBadgeCountRef = useRef<number>(0);
 
   useEffect(() => {
     if (user) fetchAll();
@@ -69,9 +73,24 @@ export function GamificationPanel() {
           .eq('challenge_date', new Date().toISOString().split('T')[0]),
       ]);
 
-      if (xpRes.data) setXP(xpRes.data);
+      if (xpRes.data) {
+        const newLevel = xpRes.data.xp_level;
+        if (prevLevelRef.current > 0 && newLevel > prevLevelRef.current) {
+          setCelebration({ show: true, type: 'level_up', title: `Level ${newLevel}!`, subtitle: 'Keep up the amazing work! 🚀', icon: '🚀' });
+        }
+        prevLevelRef.current = newLevel;
+        setXP(xpRes.data);
+      }
       if (badgesRes.data) setBadges(badgesRes.data as Badge[]);
-      if (earnedRes.data) setEarnedBadges(earnedRes.data as EarnedBadge[]);
+      if (earnedRes.data) {
+        const newCount = earnedRes.data.length;
+        if (prevBadgeCountRef.current > 0 && newCount > prevBadgeCountRef.current) {
+          const latestBadge = badgesRes.data?.find((b: any) => b.id === earnedRes.data[earnedRes.data.length - 1]?.badge_id);
+          setCelebration({ show: true, type: 'badge', title: 'Badge Earned!', subtitle: latestBadge?.name || 'New achievement!', icon: latestBadge?.icon || '🏆' });
+        }
+        prevBadgeCountRef.current = newCount;
+        setEarnedBadges(earnedRes.data as EarnedBadge[]);
+      }
       if (challengesRes.data) setChallenges(challengesRes.data as DailyChallenge[]);
       if (studentChalRes.data) setStudentChallenges(studentChalRes.data as StudentChallenge[]);
     } catch (e) {
@@ -124,7 +143,16 @@ export function GamificationPanel() {
   }
 
   return (
-    <div className="space-y-6">
+    <>
+      <CelebrationOverlay
+        show={celebration.show}
+        type={celebration.type}
+        title={celebration.title}
+        subtitle={celebration.subtitle}
+        icon={celebration.icon}
+        onComplete={() => setCelebration(c => ({ ...c, show: false }))}
+      />
+      <div className="space-y-6">
       {/* XP Level Card */}
       <div className="pixo-card bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">
         <div className="flex items-center gap-4 mb-3">
@@ -214,5 +242,6 @@ export function GamificationPanel() {
         </div>
       </div>
     </div>
+    </>
   );
 }

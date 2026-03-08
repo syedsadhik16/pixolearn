@@ -21,6 +21,7 @@ import Dictionary from "./pages/Dictionary";
 import Studio from "./pages/Studio";
 import Leaderboard from "./pages/Leaderboard";
 import Shop from "./pages/Shop";
+import Profile from "./pages/Profile";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +47,7 @@ const App = () => (
             <Route path="/studio" element={<Studio />} />
             <Route path="/leaderboard" element={<Leaderboard />} />
             <Route path="/shop" element={<Shop />} />
+            <Route path="/profile" element={<Profile />} />
             <Route path="/parent" element={<ParentDashboard />} />
             <Route path="/admin" element={<AdminDashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
