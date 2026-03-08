@@ -67,6 +67,7 @@ const plans = [
     ],
     cta: 'Choose Path',
     highlighted: false,
+    badge: 'Most Value',
   },
 ];
 
