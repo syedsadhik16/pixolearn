@@ -222,18 +222,51 @@ export default function AdminDashboard() {
 
   const openEditLesson = (lesson: Lesson) => {
     setEditingLesson(lesson);
+    const vocab = Array.isArray(lesson.vocabulary) ? (lesson.vocabulary as VocabItem[]) : [];
+    const sents = Array.isArray(lesson.sentences) ? (lesson.sentences as SentenceItem[]) : [];
     setLessonForm({
       title: lesson.title,
       level: lesson.level,
       day_number: lesson.day_number,
       description: lesson.description || '',
       is_active: lesson.is_active,
+      vocabulary: vocab.length > 0 ? vocab : [],
+      sentences: sents.length > 0 ? sents : [],
+      read_aloud_text: lesson.read_aloud_text || '',
     });
     setLessonDialogOpen(true);
   };
 
   const resetLessonForm = () => {
-    setLessonForm({ title: '', level: 'beginner', day_number: 1, description: '', is_active: true });
+    setLessonForm({ title: '', level: 'beginner', day_number: 1, description: '', is_active: true, vocabulary: [], sentences: [], read_aloud_text: '' });
+  };
+
+  const addVocabItem = () => {
+    setLessonForm({ ...lessonForm, vocabulary: [...lessonForm.vocabulary, { word: '', phonetic: '', meaning: '' }] });
+  };
+
+  const updateVocabItem = (index: number, field: keyof VocabItem, value: string) => {
+    const updated = [...lessonForm.vocabulary];
+    updated[index] = { ...updated[index], [field]: value };
+    setLessonForm({ ...lessonForm, vocabulary: updated });
+  };
+
+  const removeVocabItem = (index: number) => {
+    setLessonForm({ ...lessonForm, vocabulary: lessonForm.vocabulary.filter((_, i) => i !== index) });
+  };
+
+  const addSentenceItem = () => {
+    setLessonForm({ ...lessonForm, sentences: [...lessonForm.sentences, { text: '' }] });
+  };
+
+  const updateSentenceItem = (index: number, value: string) => {
+    const updated = [...lessonForm.sentences];
+    updated[index] = { text: value };
+    setLessonForm({ ...lessonForm, sentences: updated });
+  };
+
+  const removeSentenceItem = (index: number) => {
+    setLessonForm({ ...lessonForm, sentences: lessonForm.sentences.filter((_, i) => i !== index) });
   };
 
   const filteredStudents = students.filter(
