@@ -292,7 +292,11 @@ export default function Pricing() {
                 >
                   {plan.badge && (
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                      <span className="gradient-bg text-white text-xs font-bold px-4 py-1.5 rounded-full">
+                      <span className={`text-white text-xs font-bold px-4 py-1.5 rounded-full ${
+                        plan.badge === 'Most Value'
+                          ? 'bg-gradient-to-r from-emerald-500 to-teal-500'
+                          : 'gradient-bg'
+                      }`}>
                         {plan.badge}
                       </span>
                     </div>
