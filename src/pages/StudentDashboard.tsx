@@ -20,7 +20,8 @@ import {
   Target,
   TrendingUp,
   MessageCircle,
-  BarChart3
+  BarChart3,
+  Crown
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { GamificationPanel } from '@/components/shared/GamificationPanel';
@@ -232,7 +233,21 @@ export default function StudentDashboard() {
                 </p>
               </div>
             </div>
-            <StreakDisplay streak={streak} />
+            <div className="flex items-center gap-3">
+              {profile?.subscription_type === 'premium' ? (
+                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full gradient-bg text-white text-xs font-bold">
+                  <Crown className="h-3.5 w-3.5" /> Premium
+                </span>
+              ) : (
+                <button
+                  onClick={() => navigate('/pricing')}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted text-muted-foreground text-xs font-semibold hover:bg-primary/10 hover:text-primary transition-colors"
+                >
+                  <Crown className="h-3.5 w-3.5" /> Free Plan
+                </button>
+              )}
+              <StreakDisplay streak={streak} />
+            </div>
           </div>
         </div>
 
@@ -352,7 +367,18 @@ export default function StudentDashboard() {
 
         {/* AI Practice Section */}
         <div className="mb-8 animate-fade-in" style={{ animationDelay: '0.55s' }}>
-          <div className="pixo-card bg-gradient-to-r from-accent/20 to-secondary/20 border-accent/30">
+          <div className={`pixo-card bg-gradient-to-r from-accent/20 to-secondary/20 border-accent/30 ${profile?.subscription_type === 'free' ? 'relative overflow-hidden' : ''}`}>
+            {profile?.subscription_type === 'free' && (
+              <div className="absolute inset-0 bg-background/60 backdrop-blur-[2px] z-10 flex items-center justify-center">
+                <div className="text-center">
+                  <Lock className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                  <p className="text-sm font-semibold text-muted-foreground mb-2">Premium Feature</p>
+                  <Button variant="gradient" size="sm" onClick={() => navigate('/pricing')}>
+                    <Crown className="h-4 w-4 mr-1" /> Upgrade to Unlock
+                  </Button>
+                </div>
+              </div>
+            )}
             <div className="flex flex-col md:flex-row md:items-center gap-4">
               <div className="flex items-center gap-4 flex-1">
                 <div className="w-14 h-14 rounded-xl bg-accent/20 flex items-center justify-center">
@@ -369,6 +395,7 @@ export default function StudentDashboard() {
                 variant="gradient" 
                 size="lg"
                 onClick={() => navigate('/practice')}
+                disabled={profile?.subscription_type === 'free'}
               >
                 <MessageCircle className="h-5 w-5 mr-2" />
                 Start Practicing
@@ -476,8 +503,8 @@ export default function StudentDashboard() {
                     Get access to all lessons, unlimited practice sessions, and advanced progress tracking.
                   </p>
                 </div>
-                <Button variant="gradient">
-                  Upgrade to Premium
+                <Button variant="gradient" onClick={() => navigate('/pricing')}>
+                  <Crown className="h-4 w-4 mr-2" /> Upgrade to Premium
                 </Button>
               </div>
             </div>

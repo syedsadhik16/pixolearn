@@ -49,8 +49,34 @@ serve(async (req) => {
       throw new Error('Payment signature verification failed');
     }
 
-    // Payment verified — update user subscription
+    // Payment verified — save payment history and update subscription
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+    // Save payment record
+    await supabase.from('payment_history').insert({
+      user_id,
+      razorpay_order_id,
+      razorpay_payment_id,
+      plan_id,
+      amount: 0, // Will be fetched from order
+      currency: 'INR',
+      status: 'success',
+    });
+
+    // Fetch order to get actual amount
+    const RAZORPAY_KEY_ID = Deno.env.get('RAZORPAY_KEY_ID');
+    if (RAZORPAY_KEY_ID) {
+      const authHeader = btoa(`${RAZORPAY_KEY_ID}:${RAZORPAY_KEY_SECRET}`);
+      const orderRes = await fetch(`https://api.razorpay.com/v1/orders/${razorpay_order_id}`, {
+        headers: { 'Authorization': `Basic ${authHeader}` },
+      });
+      if (orderRes.ok) {
+        const order = await orderRes.json();
+        await supabase.from('payment_history')
+          .update({ amount: order.amount / 100 })
+          .eq('razorpay_order_id', razorpay_order_id);
+      }
+    }
 
     const { error: updateError } = await supabase
       .from('profiles')
