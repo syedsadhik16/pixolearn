@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { CelebrationOverlay } from './CelebrationOverlay';
 import { awardXP } from '@/lib/gamification';
+import { playRewardSound } from '@/lib/sounds';
 
 const REWARD_SCHEDULE = [5, 10, 15, 20, 25, 35, 50]; // XP per consecutive day (7-day cycle)
 
