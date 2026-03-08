@@ -874,7 +874,7 @@ export default function LessonSession() {
                 <Button
                   variant="gradient"
                   disabled={!hasRecorded || isEvaluating}
-                  onClick={nextItem}
+                  onClick={() => nextItem()}
                 >
                   Complete Lesson
                   <CheckCircle2 className="h-4 w-4 ml-2" />
