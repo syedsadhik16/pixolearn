@@ -44,6 +44,8 @@ export default function Settings() {
     level_up: true,
   });
   const [prefsLoading, setPrefsLoading] = useState(false);
+  const [payments, setPayments] = useState<PaymentRecord[]>([]);
+  const [paymentsLoading, setPaymentsLoading] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) navigate('/auth');
