@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Layout } from '@/components/layout/Layout';
 import pixoLogo from '@/assets/pixo-logo.png';
-import { BookOpen, MessageSquare, Check, Loader2 } from 'lucide-react';
+import { BookOpen, MessageSquare, GraduationCap, Check, Loader2 } from 'lucide-react';
 
 const levels = [
   {
@@ -43,6 +43,23 @@ const levels = [
     color: 'from-accent to-secondary',
     ageGroup: 'Ages 10-18',
   },
+  {
+    id: 'advanced',
+    title: 'Level 3: Advanced Mastery',
+    subtitle: 'For fluent communicators',
+    description: 'Master professional English with creative writing, debate, critical thinking, and leadership communication.',
+    duration: '6 months • 180 lessons',
+    features: [
+      'Advanced essay & creative writing',
+      'Debate & persuasion techniques',
+      'Critical thinking & analysis',
+      'Leadership & professional speaking',
+      'Media literacy & journalism',
+    ],
+    icon: GraduationCap,
+    color: 'from-secondary to-primary',
+    ageGroup: 'Ages 12+',
+  },
 ];
 
 export default function LevelSelection() {
@@ -60,16 +77,22 @@ export default function LevelSelection() {
       const { error } = await supabase
         .from('student_progress')
         .update({ 
-          current_level: selectedLevel as 'beginner' | 'intermediate',
+          current_level: selectedLevel as 'beginner' | 'intermediate' | 'advanced',
           current_day: 1 
         })
         .eq('student_id', user.id);
 
       if (error) throw error;
 
+      const levelNames: Record<string, string> = {
+        beginner: 'Level 1: Phonics Foundation',
+        intermediate: 'Level 2: English Communication',
+        advanced: 'Level 3: Advanced Mastery',
+      };
+
       toast({
         title: 'Level selected! 🎉',
-        description: `You're starting ${selectedLevel === 'beginner' ? 'Level 1: Phonics Foundation' : 'Level 2: English Communication'}`,
+        description: `You're starting ${levelNames[selectedLevel] || selectedLevel}`,
       });
 
       navigate('/student');
@@ -100,7 +123,7 @@ export default function LevelSelection() {
           </div>
 
           {/* Level Cards */}
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-3 gap-6">
             {levels.map((level) => (
               <button
                 key={level.id}
