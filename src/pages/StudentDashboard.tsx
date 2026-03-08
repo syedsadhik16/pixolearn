@@ -440,6 +440,7 @@ export default function StudentDashboard() {
           </div>
         )}
       </div>
+      <BottomNav />
     </Layout>
   );
 }
