@@ -331,11 +331,18 @@ export default function LessonSession() {
     }
   };
 
-  const nextItem = () => {
+  const nextItem = (skipped = false) => {
     setHasRecorded(false);
     setCurrentFeedback(null);
     
     if (phase === 'vocabulary') {
+      if (skipped) {
+        setScores(prev => {
+          const newVocab = [...prev.vocabulary];
+          newVocab[currentIndex] = newVocab[currentIndex] ?? 0;
+          return { ...prev, vocabulary: newVocab };
+        });
+      }
       if (currentIndex < (lesson?.vocabulary.length || 0) - 1) {
         setCurrentIndex(currentIndex + 1);
       } else {
@@ -343,6 +350,13 @@ export default function LessonSession() {
         setCurrentIndex(0);
       }
     } else if (phase === 'sentences') {
+      if (skipped) {
+        setScores(prev => {
+          const newSentences = [...prev.sentences];
+          newSentences[currentIndex] = newSentences[currentIndex] ?? 0;
+          return { ...prev, sentences: newSentences };
+        });
+      }
       if (currentIndex < (lesson?.sentences.length || 0) - 1) {
         setCurrentIndex(currentIndex + 1);
       } else {
@@ -350,6 +364,9 @@ export default function LessonSession() {
         setCurrentIndex(0);
       }
     } else if (phase === 'read_aloud') {
+      if (skipped) {
+        setScores(prev => ({ ...prev, readAloud: prev.readAloud ?? 0 }));
+      }
       completeLesson();
     }
   };
