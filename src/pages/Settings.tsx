@@ -208,6 +208,75 @@ export default function Settings() {
               </div>
             )}
 
+            {/* Subscription & Payment History */}
+            {activeSection === 'subscription' && (
+              <div className="space-y-4 animate-fade-in">
+                <div className="pixo-card space-y-4">
+                  <h3 className="font-display font-bold text-lg flex items-center gap-2">
+                    <Crown className="h-5 w-5 text-primary" /> Subscription
+                  </h3>
+                  <div className="flex items-center justify-between p-4 bg-muted/30 rounded-xl">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                        profile?.subscription_type === 'premium' ? 'gradient-bg' : 'bg-muted'
+                      }`}>
+                        <Crown className={`h-5 w-5 ${profile?.subscription_type === 'premium' ? 'text-white' : 'text-muted-foreground'}`} />
+                      </div>
+                      <div>
+                        <p className="font-semibold capitalize">{profile?.subscription_type === 'premium' ? 'Premium Plan' : 'Free Plan'}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {profile?.subscription_type === 'premium' ? 'All features unlocked' : 'Limited features'}
+                        </p>
+                      </div>
+                    </div>
+                    {profile?.subscription_type !== 'premium' && (
+                      <Button variant="gradient" size="sm" onClick={() => navigate('/pricing')}>
+                        Upgrade
+                      </Button>
+                    )}
+                  </div>
+                </div>
+
+                <div className="pixo-card space-y-4">
+                  <h3 className="font-display font-bold text-lg flex items-center gap-2">
+                    <Receipt className="h-5 w-5 text-primary" /> Payment History
+                  </h3>
+                  {paymentsLoading ? (
+                    <div className="text-center py-6">
+                      <Loader2 className="h-5 w-5 animate-spin mx-auto text-muted-foreground" />
+                    </div>
+                  ) : payments.length === 0 ? (
+                    <div className="text-center py-6">
+                      <CreditCard className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                      <p className="text-sm text-muted-foreground">No payments yet</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {payments.map(p => (
+                        <div key={p.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-xl">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-pixo-green/10 flex items-center justify-center">
+                              <CreditCard className="h-4 w-4 text-pixo-green" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-semibold capitalize">{p.plan_id} Plan</p>
+                              <p className="text-xs text-muted-foreground">
+                                {new Date(p.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-bold">₹{p.amount}</p>
+                            <p className="text-xs text-pixo-green capitalize">{p.status}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Appearance / Visual Comfort */}
             {activeSection === 'appearance' && (
               <div className="pixo-card space-y-5 animate-fade-in">
