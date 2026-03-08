@@ -867,7 +867,7 @@ export default function LessonSession() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => { setHasRecorded(true); nextItem(); }}
+                  onClick={() => { setHasRecorded(true); nextItem(true); }}
                 >
                   Skip Recording
                 </Button>
