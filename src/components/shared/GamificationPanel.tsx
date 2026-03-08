@@ -89,6 +89,7 @@ export function GamificationPanel() {
         if (prevBadgeCountRef.current > 0 && newCount > prevBadgeCountRef.current) {
           const latestBadge = badgesRes.data?.find((b: any) => b.id === earnedRes.data[earnedRes.data.length - 1]?.badge_id);
           setCelebration({ show: true, type: 'badge', title: 'Badge Earned!', subtitle: latestBadge?.name || 'New achievement!', icon: latestBadge?.icon || '🏆' });
+          playBadgeSound();
         }
         prevBadgeCountRef.current = newCount;
         setEarnedBadges(earnedRes.data as EarnedBadge[]);
