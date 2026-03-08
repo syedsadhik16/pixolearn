@@ -331,7 +331,7 @@ export default function ParentDashboard() {
                 </Button>
               </DialogContent>
             </Dialog>
-          </div>
+            </div>
         </div>
 
         {/* Aggregate Stats */}
