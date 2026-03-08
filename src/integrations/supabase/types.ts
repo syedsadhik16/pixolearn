@@ -142,6 +142,44 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_preferences: {
+        Row: {
+          created_at: string
+          id: string
+          lesson_completed: boolean
+          level_up: boolean
+          parent_id: string
+          streak_milestone: boolean
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lesson_completed?: boolean
+          level_up?: boolean
+          parent_id: string
+          streak_milestone?: boolean
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lesson_completed?: boolean
+          level_up?: boolean
+          parent_id?: string
+          streak_milestone?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_preferences_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           child_id: string
