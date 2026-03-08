@@ -366,7 +366,18 @@ export default function StudentDashboard() {
 
         {/* AI Practice Section */}
         <div className="mb-8 animate-fade-in" style={{ animationDelay: '0.55s' }}>
-          <div className="pixo-card bg-gradient-to-r from-accent/20 to-secondary/20 border-accent/30">
+          <div className={`pixo-card bg-gradient-to-r from-accent/20 to-secondary/20 border-accent/30 ${profile?.subscription_type === 'free' ? 'relative overflow-hidden' : ''}`}>
+            {profile?.subscription_type === 'free' && (
+              <div className="absolute inset-0 bg-background/60 backdrop-blur-[2px] z-10 flex items-center justify-center">
+                <div className="text-center">
+                  <Lock className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                  <p className="text-sm font-semibold text-muted-foreground mb-2">Premium Feature</p>
+                  <Button variant="gradient" size="sm" onClick={() => navigate('/pricing')}>
+                    <Crown className="h-4 w-4 mr-1" /> Upgrade to Unlock
+                  </Button>
+                </div>
+              </div>
+            )}
             <div className="flex flex-col md:flex-row md:items-center gap-4">
               <div className="flex items-center gap-4 flex-1">
                 <div className="w-14 h-14 rounded-xl bg-accent/20 flex items-center justify-center">
@@ -383,6 +394,7 @@ export default function StudentDashboard() {
                 variant="gradient" 
                 size="lg"
                 onClick={() => navigate('/practice')}
+                disabled={profile?.subscription_type === 'free'}
               >
                 <MessageCircle className="h-5 w-5 mr-2" />
                 Start Practicing
