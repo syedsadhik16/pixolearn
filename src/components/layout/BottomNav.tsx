@@ -7,6 +7,7 @@ import {
   Theater, 
   BookOpenText, 
   Mic2,
+  PenLine,
   Trophy,
   ShoppingBag,
   User
