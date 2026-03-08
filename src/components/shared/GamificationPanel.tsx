@@ -143,7 +143,16 @@ export function GamificationPanel() {
   }
 
   return (
-    <div className="space-y-6">
+    <>
+      <CelebrationOverlay
+        show={celebration.show}
+        type={celebration.type}
+        title={celebration.title}
+        subtitle={celebration.subtitle}
+        icon={celebration.icon}
+        onComplete={() => setCelebration(c => ({ ...c, show: false }))}
+      />
+      <div className="space-y-6">
       {/* XP Level Card */}
       <div className="pixo-card bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">
         <div className="flex items-center gap-4 mb-3">
