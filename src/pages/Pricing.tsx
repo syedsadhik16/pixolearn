@@ -330,7 +330,7 @@ export default function Pricing() {
                     className="w-full"
                     size="lg"
                     disabled={loadingPlan === plan.id}
-                    onClick={() => handleSelectPlan(plan)}
+                    onClick={() => plan.priceAmount === 0 ? handleTrialClick() : handleSelectPlan(plan)}
                   >
                     {loadingPlan === plan.id ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
