@@ -27,6 +27,7 @@ import {
   UserMinus,
 } from 'lucide-react';
 import { NotificationBell } from '@/components/shared/NotificationBell';
+import { Sparkles } from 'lucide-react';
 import { NotificationPreferences } from '@/components/shared/NotificationPreferences';
 import { useToast } from '@/hooks/use-toast';
 import { Bell } from 'lucide-react';
