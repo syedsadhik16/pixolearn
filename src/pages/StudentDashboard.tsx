@@ -20,7 +20,8 @@ import {
   Target,
   TrendingUp,
   MessageCircle,
-  BarChart3
+  BarChart3,
+  Crown
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { GamificationPanel } from '@/components/shared/GamificationPanel';
