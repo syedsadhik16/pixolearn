@@ -451,6 +451,10 @@ export default function LessonSession() {
         });
       }
 
+      // Track daily challenge & check badges
+      trackChallengeProgress(user.id, 'lesson');
+      checkAndAwardBadges(user.id);
+
       setPhase('complete');
     } catch (error) {
       console.error('Error completing lesson:', error);
