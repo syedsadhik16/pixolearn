@@ -104,7 +104,8 @@ export function GamificationPanel() {
     }
   };
 
-  const xpForNextLevel = (level: number) => level * level * 50;
+  // 180 levels: each level needs ~20 XP (scales slightly)
+  const xpForNextLevel = (level: number) => Math.round(level * 20);
   const currentLevelXP = xpForNextLevel(xp.xp_level - 1);
   const nextLevelXP = xpForNextLevel(xp.xp_level);
   const progressToNext = nextLevelXP > currentLevelXP

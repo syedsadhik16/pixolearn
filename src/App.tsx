@@ -45,6 +45,7 @@ const App = () => (
             <Route path="/dictionary" element={<Dictionary />} />
             <Route path="/studio" element={<Studio />} />
             <Route path="/leaderboard" element={<Leaderboard />} />
+            <Route path="/shop" element={<Shop />} />
             <Route path="/parent" element={<ParentDashboard />} />
             <Route path="/admin" element={<AdminDashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
