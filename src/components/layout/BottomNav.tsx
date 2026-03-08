@@ -8,7 +8,8 @@ import {
   BookOpenText, 
   Mic2,
   Trophy,
-  ShoppingBag
+  ShoppingBag,
+  User
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -22,6 +23,7 @@ const navItems = [
   { path: '/studio', label: 'Studio', icon: Mic2 },
   { path: '/leaderboard', label: 'Ranks', icon: Trophy },
   { path: '/shop', label: 'Shop', icon: ShoppingBag },
+  { path: '/profile', label: 'Profile', icon: User },
 ];
 
 export function BottomNav() {
