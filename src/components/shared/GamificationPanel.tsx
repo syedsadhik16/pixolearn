@@ -73,9 +73,24 @@ export function GamificationPanel() {
           .eq('challenge_date', new Date().toISOString().split('T')[0]),
       ]);
 
-      if (xpRes.data) setXP(xpRes.data);
+      if (xpRes.data) {
+        const newLevel = xpRes.data.xp_level;
+        if (prevLevelRef.current > 0 && newLevel > prevLevelRef.current) {
+          setCelebration({ show: true, type: 'level_up', title: `Level ${newLevel}!`, subtitle: 'Keep up the amazing work! 🚀', icon: '🚀' });
+        }
+        prevLevelRef.current = newLevel;
+        setXP(xpRes.data);
+      }
       if (badgesRes.data) setBadges(badgesRes.data as Badge[]);
-      if (earnedRes.data) setEarnedBadges(earnedRes.data as EarnedBadge[]);
+      if (earnedRes.data) {
+        const newCount = earnedRes.data.length;
+        if (prevBadgeCountRef.current > 0 && newCount > prevBadgeCountRef.current) {
+          const latestBadge = badgesRes.data?.find((b: any) => b.id === earnedRes.data[earnedRes.data.length - 1]?.badge_id);
+          setCelebration({ show: true, type: 'badge', title: 'Badge Earned!', subtitle: latestBadge?.name || 'New achievement!', icon: latestBadge?.icon || '🏆' });
+        }
+        prevBadgeCountRef.current = newCount;
+        setEarnedBadges(earnedRes.data as EarnedBadge[]);
+      }
       if (challengesRes.data) setChallenges(challengesRes.data as DailyChallenge[]);
       if (studentChalRes.data) setStudentChallenges(studentChalRes.data as StudentChallenge[]);
     } catch (e) {
