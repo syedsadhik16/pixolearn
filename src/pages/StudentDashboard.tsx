@@ -57,6 +57,7 @@ export default function StudentDashboard() {
   const { user, profile, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const companion = useCompanion();
   
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [progress, setProgress] = useState<StudentProgress | null>(null);
