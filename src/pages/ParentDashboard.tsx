@@ -304,13 +304,15 @@ export default function ParentDashboard() {
                 Track your children's learning progress and achievements.
               </p>
             </div>
-            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="gradient">
-                  <UserPlus className="h-5 w-5 mr-2" />
-                  Add Child
-                </Button>
-              </DialogTrigger>
+            <div className="flex items-center gap-2">
+              {user && <NotificationBell userId={user.id} />}
+              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="gradient">
+                    <UserPlus className="h-5 w-5 mr-2" />
+                    Add Child
+                  </Button>
+                </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Link a Child Account</DialogTitle>
