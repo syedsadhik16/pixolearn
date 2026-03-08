@@ -24,6 +24,7 @@ import {
   CheckCircle2,
   XCircle,
   UserPlus,
+  UserMinus,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
@@ -34,7 +35,28 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { format, subDays } from 'date-fns';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from 'recharts';
 
 interface ChildProfile {
   id: string;
@@ -69,6 +91,7 @@ export default function ParentDashboard() {
   const [addChildEmail, setAddChildEmail] = useState('');
   const [addingChild, setAddingChild] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [removingChildId, setRemovingChildId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -86,7 +109,6 @@ export default function ParentDashboard() {
 
   const fetchChildren = async () => {
     try {
-      // Get linked children
       const { data: links, error: linksError } = await supabase
         .from('parent_children')
         .select('child_id')
@@ -101,16 +123,14 @@ export default function ParentDashboard() {
 
       const childIds = links.map((l) => l.child_id);
 
-      // Fetch all child data in parallel
       const childDataPromises = childIds.map(async (childId) => {
         const [profileRes, progressRes, completionsRes, attendanceRes] = await Promise.all([
-          supabase.from('profiles').select('id, full_name, email, avatar_url').eq('id', childId).single(),
-          supabase.from('student_progress').select('current_level, current_day').eq('student_id', childId).single(),
+          supabase.from('profiles').select('id, full_name, email, avatar_url').eq('id', childId).maybeSingle(),
+          supabase.from('student_progress').select('current_level, current_day').eq('student_id', childId).maybeSingle(),
           supabase.from('lesson_completions').select('lesson_id, pronunciation_score, fluency_score, clarity_score, confidence_score, practice_count, completed_at').eq('student_id', childId).order('completed_at', { ascending: false }),
           supabase.from('attendance').select('date, is_present, lesson_completed').eq('student_id', childId).order('date', { ascending: false }),
         ]);
 
-        // Calculate streak
         let streak = 0;
         if (attendanceRes.data) {
           const today = new Date();
@@ -151,12 +171,11 @@ export default function ParentDashboard() {
     if (!addChildEmail.trim()) return;
     setAddingChild(true);
     try {
-      // Find the child profile by email
       const { data: childProfile, error: findError } = await supabase
         .from('profiles')
         .select('id, role')
         .eq('email', addChildEmail.trim())
-        .single();
+        .maybeSingle();
 
       if (findError || !childProfile) {
         toast({ title: 'Not found', description: 'No student account found with that email.', variant: 'destructive' });
@@ -168,7 +187,6 @@ export default function ParentDashboard() {
         return;
       }
 
-      // Link parent to child
       const { error: linkError } = await supabase
         .from('parent_children')
         .insert({ parent_id: user!.id, child_id: childProfile.id });
@@ -194,6 +212,27 @@ export default function ParentDashboard() {
     }
   };
 
+  const handleRemoveChild = async (childId: string) => {
+    setRemovingChildId(childId);
+    try {
+      const { error } = await supabase
+        .from('parent_children')
+        .delete()
+        .eq('parent_id', user!.id)
+        .eq('child_id', childId);
+
+      if (error) throw error;
+
+      toast({ title: 'Removed', description: 'Child has been unlinked from your account.' });
+      setChildren((prev) => prev.filter((c) => c.profile.id !== childId));
+    } catch (error) {
+      console.error('Error removing child:', error);
+      toast({ title: 'Error', description: 'Failed to remove child', variant: 'destructive' });
+    } finally {
+      setRemovingChildId(null);
+    }
+  };
+
   const getAvgScore = (completions: ChildData['completions']) => {
     const scores = completions.flatMap((c) => [
       c.pronunciation_score, c.fluency_score, c.clarity_score, c.confidence_score,
@@ -216,6 +255,17 @@ export default function ParentDashboard() {
       days.push({ date: d, present: record?.lesson_completed ?? false });
     }
     return days;
+  };
+
+  const getScoreTrendData = (completions: ChildData['completions']) => {
+    // Reverse to show oldest first for the chart
+    return [...completions].reverse().map((c) => ({
+      date: format(new Date(c.completed_at), 'MMM d'),
+      Pronunciation: c.pronunciation_score ?? 0,
+      Fluency: c.fluency_score ?? 0,
+      Clarity: c.clarity_score ?? 0,
+      Confidence: c.confidence_score ?? 0,
+    }));
   };
 
   // Aggregate stats
@@ -316,6 +366,7 @@ export default function ParentDashboard() {
         {children.map((child, idx) => {
           const avgScore = getAvgScore(child.completions);
           const last7 = getLast7DaysAttendance(child.attendance);
+          const trendData = getScoreTrendData(child.completions);
 
           return (
             <div
@@ -344,6 +395,31 @@ export default function ParentDashboard() {
                     </ProgressRing>
                     <p className="text-xs text-muted-foreground mt-1">Avg Score</p>
                   </div>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive">
+                        <UserMinus className="h-5 w-5" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Remove Child</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to unlink <strong>{child.profile.full_name || child.profile.email}</strong> from your account? You can re-add them later. Their data will not be deleted.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => handleRemoveChild(child.profile.id)}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          disabled={removingChildId === child.profile.id}
+                        >
+                          {removingChildId === child.profile.id ? 'Removing...' : 'Remove'}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </div>
 
@@ -394,6 +470,38 @@ export default function ParentDashboard() {
                   ))}
                 </div>
               </div>
+
+              {/* Score Trend Chart */}
+              {trendData.length > 0 && (
+                <div className="mb-6">
+                  <h3 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
+                    <TrendingUp className="h-4 w-4" />
+                    Score Trends Over Time
+                  </h3>
+                  <div className="bg-muted/30 rounded-xl p-4">
+                    <ResponsiveContainer width="100%" height={250}>
+                      <LineChart data={trendData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                        <XAxis dataKey="date" tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
+                        <YAxis domain={[0, 100]} tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: 'hsl(var(--card))',
+                            border: '1px solid hsl(var(--border))',
+                            borderRadius: '0.75rem',
+                            fontSize: '0.875rem',
+                          }}
+                        />
+                        <Legend />
+                        <Line type="monotone" dataKey="Pronunciation" stroke="hsl(var(--pixo-orange))" strokeWidth={2} dot={{ r: 4 }} />
+                        <Line type="monotone" dataKey="Fluency" stroke="hsl(var(--pixo-blue))" strokeWidth={2} dot={{ r: 4 }} />
+                        <Line type="monotone" dataKey="Clarity" stroke="hsl(var(--pixo-green))" strokeWidth={2} dot={{ r: 4 }} />
+                        <Line type="monotone" dataKey="Confidence" stroke="hsl(var(--pixo-purple))" strokeWidth={2} dot={{ r: 4 }} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              )}
 
               {/* Recent Completions Table */}
               {child.completions.length > 0 && (
