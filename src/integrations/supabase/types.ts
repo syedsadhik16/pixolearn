@@ -414,6 +414,45 @@ export type Database = {
         }
         Relationships: []
       }
+      purchased_items: {
+        Row: {
+          id: string
+          is_equipped: boolean
+          item_id: string
+          purchased_at: string
+          student_id: string
+        }
+        Insert: {
+          id?: string
+          is_equipped?: boolean
+          item_id: string
+          purchased_at?: string
+          student_id: string
+        }
+        Update: {
+          id?: string
+          is_equipped?: boolean
+          item_id?: string
+          purchased_at?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchased_items_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "shop_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchased_items_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       saved_words: {
         Row: {
           created_at: string
@@ -448,6 +487,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      shop_items: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          icon: string
+          id: string
+          is_available: boolean
+          name: string
+          xp_cost: number
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: string
+          is_available?: boolean
+          name: string
+          xp_cost?: number
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: string
+          is_available?: boolean
+          name?: string
+          xp_cost?: number
+        }
+        Relationships: []
       }
       student_badges: {
         Row: {
