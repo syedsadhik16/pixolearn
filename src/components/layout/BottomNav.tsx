@@ -7,7 +7,8 @@ import {
   Theater, 
   BookOpenText, 
   Mic2,
-  Trophy
+  Trophy,
+  ShoppingBag
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -20,6 +21,7 @@ const navItems = [
   { path: '/dictionary', label: 'Dictionary', icon: BookOpenText },
   { path: '/studio', label: 'Studio', icon: Mic2 },
   { path: '/leaderboard', label: 'Ranks', icon: Trophy },
+  { path: '/shop', label: 'Shop', icon: ShoppingBag },
 ];
 
 export function BottomNav() {
