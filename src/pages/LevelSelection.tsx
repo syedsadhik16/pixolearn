@@ -123,7 +123,7 @@ export default function LevelSelection() {
           </div>
 
           {/* Level Cards */}
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-3 gap-6">
             {levels.map((level) => (
               <button
                 key={level.id}
