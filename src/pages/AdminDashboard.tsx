@@ -31,6 +31,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { Separator } from '@/components/ui/separator';
 import { Label } from '@/components/ui/label';
 import {
   Users,
@@ -38,6 +39,7 @@ import {
   TrendingUp,
   Trophy,
   Plus,
+  Trash2,
   Pencil,
   Search,
   BarChart3,
@@ -79,12 +81,25 @@ interface Lesson {
   read_aloud_text: string | null;
 }
 
+interface VocabItem {
+  word: string;
+  phonetic: string;
+  meaning: string;
+}
+
+interface SentenceItem {
+  text: string;
+}
+
 interface LessonForm {
   title: string;
   level: string;
   day_number: number;
   description: string;
   is_active: boolean;
+  vocabulary: VocabItem[];
+  sentences: SentenceItem[];
+  read_aloud_text: string;
 }
 
 const CHART_COLORS = [
@@ -113,6 +128,9 @@ export default function AdminDashboard() {
     day_number: 1,
     description: '',
     is_active: true,
+    vocabulary: [],
+    sentences: [],
+    read_aloud_text: '',
   });
 
   useEffect(() => {
@@ -164,16 +182,21 @@ export default function AdminDashboard() {
         return;
       }
 
+      const lessonData = {
+        title: lessonForm.title.trim(),
+        level: lessonForm.level as 'beginner' | 'intermediate' | 'advanced',
+        day_number: lessonForm.day_number,
+        description: lessonForm.description.trim() || null,
+        is_active: lessonForm.is_active,
+        vocabulary: JSON.parse(JSON.stringify(lessonForm.vocabulary.filter(v => v.word.trim()))),
+        sentences: JSON.parse(JSON.stringify(lessonForm.sentences.filter(s => s.text.trim()))),
+        read_aloud_text: lessonForm.read_aloud_text.trim() || null,
+      };
+
       if (editingLesson) {
         const { error } = await supabase
           .from('lessons')
-          .update({
-            title: lessonForm.title,
-            level: lessonForm.level as 'beginner' | 'intermediate' | 'advanced',
-            day_number: lessonForm.day_number,
-            description: lessonForm.description || null,
-            is_active: lessonForm.is_active,
-          })
+          .update(lessonData)
           .eq('id', editingLesson.id);
 
         if (error) throw error;
@@ -181,13 +204,7 @@ export default function AdminDashboard() {
       } else {
         const { error } = await supabase
           .from('lessons')
-          .insert({
-            title: lessonForm.title,
-            level: lessonForm.level as 'beginner' | 'intermediate' | 'advanced',
-            day_number: lessonForm.day_number,
-            description: lessonForm.description || null,
-            is_active: lessonForm.is_active,
-          });
+          .insert(lessonData);
 
         if (error) throw error;
         toast({ title: 'Created', description: 'Lesson created successfully.' });
@@ -205,18 +222,51 @@ export default function AdminDashboard() {
 
   const openEditLesson = (lesson: Lesson) => {
     setEditingLesson(lesson);
+    const vocab = Array.isArray(lesson.vocabulary) ? (lesson.vocabulary as VocabItem[]) : [];
+    const sents = Array.isArray(lesson.sentences) ? (lesson.sentences as SentenceItem[]) : [];
     setLessonForm({
       title: lesson.title,
       level: lesson.level,
       day_number: lesson.day_number,
       description: lesson.description || '',
       is_active: lesson.is_active,
+      vocabulary: vocab.length > 0 ? vocab : [],
+      sentences: sents.length > 0 ? sents : [],
+      read_aloud_text: lesson.read_aloud_text || '',
     });
     setLessonDialogOpen(true);
   };
 
   const resetLessonForm = () => {
-    setLessonForm({ title: '', level: 'beginner', day_number: 1, description: '', is_active: true });
+    setLessonForm({ title: '', level: 'beginner', day_number: 1, description: '', is_active: true, vocabulary: [], sentences: [], read_aloud_text: '' });
+  };
+
+  const addVocabItem = () => {
+    setLessonForm({ ...lessonForm, vocabulary: [...lessonForm.vocabulary, { word: '', phonetic: '', meaning: '' }] });
+  };
+
+  const updateVocabItem = (index: number, field: keyof VocabItem, value: string) => {
+    const updated = [...lessonForm.vocabulary];
+    updated[index] = { ...updated[index], [field]: value };
+    setLessonForm({ ...lessonForm, vocabulary: updated });
+  };
+
+  const removeVocabItem = (index: number) => {
+    setLessonForm({ ...lessonForm, vocabulary: lessonForm.vocabulary.filter((_, i) => i !== index) });
+  };
+
+  const addSentenceItem = () => {
+    setLessonForm({ ...lessonForm, sentences: [...lessonForm.sentences, { text: '' }] });
+  };
+
+  const updateSentenceItem = (index: number, value: string) => {
+    const updated = [...lessonForm.sentences];
+    updated[index] = { text: value };
+    setLessonForm({ ...lessonForm, sentences: updated });
+  };
+
+  const removeSentenceItem = (index: number) => {
+    setLessonForm({ ...lessonForm, sentences: lessonForm.sentences.filter((_, i) => i !== index) });
   };
 
   const filteredStudents = students.filter(
@@ -316,14 +366,14 @@ export default function AdminDashboard() {
                       New Lesson
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="max-w-md">
+                  <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
                     <DialogHeader>
                       <DialogTitle>{editingLesson ? 'Edit Lesson' : 'Create Lesson'}</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4">
                       <div>
                         <Label>Title</Label>
-                        <Input value={lessonForm.title} onChange={(e) => setLessonForm({ ...lessonForm, title: e.target.value })} placeholder="Lesson title" />
+                        <Input value={lessonForm.title} onChange={(e) => setLessonForm({ ...lessonForm, title: e.target.value })} placeholder="Lesson title" maxLength={200} />
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
@@ -344,8 +394,77 @@ export default function AdminDashboard() {
                       </div>
                       <div>
                         <Label>Description</Label>
-                        <Textarea value={lessonForm.description} onChange={(e) => setLessonForm({ ...lessonForm, description: e.target.value })} placeholder="Lesson description" rows={3} />
+                        <Textarea value={lessonForm.description} onChange={(e) => setLessonForm({ ...lessonForm, description: e.target.value })} placeholder="Lesson description" rows={2} maxLength={500} />
                       </div>
+
+                      <Separator />
+
+                      {/* Vocabulary Section */}
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <Label className="text-base font-semibold">Vocabulary</Label>
+                          <Button type="button" variant="outline" size="sm" onClick={addVocabItem}>
+                            <Plus className="h-3 w-3 mr-1" /> Add Word
+                          </Button>
+                        </div>
+                        {lessonForm.vocabulary.length === 0 && (
+                          <p className="text-sm text-muted-foreground py-2">No vocabulary items yet. Click "Add Word" to start.</p>
+                        )}
+                        <div className="space-y-3">
+                          {lessonForm.vocabulary.map((item, i) => (
+                            <div key={i} className="flex gap-2 items-start bg-muted/30 rounded-lg p-3">
+                              <div className="flex-1 grid grid-cols-3 gap-2">
+                                <Input placeholder="Word" value={item.word} onChange={(e) => updateVocabItem(i, 'word', e.target.value)} maxLength={100} />
+                                <Input placeholder="Phonetic" value={item.phonetic} onChange={(e) => updateVocabItem(i, 'phonetic', e.target.value)} maxLength={100} />
+                                <Input placeholder="Meaning" value={item.meaning} onChange={(e) => updateVocabItem(i, 'meaning', e.target.value)} maxLength={200} />
+                              </div>
+                              <Button type="button" variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive shrink-0" onClick={() => removeVocabItem(i)}>
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <Separator />
+
+                      {/* Sentences Section */}
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <Label className="text-base font-semibold">Sentences</Label>
+                          <Button type="button" variant="outline" size="sm" onClick={addSentenceItem}>
+                            <Plus className="h-3 w-3 mr-1" /> Add Sentence
+                          </Button>
+                        </div>
+                        {lessonForm.sentences.length === 0 && (
+                          <p className="text-sm text-muted-foreground py-2">No sentences yet. Click "Add Sentence" to start.</p>
+                        )}
+                        <div className="space-y-2">
+                          {lessonForm.sentences.map((item, i) => (
+                            <div key={i} className="flex gap-2 items-center">
+                              <Input placeholder="Sentence text" value={item.text} onChange={(e) => updateSentenceItem(i, e.target.value)} className="flex-1" maxLength={500} />
+                              <Button type="button" variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive shrink-0" onClick={() => removeSentenceItem(i)}>
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <Separator />
+
+                      {/* Read Aloud Text */}
+                      <div>
+                        <Label className="text-base font-semibold">Read-Aloud Text</Label>
+                        <Textarea
+                          value={lessonForm.read_aloud_text}
+                          onChange={(e) => setLessonForm({ ...lessonForm, read_aloud_text: e.target.value })}
+                          placeholder="Enter a paragraph for students to read aloud..."
+                          rows={4}
+                          maxLength={2000}
+                        />
+                      </div>
+
                       <Button onClick={handleSaveLesson} className="w-full">
                         {editingLesson ? 'Update Lesson' : 'Create Lesson'}
                       </Button>
