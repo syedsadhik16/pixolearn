@@ -7,14 +7,20 @@ import { useToast } from '@/hooks/use-toast';
 import { Layout } from '@/components/layout/Layout';
 import pixoLogo from '@/assets/pixo-logo.png';
 import { Check, Loader2, ArrowRight, ArrowLeft, Sparkles } from 'lucide-react';
+import pixelChar from '@/assets/characters/pixel.png';
+import zestChar from '@/assets/characters/zest.png';
+import bloomChar from '@/assets/characters/bloom.png';
+import sparkChar from '@/assets/characters/spark.png';
+import novaChar from '@/assets/characters/nova.png';
+import terraChar from '@/assets/characters/terra.png';
 
 const avatars = [
-  { id: 'pixel', name: 'Pixel', emoji: '🤖', trait: 'Curious & Clever', color: 'from-pixo-blue to-pixo-purple' },
-  { id: 'zest', name: 'Zest', emoji: '⚡', trait: 'Energetic & Bold', color: 'from-pixo-orange to-pixo-yellow' },
-  { id: 'bloom', name: 'Bloom', emoji: '🌸', trait: 'Creative & Kind', color: 'from-pink-400 to-pixo-purple' },
-  { id: 'spark', name: 'Spark', emoji: '✨', trait: 'Bright & Quick', color: 'from-pixo-yellow to-pixo-orange' },
-  { id: 'nova', name: 'Nova', emoji: '🌟', trait: 'Brave & Dreamy', color: 'from-pixo-purple to-pixo-blue' },
-  { id: 'terra', name: 'Terra', emoji: '🌿', trait: 'Calm & Wise', color: 'from-pixo-green to-teal-500' },
+  { id: 'pixel', name: 'Pixel', image: pixelChar, trait: 'Curious & Clever', color: 'from-pixo-blue to-pixo-purple' },
+  { id: 'zest', name: 'Zest', image: zestChar, trait: 'Energetic & Bold', color: 'from-pixo-orange to-pixo-yellow' },
+  { id: 'bloom', name: 'Bloom', image: bloomChar, trait: 'Creative & Kind', color: 'from-pink-400 to-pixo-purple' },
+  { id: 'spark', name: 'Spark', image: sparkChar, trait: 'Bright & Quick', color: 'from-pixo-yellow to-pixo-orange' },
+  { id: 'nova', name: 'Nova', image: novaChar, trait: 'Brave & Dreamy', color: 'from-pixo-purple to-pixo-blue' },
+  { id: 'terra', name: 'Terra', image: terraChar, trait: 'Calm & Wise', color: 'from-pixo-green to-teal-500' },
 ];
 
 const ageGroups = [
