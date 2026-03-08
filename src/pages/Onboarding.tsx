@@ -155,7 +155,7 @@ export default function Onboarding() {
                           <Check className="h-4 w-4 text-primary" />
                         </div>
                       )}
-                      <div className="text-4xl mb-2">{avatar.emoji}</div>
+                      <img src={avatar.image} alt={avatar.name} className="w-16 h-16 mx-auto mb-2 object-contain" />
                       <p className="font-display font-bold text-white text-lg">{avatar.name}</p>
                       <p className="text-xs text-white/60 mt-1">{avatar.trait}</p>
                     </button>
