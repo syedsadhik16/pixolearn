@@ -349,10 +349,18 @@ export default function Pricing() {
         </section>
 
         {/* Comparison Table */}
-        <ComparisonTable />
+        <ScrollReveal>
+          <ComparisonTable />
+        </ScrollReveal>
+
+        {/* Testimonials */}
+        <Testimonials />
 
         {/* FAQ */}
-        <PricingFAQ />
+        <ScrollReveal>
+          <PricingFAQ />
+        </ScrollReveal>
+
 
         <section className="py-12 border-t border-border">
           <div className="container mx-auto px-4 text-center">
