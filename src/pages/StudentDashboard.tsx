@@ -22,6 +22,8 @@ import {
   MessageCircle
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { GamificationPanel } from '@/components/shared/GamificationPanel';
+import { checkAndAwardBadges } from '@/lib/gamification';
 
 interface Lesson {
   id: string;
