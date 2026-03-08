@@ -77,16 +77,22 @@ export default function LevelSelection() {
       const { error } = await supabase
         .from('student_progress')
         .update({ 
-          current_level: selectedLevel as 'beginner' | 'intermediate',
+          current_level: selectedLevel as 'beginner' | 'intermediate' | 'advanced',
           current_day: 1 
         })
         .eq('student_id', user.id);
 
       if (error) throw error;
 
+      const levelNames: Record<string, string> = {
+        beginner: 'Level 1: Phonics Foundation',
+        intermediate: 'Level 2: English Communication',
+        advanced: 'Level 3: Advanced Mastery',
+      };
+
       toast({
         title: 'Level selected! 🎉',
-        description: `You're starting ${selectedLevel === 'beginner' ? 'Level 1: Phonics Foundation' : 'Level 2: English Communication'}`,
+        description: `You're starting ${levelNames[selectedLevel] || selectedLevel}`,
       });
 
       navigate('/student');
