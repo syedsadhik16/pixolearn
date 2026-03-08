@@ -306,6 +306,7 @@ export default function ParentDashboard() {
               </p>
             </div>
             <div className="flex items-center gap-2">
+              {user && <NotificationPreferences userId={user.id} />}
               {user && <NotificationBell userId={user.id} />}
               <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                 <DialogTrigger asChild>
