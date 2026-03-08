@@ -25,6 +25,7 @@ import {
   XCircle,
   UserPlus,
   UserMinus,
+  BarChart3,
 } from 'lucide-react';
 import { NotificationBell } from '@/components/shared/NotificationBell';
 import { Sparkles } from 'lucide-react';
