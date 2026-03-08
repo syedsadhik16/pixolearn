@@ -221,7 +221,7 @@ export default function StudentDashboard() {
             <StatCard
               title="Completed Lessons"
               value={completions.length}
-              subtitle={`of ${lessons.length} in Level 1`}
+              subtitle={`of ${lessons.length} in ${progress?.current_level === 'beginner' ? 'Level 1' : progress?.current_level === 'intermediate' ? 'Level 2' : 'Level 3'}`}
               icon={BookOpen}
               colorClass="bg-pixo-orange/10 text-pixo-orange"
             />
@@ -249,7 +249,7 @@ export default function StudentDashboard() {
           <div className="animate-slide-up" style={{ animationDelay: '0.4s' }}>
             <StatCard
               title="Current Level"
-              value={progress?.current_level === 'beginner' ? 'Beginner' : 'Intermediate'}
+              value={progress?.current_level === 'beginner' ? 'Beginner' : progress?.current_level === 'intermediate' ? 'Intermediate' : 'Advanced'}
               subtitle={`Day ${progress?.current_day || 1}`}
               icon={Trophy}
               colorClass="bg-pixo-yellow/10 text-pixo-yellow"
@@ -343,7 +343,7 @@ export default function StudentDashboard() {
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-xl font-display font-bold">Your Lessons</h3>
             <span className="text-sm text-muted-foreground">
-              Level: {progress?.current_level === 'beginner' ? 'Beginner' : 'Intermediate'}
+              Level: {progress?.current_level === 'beginner' ? 'Beginner' : progress?.current_level === 'intermediate' ? 'Intermediate' : 'Advanced'}
             </span>
           </div>
 
