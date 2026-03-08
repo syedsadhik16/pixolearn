@@ -115,6 +115,41 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_login_rewards: {
+        Row: {
+          claimed_at: string
+          consecutive_days: number
+          id: string
+          login_date: string
+          student_id: string
+          xp_rewarded: number
+        }
+        Insert: {
+          claimed_at?: string
+          consecutive_days?: number
+          id?: string
+          login_date?: string
+          student_id: string
+          xp_rewarded?: number
+        }
+        Update: {
+          claimed_at?: string
+          consecutive_days?: number
+          id?: string
+          login_date?: string
+          student_id?: string
+          xp_rewarded?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_login_rewards_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lesson_completions: {
         Row: {
           clarity_score: number | null
