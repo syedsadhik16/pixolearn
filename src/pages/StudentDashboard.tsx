@@ -233,8 +233,21 @@ export default function StudentDashboard() {
                 </p>
               </div>
             </div>
-            <StreakDisplay streak={streak} />
-          </div>
+            <div className="flex items-center gap-3">
+              {profile?.subscription_type === 'premium' ? (
+                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full gradient-bg text-white text-xs font-bold">
+                  <Crown className="h-3.5 w-3.5" /> Premium
+                </span>
+              ) : (
+                <button
+                  onClick={() => navigate('/pricing')}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted text-muted-foreground text-xs font-semibold hover:bg-primary/10 hover:text-primary transition-colors"
+                >
+                  <Crown className="h-3.5 w-3.5" /> Free Plan
+                </button>
+              )}
+              <StreakDisplay streak={streak} />
+            </div>
         </div>
 
         {/* Stats Grid */}
