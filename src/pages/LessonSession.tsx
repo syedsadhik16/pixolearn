@@ -846,14 +846,23 @@ export default function LessonSession() {
                 </div>
               )}
 
-              <Button
-                variant="gradient"
-                disabled={!hasRecorded || isEvaluating}
-                onClick={nextItem}
-              >
-                Complete Lesson
-                <CheckCircle2 className="h-4 w-4 ml-2" />
-              </Button>
+              <div className="flex gap-2 justify-center">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => { setHasRecorded(true); nextItem(); }}
+                >
+                  Skip Recording
+                </Button>
+                <Button
+                  variant="gradient"
+                  disabled={!hasRecorded || isEvaluating}
+                  onClick={nextItem}
+                >
+                  Complete Lesson
+                  <CheckCircle2 className="h-4 w-4 ml-2" />
+                </Button>
+              </div>
             </div>
           )}
 
