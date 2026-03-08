@@ -20,6 +20,7 @@ import Roleplay from "./pages/Roleplay";
 import Dictionary from "./pages/Dictionary";
 import Studio from "./pages/Studio";
 import Leaderboard from "./pages/Leaderboard";
+import Shop from "./pages/Shop";
 
 const queryClient = new QueryClient();
 
