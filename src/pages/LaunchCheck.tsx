@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Layout } from '@/components/layout/Layout';
 import pixoLogo from '@/assets/pixo-logo.png';
-import { Check, X, Clock, ArrowRight, Loader2, Trophy } from 'lucide-react';
+import { useCompanion } from '@/hooks/useCompanion';
+import { Check, X, Clock, ArrowRight, ArrowLeft, Loader2, Trophy, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface Question {
   id: number;
@@ -14,36 +15,37 @@ interface Question {
   options: string[];
   correct: number;
   difficulty: 'easy' | 'medium' | 'hard';
+  explanation: string;
 }
 
-// Question bank organized by difficulty
 const questionBank: Question[] = [
   // Easy (1-5)
-  { id: 1, question: 'Which letter does the word "Apple" start with?', options: ['B', 'A', 'C', 'D'], correct: 1, difficulty: 'easy' },
-  { id: 2, question: 'What is the opposite of "Hot"?', options: ['Warm', 'Cold', 'Big', 'Fast'], correct: 1, difficulty: 'easy' },
-  { id: 3, question: 'Which word rhymes with "Cat"?', options: ['Dog', 'Bat', 'Cup', 'Sun'], correct: 1, difficulty: 'easy' },
-  { id: 4, question: 'What color is the sky on a clear day?', options: ['Red', 'Green', 'Blue', 'Yellow'], correct: 2, difficulty: 'easy' },
-  { id: 5, question: 'Complete: "The _____ is shining."', options: ['moon', 'sun', 'star', 'cloud'], correct: 1, difficulty: 'easy' },
+  { id: 1, question: 'Which letter does the word "Apple" start with?', options: ['B', 'A', 'C', 'D'], correct: 1, difficulty: 'easy', explanation: '"Apple" starts with the letter A.' },
+  { id: 2, question: 'What is the opposite of "Hot"?', options: ['Warm', 'Cold', 'Big', 'Fast'], correct: 1, difficulty: 'easy', explanation: 'The opposite of "Hot" is "Cold".' },
+  { id: 3, question: 'Which word rhymes with "Cat"?', options: ['Dog', 'Bat', 'Cup', 'Sun'], correct: 1, difficulty: 'easy', explanation: '"Bat" rhymes with "Cat" — they both end with "-at".' },
+  { id: 4, question: 'What color is the sky on a clear day?', options: ['Red', 'Green', 'Blue', 'Yellow'], correct: 2, difficulty: 'easy', explanation: 'The sky appears blue on a clear day due to how sunlight scatters.' },
+  { id: 5, question: 'Complete: "The _____ is shining."', options: ['moon', 'sun', 'star', 'cloud'], correct: 1, difficulty: 'easy', explanation: '"The sun is shining" is the most natural expression.' },
   // Medium (6-10)
-  { id: 6, question: 'Choose the correct sentence:', options: ['She go to school.', 'She goes to school.', 'She going school.', 'She goed to school.'], correct: 1, difficulty: 'medium' },
-  { id: 7, question: 'What is the plural of "Child"?', options: ['Childs', 'Childrens', 'Children', 'Childes'], correct: 2, difficulty: 'medium' },
-  { id: 8, question: '"He is very _____ because he didn\'t sleep well." Choose the best word:', options: ['happy', 'tired', 'hungry', 'angry'], correct: 1, difficulty: 'medium' },
-  { id: 9, question: 'Which word is a verb?', options: ['Beautiful', 'Quickly', 'Running', 'Happy'], correct: 2, difficulty: 'medium' },
-  { id: 10, question: 'Choose the correct past tense: "Yesterday, I _____ to the park."', options: ['go', 'goes', 'went', 'going'], correct: 2, difficulty: 'medium' },
+  { id: 6, question: 'Choose the correct sentence:', options: ['She go to school.', 'She goes to school.', 'She going school.', 'She goed to school.'], correct: 1, difficulty: 'medium', explanation: 'With third person singular (she/he), we use "goes" in simple present tense.' },
+  { id: 7, question: 'What is the plural of "Child"?', options: ['Childs', 'Childrens', 'Children', 'Childes'], correct: 2, difficulty: 'medium', explanation: '"Children" is the irregular plural of "Child".' },
+  { id: 8, question: '"He is very _____ because he didn\'t sleep well." Choose the best word:', options: ['happy', 'tired', 'hungry', 'angry'], correct: 1, difficulty: 'medium', explanation: 'Not sleeping well makes someone "tired".' },
+  { id: 9, question: 'Which word is a verb?', options: ['Beautiful', 'Quickly', 'Running', 'Happy'], correct: 2, difficulty: 'medium', explanation: '"Running" is a verb (action word). Beautiful and Happy are adjectives, Quickly is an adverb.' },
+  { id: 10, question: 'Choose the correct past tense: "Yesterday, I _____ to the park."', options: ['go', 'goes', 'went', 'going'], correct: 2, difficulty: 'medium', explanation: '"Went" is the past tense of "go".' },
   // Hard (11-15)
-  { id: 11, question: 'Which sentence uses the correct article?', options: ['I saw an elephant at a zoo.', 'I saw a elephant at an zoo.', 'I saw an elephant at an zoo.', 'I saw a elephant at a zoo.'], correct: 0, difficulty: 'hard' },
-  { id: 12, question: 'Read: "Tom was late because the bus broke down." Why was Tom late?', options: ['He forgot his bag.', 'The bus had a problem.', 'He woke up late.', 'It was raining.'], correct: 1, difficulty: 'hard' },
-  { id: 13, question: '"If I _____ taller, I would play basketball." Fill in the blank:', options: ['am', 'was', 'were', 'be'], correct: 2, difficulty: 'hard' },
-  { id: 14, question: 'Which is a compound sentence?', options: ['The dog barked.', 'I like cats and dogs.', 'She sang, and he danced.', 'Running fast.'], correct: 2, difficulty: 'hard' },
-  { id: 15, question: 'Choose the word that best completes: "The scientist made an important _____ in the laboratory."', options: ['invention', 'discovery', 'decision', 'adventure'], correct: 1, difficulty: 'hard' },
+  { id: 11, question: 'Which sentence uses the correct article?', options: ['I saw an elephant at a zoo.', 'I saw a elephant at an zoo.', 'I saw an elephant at an zoo.', 'I saw a elephant at a zoo.'], correct: 0, difficulty: 'hard', explanation: 'Use "an" before vowel sounds (elephant) and "a" before consonant sounds (zoo).' },
+  { id: 12, question: 'Read: "Tom was late because the bus broke down." Why was Tom late?', options: ['He forgot his bag.', 'The bus had a problem.', 'He woke up late.', 'It was raining.'], correct: 1, difficulty: 'hard', explanation: '"The bus broke down" means the bus had a mechanical problem.' },
+  { id: 13, question: '"If I _____ taller, I would play basketball." Fill in the blank:', options: ['am', 'was', 'were', 'be'], correct: 2, difficulty: 'hard', explanation: 'In the subjunctive mood (hypothetical situations), we use "were" regardless of the subject.' },
+  { id: 14, question: 'Which is a compound sentence?', options: ['The dog barked.', 'I like cats and dogs.', 'She sang, and he danced.', 'Running fast.'], correct: 2, difficulty: 'hard', explanation: 'A compound sentence joins two independent clauses with a conjunction: "She sang" + "he danced".' },
+  { id: 15, question: 'Choose the word that best completes: "The scientist made an important _____ in the laboratory."', options: ['invention', 'discovery', 'decision', 'adventure'], correct: 1, difficulty: 'hard', explanation: 'A "discovery" is finding something new, which is what scientists do in laboratories.' },
 ];
 
-const TOTAL_TIME = 600; // 10 minutes in seconds
+const TOTAL_TIME = 600;
 
 export default function LaunchCheck() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const companion = useCompanion();
 
   const [currentQ, setCurrentQ] = useState(0);
   const [answers, setAnswers] = useState<(number | null)[]>(Array(15).fill(null));
@@ -53,8 +55,9 @@ export default function LaunchCheck() {
   const [assignedLevel, setAssignedLevel] = useState('');
   const [loading, setLoading] = useState(false);
   const [started, setStarted] = useState(false);
+  const [showReview, setShowReview] = useState(false);
+  const [expandedQ, setExpandedQ] = useState<number | null>(null);
 
-  // Timer
   useEffect(() => {
     if (!started || isFinished) return;
     const timer = setInterval(() => {
@@ -87,7 +90,6 @@ export default function LaunchCheck() {
     setIsFinished(true);
     setLoading(true);
 
-    // Calculate score
     let correct = 0;
     const answerDetails = questionBank.map((q, i) => ({
       questionId: q.id,
@@ -97,7 +99,6 @@ export default function LaunchCheck() {
     }));
     answerDetails.forEach(a => { if (a.isCorrect) correct++; });
 
-    // Assign level based on score
     let level: string;
     if (correct <= 5) {
       level = 'beginner';
@@ -116,7 +117,6 @@ export default function LaunchCheck() {
     }
 
     try {
-      // Save assessment result
       await supabase.from('assessment_results').upsert({
         student_id: user.id,
         score: correct,
@@ -126,12 +126,10 @@ export default function LaunchCheck() {
         answers: answerDetails,
       }, { onConflict: 'student_id' });
 
-      // Update student progress with assigned level
       await supabase.from('student_progress').update({
         current_level: level as 'beginner' | 'intermediate' | 'advanced',
         current_day: 1,
       }).eq('student_id', user.id);
-
     } catch (error) {
       console.error('Error saving assessment:', error);
     } finally {
@@ -151,6 +149,27 @@ export default function LaunchCheck() {
     return 'Level 3: Sentences to Conversation';
   };
 
+  const getScoreComment = () => {
+    if (score <= 3) return { emoji: '💪', title: 'Great start!', message: "Don't worry, everyone starts somewhere. PIXO will build your skills step by step with fun lessons tailored just for you!" };
+    if (score <= 5) return { emoji: '🌱', title: 'Good foundation!', message: "You know the basics! Let's strengthen your vocabulary and grammar with daily practice." };
+    if (score <= 8) return { emoji: '📚', title: 'Nice work!', message: "You have solid basics. Time to level up with more challenging sentences and conversations!" };
+    if (score <= 10) return { emoji: '🚀', title: 'Impressive!', message: "You're doing great! Let's polish your grammar and build advanced communication skills." };
+    if (score <= 13) return { emoji: '🌟', title: 'Excellent!', message: "Your English is strong! Time to master complex structures and boost your confidence." };
+    return { emoji: '🏆', title: 'Outstanding!', message: "You're a language star! Let's take you to the next level with advanced conversations and creative expression." };
+  };
+
+  const getDifficultyBreakdown = () => {
+    const easy = questionBank.filter(q => q.difficulty === 'easy');
+    const medium = questionBank.filter(q => q.difficulty === 'medium');
+    const hard = questionBank.filter(q => q.difficulty === 'hard');
+
+    const easyScore = easy.filter((q, i) => answers[questionBank.indexOf(q)] === q.correct).length;
+    const mediumScore = medium.filter(q => answers[questionBank.indexOf(q)] === q.correct).length;
+    const hardScore = hard.filter(q => answers[questionBank.indexOf(q)] === q.correct).length;
+
+    return { easy: easyScore, easyTotal: easy.length, medium: mediumScore, mediumTotal: medium.length, hard: hardScore, hardTotal: hard.length };
+  };
+
   // Intro screen
   if (!started) {
     return (
@@ -159,9 +178,7 @@ export default function LaunchCheck() {
           <div className="w-full max-w-md text-center space-y-8 animate-fade-in">
             <img src={pixoLogo} alt="PIXO" className="h-16 mx-auto animate-float" />
             <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-8 border border-white/20 space-y-6">
-              <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center mx-auto">
-                <Trophy className="h-10 w-10 text-white" />
-              </div>
+              <img src={companion.image} alt={companion.name} className="w-24 h-24 mx-auto object-contain animate-float" />
               <h1 className="text-3xl font-display font-bold text-white">
                 Learning Launch Check 🚀
               </h1>
@@ -198,34 +215,158 @@ export default function LaunchCheck() {
 
   // Results screen
   if (isFinished) {
+    const comment = getScoreComment();
+    const breakdown = getDifficultyBreakdown();
+
     return (
       <Layout showNavbar={false}>
-        <div className="min-h-screen gradient-bg flex items-center justify-center p-4">
-          <div className="w-full max-w-md text-center space-y-8 animate-fade-in">
-            <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-8 border border-white/20 space-y-6">
-              <div className="text-6xl animate-bounce-gentle">{getLevelEmoji(assignedLevel)}</div>
-              <h1 className="text-3xl font-display font-bold text-white">
-                Mission Confirmed!
-              </h1>
+        <div className="min-h-screen gradient-bg">
+          <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
+            {/* Score Summary */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-8 border border-white/20 text-center space-y-5 animate-fade-in">
+              <div className="text-6xl">{comment.emoji}</div>
+              <h1 className="text-3xl font-display font-bold text-white">{comment.title}</h1>
               <p className="text-white/80 text-lg">
-                You scored <span className="font-bold text-white">{score}/15</span>
+                You scored <span className="font-bold text-white text-2xl">{score}/15</span>
               </p>
-              <div className="bg-white/20 rounded-2xl p-6">
-                <p className="text-sm text-white/70 mb-2">Your starting point:</p>
-                <h2 className="text-2xl font-display font-bold text-white">
-                  {getLevelName(assignedLevel)}
+              <p className="text-white/70 text-sm max-w-md mx-auto">{comment.message}</p>
+
+              {/* Level Assignment */}
+              <div className="bg-white/20 rounded-2xl p-5">
+                <p className="text-sm text-white/70 mb-2">Your assigned level:</p>
+                <h2 className="text-2xl font-display font-bold text-white flex items-center justify-center gap-2">
+                  {getLevelEmoji(assignedLevel)} {getLevelName(assignedLevel)}
                 </h2>
               </div>
+
+              {/* Difficulty Breakdown */}
+              <div className="grid grid-cols-3 gap-3">
+                <div className="bg-white/10 rounded-xl p-3">
+                  <p className="text-xs text-white/60 mb-1">Easy</p>
+                  <p className="text-lg font-bold text-pixo-green">{breakdown.easy}/{breakdown.easyTotal}</p>
+                </div>
+                <div className="bg-white/10 rounded-xl p-3">
+                  <p className="text-xs text-white/60 mb-1">Medium</p>
+                  <p className="text-lg font-bold text-pixo-yellow">{breakdown.medium}/{breakdown.mediumTotal}</p>
+                </div>
+                <div className="bg-white/10 rounded-xl p-3">
+                  <p className="text-xs text-white/60 mb-1">Hard</p>
+                  <p className="text-lg font-bold text-pixo-orange">{breakdown.hard}/{breakdown.hardTotal}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Review Answers Toggle */}
+            <button
+              onClick={() => setShowReview(!showReview)}
+              className="w-full bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20 flex items-center justify-between text-white hover:bg-white/15 transition-colors"
+            >
+              <span className="font-display font-bold">📝 Review All Answers</span>
+              {showReview ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+            </button>
+
+            {/* Answer Review */}
+            {showReview && (
+              <div className="space-y-3 animate-fade-in">
+                {questionBank.map((q, i) => {
+                  const userAnswer = answers[i];
+                  const isCorrect = userAnswer === q.correct;
+                  const isExpanded = expandedQ === i;
+
+                  return (
+                    <div
+                      key={q.id}
+                      className={`rounded-2xl border-2 overflow-hidden transition-all ${
+                        isCorrect
+                          ? 'bg-green-500/10 border-green-500/30'
+                          : 'bg-red-500/10 border-red-500/30'
+                      }`}
+                    >
+                      <button
+                        onClick={() => setExpandedQ(isExpanded ? null : i)}
+                        className="w-full p-4 flex items-start gap-3 text-left"
+                      >
+                        <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${
+                          isCorrect ? 'bg-green-500' : 'bg-red-500'
+                        }`}>
+                          {isCorrect ? <Check className="h-4 w-4 text-white" /> : <X className="h-4 w-4 text-white" />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-white">Q{i + 1}. {q.question}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className={`text-xs px-2 py-0.5 rounded-full ${
+                              q.difficulty === 'easy' ? 'bg-green-500/20 text-green-300' :
+                              q.difficulty === 'medium' ? 'bg-yellow-500/20 text-yellow-300' :
+                              'bg-orange-500/20 text-orange-300'
+                            }`}>
+                              {q.difficulty}
+                            </span>
+                          </div>
+                        </div>
+                        {isExpanded ? <ChevronUp className="h-4 w-4 text-white/60 flex-shrink-0" /> : <ChevronDown className="h-4 w-4 text-white/60 flex-shrink-0" />}
+                      </button>
+
+                      {isExpanded && (
+                        <div className="px-4 pb-4 space-y-3 animate-fade-in">
+                          <div className="space-y-2">
+                            {q.options.map((opt, idx) => (
+                              <div
+                                key={idx}
+                                className={`p-2.5 rounded-lg text-sm flex items-center gap-2 ${
+                                  idx === q.correct
+                                    ? 'bg-green-500/20 text-green-200 font-semibold'
+                                    : idx === userAnswer && !isCorrect
+                                    ? 'bg-red-500/20 text-red-200 line-through'
+                                    : 'bg-white/5 text-white/60'
+                                }`}
+                              >
+                                <span className="w-5 h-5 rounded-full border border-current flex items-center justify-center text-xs flex-shrink-0">
+                                  {String.fromCharCode(65 + idx)}
+                                </span>
+                                {opt}
+                                {idx === q.correct && <Check className="h-3.5 w-3.5 ml-auto text-green-400" />}
+                                {idx === userAnswer && !isCorrect && <X className="h-3.5 w-3.5 ml-auto text-red-400" />}
+                              </div>
+                            ))}
+                          </div>
+                          <div className="bg-white/10 rounded-lg p-3">
+                            <p className="text-xs text-white/90">💡 {q.explanation}</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* CTA - Go to Subscription */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-6 border border-white/20 text-center space-y-4">
+              <img src={companion.image} alt={companion.name} className="w-16 h-16 mx-auto object-contain animate-float" />
+              <h3 className="text-xl font-display font-bold text-white">
+                Ready to start your journey? 🚀
+              </h3>
               <p className="text-white/70 text-sm">
-                Don't worry — every expert was once a beginner. Your adventure starts now! 🎉
+                Choose a plan to unlock all lessons and features tailored to your level.
               </p>
               <Button
                 className="w-full bg-white text-primary hover:bg-white/90 font-bold text-lg py-6"
                 disabled={loading}
-                onClick={() => navigate('/student')}
+                onClick={() => navigate('/pricing')}
               >
-                {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Let's Begin!"}
+                {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : (
+                  <>
+                    Choose Your Plan
+                    <ArrowRight className="h-5 w-5 ml-2" />
+                  </>
+                )}
               </Button>
+              <button
+                onClick={() => navigate('/student')}
+                className="text-white/50 text-sm hover:text-white/80 transition-colors underline"
+              >
+                Skip for now (Free plan)
+              </button>
             </div>
           </div>
         </div>
@@ -309,6 +450,7 @@ export default function LaunchCheck() {
                 disabled={currentQ === 0}
                 onClick={() => setCurrentQ(currentQ - 1)}
               >
+                <ArrowLeft className="h-4 w-4 mr-2" />
                 Previous
               </Button>
 
