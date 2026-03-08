@@ -340,6 +340,9 @@ export default function Pricing() {
           </div>
         </section>
 
+        {/* Comparison Table */}
+        <ComparisonTable />
+
         {/* Trust */}
         <section className="py-12 border-t border-border">
           <div className="container mx-auto px-4 text-center">
