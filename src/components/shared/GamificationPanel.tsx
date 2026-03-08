@@ -242,5 +242,6 @@ export function GamificationPanel() {
         </div>
       </div>
     </div>
+    </>
   );
 }

@@ -21,6 +21,7 @@ import Dictionary from "./pages/Dictionary";
 import Studio from "./pages/Studio";
 import Leaderboard from "./pages/Leaderboard";
 import Shop from "./pages/Shop";
+import Profile from "./pages/Profile";
 
 const queryClient = new QueryClient();
 
