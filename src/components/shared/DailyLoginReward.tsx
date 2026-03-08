@@ -81,6 +81,7 @@ export function DailyLoginReward() {
 
       setClaimed(true);
       setShowCelebration(true);
+      playRewardSound();
       toast({ title: `+${todayReward} XP! 🎁`, description: `Day ${consecutiveDays} login streak!` });
     } catch (e) {
       console.error('Claim login reward error:', e);
