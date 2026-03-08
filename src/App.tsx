@@ -23,6 +23,7 @@ import Leaderboard from "./pages/Leaderboard";
 import Shop from "./pages/Shop";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
+import WeeklyReport from "./pages/WeeklyReport";
 
 const queryClient = new QueryClient();
 
