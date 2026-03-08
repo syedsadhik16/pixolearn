@@ -28,6 +28,7 @@ import { GamificationPanel } from '@/components/shared/GamificationPanel';
 import { DailyLoginReward } from '@/components/shared/DailyLoginReward';
 import { checkAndAwardBadges } from '@/lib/gamification';
 import { useCompanion } from '@/hooks/useCompanion';
+import { TrialCountdown } from '@/components/shared/TrialCountdown';
 
 interface Lesson {
   id: string;
