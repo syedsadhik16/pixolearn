@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import pixoLogo from '@/assets/pixo-logo.png';
 import { Check, ArrowRight, Star, Sparkles, ArrowLeft, Loader2, Shield } from 'lucide-react';
 import { ComparisonTable } from '@/components/pricing/ComparisonTable';
+import { PricingFAQ } from '@/components/pricing/PricingFAQ';
 
 declare global {
   interface Window {
@@ -292,7 +293,11 @@ export default function Pricing() {
                 >
                   {plan.badge && (
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                      <span className="gradient-bg text-white text-xs font-bold px-4 py-1.5 rounded-full">
+                      <span className={`text-white text-xs font-bold px-4 py-1.5 rounded-full ${
+                        plan.badge === 'Most Value'
+                          ? 'bg-gradient-to-r from-emerald-500 to-teal-500'
+                          : 'gradient-bg'
+                      }`}>
                         {plan.badge}
                       </span>
                     </div>
@@ -344,7 +349,9 @@ export default function Pricing() {
         {/* Comparison Table */}
         <ComparisonTable />
 
-        {/* Trust */}
+        {/* FAQ */}
+        <PricingFAQ />
+
         <section className="py-12 border-t border-border">
           <div className="container mx-auto px-4 text-center">
             <div className="flex items-center justify-center gap-6 flex-wrap text-sm text-muted-foreground">
