@@ -223,6 +223,37 @@ export default function Pricing() {
           </div>
         </section>
 
+        {/* Free Trial CTA */}
+        <section className="pb-10">
+          <div className="container mx-auto px-4 text-center">
+            <div className="max-w-md mx-auto pixo-card p-6 animate-slide-up">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <Sparkles className="h-5 w-5 text-primary" />
+                <h2 className="text-lg font-display font-bold">Not sure yet?</h2>
+              </div>
+              <p className="text-sm text-muted-foreground mb-4">
+                Try PIXO free for 24 hours — no payment required!
+              </p>
+              <Button
+                variant="gradient"
+                size="lg"
+                className="w-full"
+                onClick={() => {
+                  if (!user) {
+                    navigate('/auth?signup=true&trial=true');
+                  } else {
+                    navigate('/student');
+                    toast({ title: '🎉 Free Trial Activated!', description: 'Enjoy 24 hours of full access.' });
+                  }
+                }}
+              >
+                Start 1-Day Free Trial
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            </div>
+          </div>
+        </section>
+
         {/* Plans */}
         <section className="pb-20">
           <div className="container mx-auto px-4">
