@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Layout } from '@/components/layout/Layout';
 import pixoLogo from '@/assets/pixo-logo.png';
-import { BookOpen, MessageSquare, Check, Loader2 } from 'lucide-react';
+import { BookOpen, MessageSquare, GraduationCap, Check, Loader2 } from 'lucide-react';
 
 const levels = [
   {
