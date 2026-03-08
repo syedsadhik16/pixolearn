@@ -28,6 +28,7 @@ import { GamificationPanel } from '@/components/shared/GamificationPanel';
 import { DailyLoginReward } from '@/components/shared/DailyLoginReward';
 import { checkAndAwardBadges } from '@/lib/gamification';
 import { useCompanion } from '@/hooks/useCompanion';
+import { TrialCountdown } from '@/components/shared/TrialCountdown';
 
 interface Lesson {
   id: string;
@@ -209,6 +210,12 @@ export default function StudentDashboard() {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8 pb-24">
+        {/* Trial Countdown */}
+        {profile?.trial_expires_at && (
+          <div className="mb-6">
+            <TrialCountdown trialExpiresAt={profile.trial_expires_at} />
+          </div>
+        )}
         {/* Daily Login Reward */}
         <div className="mb-6">
           <DailyLoginReward />
