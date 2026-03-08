@@ -78,6 +78,7 @@ export function GamificationPanel() {
         const newLevel = xpRes.data.xp_level;
         if (prevLevelRef.current > 0 && newLevel > prevLevelRef.current) {
           setCelebration({ show: true, type: 'level_up', title: `Level ${newLevel}!`, subtitle: 'Keep up the amazing work! 🚀', icon: '🚀' });
+          playLevelUpSound();
         }
         prevLevelRef.current = newLevel;
         setXP(xpRes.data);
