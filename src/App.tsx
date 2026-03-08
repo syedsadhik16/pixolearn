@@ -27,6 +27,7 @@ import Shop from "./pages/Shop";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import WeeklyReport from "./pages/WeeklyReport";
+import CreativeWriting from "./pages/CreativeWriting";
 
 const queryClient = new QueryClient();
 
