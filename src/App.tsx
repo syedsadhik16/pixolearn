@@ -27,6 +27,7 @@ import Shop from "./pages/Shop";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import WeeklyReport from "./pages/WeeklyReport";
+import CreativeWriting from "./pages/CreativeWriting";
 
 const queryClient = new QueryClient();
 
@@ -58,6 +59,7 @@ const App = () => (
             <Route path="/profile" element={<Profile />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/weekly-report" element={<WeeklyReport />} />
+            <Route path="/creative-writing" element={<CreativeWriting />} />
             <Route path="/parent" element={<ParentDashboard />} />
             <Route path="/admin" element={<AdminDashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

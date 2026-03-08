@@ -8,12 +8,14 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Layout } from '@/components/layout/Layout';
 import { BottomNav } from '@/components/layout/BottomNav';
+import { VoicePicker } from '@/components/shared/VoicePicker';
 import { 
   ArrowLeft, Mic, MicOff, Volume2, Loader2, Send, Bot, User,
   ShoppingCart, Utensils, Plane, GraduationCap, Briefcase, Phone,
-  Hotel, Stethoscope, Theater
+  Hotel, Stethoscope, Theater, Settings2
 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 interface Message { role: 'user' | 'assistant'; content: string; }
 
@@ -56,6 +58,9 @@ export default function Roleplay() {
   const [isRecording, setIsRecording] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [selectedVoice, setSelectedVoice] = useState<SpeechSynthesisVoice | null>(null);
+  const [selectedVoiceURI, setSelectedVoiceURI] = useState<string | undefined>();
+  const [voiceOpen, setVoiceOpen] = useState(false);
   const recognitionRef = useRef<any>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { user, loading: authLoading } = useAuth();
@@ -70,10 +75,16 @@ export default function Roleplay() {
       window.speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(text);
       u.rate = 0.9;
+      if (selectedVoice) u.voice = selectedVoice;
       u.onstart = () => setIsSpeaking(true);
       u.onend = () => setIsSpeaking(false);
       window.speechSynthesis.speak(u);
     }
+  };
+
+  const handleVoiceChange = (voice: SpeechSynthesisVoice | null) => {
+    setSelectedVoice(voice);
+    setSelectedVoiceURI(voice?.voiceURI);
   };
 
   const startRecording = () => {
@@ -126,6 +137,14 @@ export default function Roleplay() {
             </h1>
             <p className="text-sm text-muted-foreground">Practice real-life conversations with AI</p>
           </div>
+
+          {/* Voice Selection */}
+          <Card className="mb-4">
+            <CardContent className="p-3">
+              <VoicePicker onVoiceChange={handleVoiceChange} selectedVoiceURI={selectedVoiceURI} />
+            </CardContent>
+          </Card>
+
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             {scenarios.map((s) => (
               <Card key={s.id} className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1 overflow-hidden group" onClick={() => startScenario(s)}>
@@ -163,7 +182,21 @@ export default function Roleplay() {
               <p className="text-xs text-white/80">{selectedScenario.description}</p>
             </div>
             {isSpeaking && <Volume2 className="h-4 w-4 animate-pulse" />}
+            <Collapsible open={voiceOpen} onOpenChange={setVoiceOpen}>
+              <CollapsibleTrigger asChild>
+                <Button variant="ghost" size="icon" className="text-white hover:bg-white/20">
+                  <Settings2 className="h-4 w-4" />
+                </Button>
+              </CollapsibleTrigger>
+            </Collapsible>
           </div>
+          <Collapsible open={voiceOpen} onOpenChange={setVoiceOpen}>
+            <CollapsibleContent>
+              <div className="max-w-2xl mx-auto pt-2">
+                <VoicePicker onVoiceChange={handleVoiceChange} selectedVoiceURI={selectedVoiceURI} compact />
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
         </div>
 
         <ScrollArea className="flex-1 p-4" ref={scrollRef}>
