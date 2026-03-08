@@ -39,6 +39,7 @@ import {
   TrendingUp,
   Trophy,
   Plus,
+  Trash2,
   Pencil,
   Search,
   BarChart3,
