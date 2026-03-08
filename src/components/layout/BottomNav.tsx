@@ -22,6 +22,7 @@ const navItems = [
   { path: '/roleplay', label: 'Roleplay', icon: Theater },
   { path: '/dictionary', label: 'Dictionary', icon: BookOpenText },
   { path: '/studio', label: 'Studio', icon: Mic2 },
+  { path: '/creative-writing', label: 'Write', icon: PenLine },
   { path: '/leaderboard', label: 'Ranks', icon: Trophy },
   { path: '/shop', label: 'Shop', icon: ShoppingBag },
   { path: '/profile', label: 'Profile', icon: User },
