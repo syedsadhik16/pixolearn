@@ -64,28 +64,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const fetchProfile = async (userId: string) => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, email, full_name, avatar_url, role, subscription_type, trial_started_at, trial_expires_at')
+        .eq('id', userId)
+        .single();
 
-    if (!error && data) {
-      const profileData = data as Profile;
-      // Client-side trial expiry check
-      if (
-        profileData.subscription_type === 'premium' &&
-        profileData.trial_expires_at &&
-        new Date(profileData.trial_expires_at) < new Date()
-      ) {
-        profileData.subscription_type = 'free';
-        supabase
-          .from('profiles')
-          .update({ subscription_type: 'free' })
-          .eq('id', userId)
-          .then(() => {});
+      if (!error && data) {
+        const profileData = data as unknown as Profile;
+        // Client-side trial expiry check
+        if (
+          profileData.subscription_type === 'premium' &&
+          profileData.trial_expires_at &&
+          new Date(profileData.trial_expires_at) < new Date()
+        ) {
+          profileData.subscription_type = 'free';
+          supabase
+            .from('profiles')
+            .update({ subscription_type: 'free' } as any)
+            .eq('id', userId)
+            .then(() => {});
+        }
+        setProfile(profileData);
       }
-      setProfile(profileData);
+    } catch (err) {
+      console.error('Error fetching profile:', err);
     }
   };
 
