@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import pixoLogo from '@/assets/pixo-logo.png';
 import { Check, ArrowRight, Star, Sparkles, ArrowLeft, Loader2, Shield } from 'lucide-react';
 import { ComparisonTable } from '@/components/pricing/ComparisonTable';
+import { PricingFAQ } from '@/components/pricing/PricingFAQ';
 
 declare global {
   interface Window {
