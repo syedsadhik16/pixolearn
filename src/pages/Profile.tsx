@@ -11,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import {
   User, Zap, Trophy, Calendar, Edit3, Save, LogOut,
-  ShoppingBag, Star, Flame
+  ShoppingBag, Star, Flame, Settings
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -322,8 +322,12 @@ export default function Profile() {
           </TabsContent>
         </Tabs>
 
-        {/* Sign Out */}
-        <div className="mt-8 text-center">
+        {/* Actions */}
+        <div className="mt-8 flex items-center justify-center gap-3">
+          <Button variant="outline" onClick={() => navigate('/settings')}>
+            <Settings className="h-4 w-4 mr-2" />
+            Settings
+          </Button>
           <Button variant="outline" onClick={handleSignOut} className="text-destructive border-destructive/30 hover:bg-destructive/10">
             <LogOut className="h-4 w-4 mr-2" />
             Sign Out

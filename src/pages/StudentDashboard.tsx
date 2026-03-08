@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { GamificationPanel } from '@/components/shared/GamificationPanel';
+import { DailyLoginReward } from '@/components/shared/DailyLoginReward';
 import { checkAndAwardBadges } from '@/lib/gamification';
 
 interface Lesson {
@@ -204,6 +205,10 @@ export default function StudentDashboard() {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8 pb-24">
+        {/* Daily Login Reward */}
+        <div className="mb-6">
+          <DailyLoginReward />
+        </div>
         {/* Header */}
         <div className="mb-8 animate-fade-in">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
