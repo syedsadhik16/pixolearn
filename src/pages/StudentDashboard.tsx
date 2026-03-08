@@ -205,6 +205,10 @@ export default function StudentDashboard() {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8 pb-24">
+        {/* Daily Login Reward */}
+        <div className="mb-6">
+          <DailyLoginReward />
+        </div>
         {/* Header */}
         <div className="mb-8 animate-fade-in">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
