@@ -8,31 +8,16 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
+import { awardXP } from '@/lib/gamification';
 import {
   PenLine, Sparkles, Loader2, RotateCcw, Send, BookOpen,
-  MessageSquareText, Lightbulb, CheckCircle2, AlertCircle
+  MessageSquareText, Lightbulb, CheckCircle2, Clock, History
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-interface WritingPrompt {
-  id: string;
-  title: string;
-  prompt: string;
-  difficulty: 'easy' | 'medium' | 'hard';
-  category: string;
-  icon: React.ElementType;
-  wordTarget: number;
-}
-
-interface Feedback {
-  score: number;
-  grammar: string;
-  vocabulary: string;
-  creativity: string;
-  suggestions: string[];
-  correctedText: string;
-}
+import { PromptCard, difficultyColors, type WritingPrompt } from '@/components/creative-writing/PromptCard';
+import { FeedbackDisplay, type Feedback } from '@/components/creative-writing/FeedbackDisplay';
 
 const prompts: WritingPrompt[] = [
   { id: '1', title: 'My Best Day', prompt: 'Write about the best day you ever had. What happened? How did you feel?', difficulty: 'easy', category: 'Personal', icon: BookOpen, wordTarget: 50 },
@@ -45,18 +30,32 @@ const prompts: WritingPrompt[] = [
   { id: '8', title: 'A New Invention', prompt: 'Invent something that would make life better. Describe what it does and how it works.', difficulty: 'medium', category: 'Imagination', icon: Lightbulb, wordTarget: 90 },
 ];
 
-const difficultyColors: Record<string, string> = {
-  easy: 'bg-green-500/10 text-green-600 border-green-500/20',
-  medium: 'bg-amber-500/10 text-amber-600 border-amber-500/20',
-  hard: 'bg-red-500/10 text-red-600 border-red-500/20',
-};
+interface PastSubmission {
+  id: string;
+  prompt_title: string;
+  score: number | null;
+  xp_awarded: number;
+  created_at: string;
+  writing_text: string;
+}
+
+function calculateXP(score: number): number {
+  if (score >= 90) return 30;
+  if (score >= 70) return 20;
+  if (score >= 50) return 15;
+  if (score >= 30) return 10;
+  return 5;
+}
 
 export default function CreativeWriting() {
   const [selectedPrompt, setSelectedPrompt] = useState<WritingPrompt | null>(null);
   const [writingText, setWritingText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
+  const [xpAwarded, setXpAwarded] = useState(0);
   const [filterCategory, setFilterCategory] = useState<string>('All');
+  const [pastSubmissions, setPastSubmissions] = useState<PastSubmission[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
 
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -64,12 +63,29 @@ export default function CreativeWriting() {
 
   useEffect(() => { if (!authLoading && !user) navigate('/auth'); }, [user, authLoading, navigate]);
 
+  useEffect(() => {
+    if (user) loadPastSubmissions();
+  }, [user]);
+
+  const loadPastSubmissions = async () => {
+    if (!user) return;
+    setLoadingHistory(true);
+    const { data } = await supabase
+      .from('writing_submissions')
+      .select('id, prompt_title, score, xp_awarded, created_at, writing_text')
+      .eq('student_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(20);
+    setPastSubmissions((data as PastSubmission[]) || []);
+    setLoadingHistory(false);
+  };
+
   const wordCount = writingText.trim().split(/\s+/).filter(Boolean).length;
   const categories = ['All', ...Array.from(new Set(prompts.map(p => p.category)))];
   const filtered = filterCategory === 'All' ? prompts : prompts.filter(p => p.category === filterCategory);
 
   const handleSubmit = async () => {
-    if (!selectedPrompt || wordCount < 10) {
+    if (!selectedPrompt || wordCount < 10 || !user) {
       toast({ title: 'Too short', description: 'Please write at least 10 words.', variant: 'destructive' });
       return;
     }
@@ -92,8 +108,33 @@ Evaluate their writing and respond ONLY with valid JSON (no markdown, no code fe
         },
       });
       if (error) throw error;
-      const parsed = JSON.parse(data.response);
+      const parsed: Feedback = JSON.parse(data.response);
       setFeedback(parsed);
+
+      // Calculate and award XP
+      const xp = calculateXP(parsed.score);
+      setXpAwarded(xp);
+      await awardXP(user.id, xp, 'creative_writing', selectedPrompt.id);
+
+      // Save submission to database
+      await supabase.from('writing_submissions').insert({
+        student_id: user.id,
+        prompt_id: selectedPrompt.id,
+        prompt_title: selectedPrompt.title,
+        writing_text: writingText,
+        score: parsed.score,
+        grammar_feedback: parsed.grammar,
+        vocabulary_feedback: parsed.vocabulary,
+        creativity_feedback: parsed.creativity,
+        suggestions: parsed.suggestions,
+        corrected_text: parsed.correctedText,
+        xp_awarded: xp,
+      });
+
+      // Refresh history
+      loadPastSubmissions();
+
+      toast({ title: `+${xp} XP earned! ⚡`, description: `You scored ${parsed.score}/100` });
     } catch (err) {
       toast({ title: 'Error', description: 'Could not get feedback. Please try again.', variant: 'destructive' });
     } finally {
@@ -101,170 +142,124 @@ Evaluate their writing and respond ONLY with valid JSON (no markdown, no code fe
     }
   };
 
-  const resetWriting = () => {
-    setWritingText('');
-    setFeedback(null);
-  };
-
-  const backToPrompts = () => {
-    setSelectedPrompt(null);
-    resetWriting();
-  };
+  const resetWriting = () => { setWritingText(''); setFeedback(null); setXpAwarded(0); };
+  const backToPrompts = () => { setSelectedPrompt(null); resetWriting(); };
 
   if (authLoading) return <Layout><div className="min-h-screen flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div></Layout>;
 
-  // Prompt selection screen
-  if (!selectedPrompt) {
+  // Writing & feedback screen
+  if (selectedPrompt) {
     return (
       <Layout>
         <div className="container mx-auto px-4 py-6 pb-24">
-          <div className="mb-6">
-            <h1 className="text-2xl font-display font-bold flex items-center gap-2">
-              <PenLine className="h-6 w-6 text-primary" />
-              Creative <span className="gradient-text">Writing</span>
-            </h1>
-            <p className="text-sm text-muted-foreground">Practice writing with AI-powered feedback</p>
-          </div>
+          <Button variant="ghost" size="sm" onClick={backToPrompts} className="mb-4 -ml-2 text-muted-foreground">← Back to prompts</Button>
 
-          <div className="flex gap-2 overflow-x-auto pb-3 mb-4">
-            {categories.map(cat => (
-              <Button key={cat} variant={filterCategory === cat ? 'default' : 'outline'} size="sm" onClick={() => setFilterCategory(cat)} className="whitespace-nowrap shrink-0">{cat}</Button>
-            ))}
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {filtered.map((p) => (
-              <Card key={p.id} className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-0.5 group" onClick={() => setSelectedPrompt(p)}>
-                <CardContent className="p-4">
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
-                      <p.icon className="h-5 w-5 text-primary" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-semibold text-sm">{p.title}</h3>
-                        <Badge variant="outline" className={cn("text-[10px] px-1.5 py-0", difficultyColors[p.difficulty])}>{p.difficulty}</Badge>
-                      </div>
-                      <p className="text-xs text-muted-foreground line-clamp-2">{p.prompt}</p>
-                      <p className="text-[10px] text-muted-foreground mt-1">🎯 Target: {p.wordTarget} words</p>
-                    </div>
+          <Card className="mb-4 bg-primary/5 border-primary/20">
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3">
+                <selectedPrompt.icon className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                <div>
+                  <h2 className="font-bold text-sm">{selectedPrompt.title}</h2>
+                  <p className="text-sm text-muted-foreground mt-1">{selectedPrompt.prompt}</p>
+                  <div className="flex gap-2 mt-2">
+                    <Badge variant="outline" className={cn("text-[10px]", difficultyColors[selectedPrompt.difficulty])}>{selectedPrompt.difficulty}</Badge>
+                    <Badge variant="outline" className="text-[10px]">🎯 {selectedPrompt.wordTarget} words</Badge>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="space-y-3">
+            <div className="relative">
+              <Textarea value={writingText} onChange={(e) => setWritingText(e.target.value)} placeholder="Start writing here..." rows={8} className="resize-none text-sm" disabled={isSubmitting} />
+              <div className={cn("absolute bottom-2 right-3 text-xs font-medium", wordCount >= selectedPrompt.wordTarget ? "text-green-600" : "text-muted-foreground")}>
+                {wordCount}/{selectedPrompt.wordTarget} words
+                {wordCount >= selectedPrompt.wordTarget && <CheckCircle2 className="inline h-3 w-3 ml-1" />}
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button onClick={handleSubmit} disabled={isSubmitting || wordCount < 10} className="flex-1 gap-2">
+                {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                {isSubmitting ? 'Getting feedback...' : 'Submit for Feedback'}
+              </Button>
+              <Button variant="outline" size="icon" onClick={resetWriting} disabled={isSubmitting}>
+                <RotateCcw className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
+
+          {feedback && <FeedbackDisplay feedback={feedback} xpAwarded={xpAwarded} />}
         </div>
         <BottomNav />
       </Layout>
     );
   }
 
-  // Writing & feedback screen
+  // Prompt selection screen with history tab
   return (
     <Layout>
       <div className="container mx-auto px-4 py-6 pb-24">
-        <Button variant="ghost" size="sm" onClick={backToPrompts} className="mb-4 -ml-2 text-muted-foreground">← Back to prompts</Button>
-
-        <Card className="mb-4 bg-primary/5 border-primary/20">
-          <CardContent className="p-4">
-            <div className="flex items-start gap-3">
-              <selectedPrompt.icon className="h-5 w-5 text-primary mt-0.5 shrink-0" />
-              <div>
-                <h2 className="font-bold text-sm">{selectedPrompt.title}</h2>
-                <p className="text-sm text-muted-foreground mt-1">{selectedPrompt.prompt}</p>
-                <div className="flex gap-2 mt-2">
-                  <Badge variant="outline" className={cn("text-[10px]", difficultyColors[selectedPrompt.difficulty])}>{selectedPrompt.difficulty}</Badge>
-                  <Badge variant="outline" className="text-[10px]">🎯 {selectedPrompt.wordTarget} words</Badge>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <div className="space-y-3">
-          <div className="relative">
-            <Textarea
-              value={writingText}
-              onChange={(e) => setWritingText(e.target.value)}
-              placeholder="Start writing here..."
-              rows={8}
-              className="resize-none text-sm"
-              disabled={isSubmitting}
-            />
-            <div className={cn(
-              "absolute bottom-2 right-3 text-xs font-medium",
-              wordCount >= selectedPrompt.wordTarget ? "text-green-600" : "text-muted-foreground"
-            )}>
-              {wordCount}/{selectedPrompt.wordTarget} words
-              {wordCount >= selectedPrompt.wordTarget && <CheckCircle2 className="inline h-3 w-3 ml-1" />}
-            </div>
-          </div>
-
-          <div className="flex gap-2">
-            <Button onClick={handleSubmit} disabled={isSubmitting || wordCount < 10} className="flex-1 gap-2">
-              {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-              {isSubmitting ? 'Getting feedback...' : 'Submit for Feedback'}
-            </Button>
-            <Button variant="outline" size="icon" onClick={resetWriting} disabled={isSubmitting}>
-              <RotateCcw className="h-4 w-4" />
-            </Button>
-          </div>
+        <div className="mb-6">
+          <h1 className="text-2xl font-display font-bold flex items-center gap-2">
+            <PenLine className="h-6 w-6 text-primary" />
+            Creative <span className="gradient-text">Writing</span>
+          </h1>
+          <p className="text-sm text-muted-foreground">Practice writing with AI-powered feedback</p>
         </div>
 
-        {feedback && (
-          <div className="mt-6 space-y-4 animate-slide-up">
-            {/* Score */}
-            <Card className={cn("border-2", feedback.score >= 70 ? "border-green-500/30" : feedback.score >= 40 ? "border-amber-500/30" : "border-red-500/30")}>
-              <CardContent className="p-4 text-center">
-                <div className={cn("text-4xl font-bold mb-1", feedback.score >= 70 ? "text-green-600" : feedback.score >= 40 ? "text-amber-600" : "text-red-600")}>
-                  {feedback.score}/100
-                </div>
-                <p className="text-xs text-muted-foreground">Overall Score</p>
-              </CardContent>
-            </Card>
+        <Tabs defaultValue="prompts" className="w-full">
+          <TabsList className="w-full mb-4">
+            <TabsTrigger value="prompts" className="flex-1 gap-1"><PenLine className="h-3.5 w-3.5" />Prompts</TabsTrigger>
+            <TabsTrigger value="history" className="flex-1 gap-1"><History className="h-3.5 w-3.5" />My Work</TabsTrigger>
+          </TabsList>
 
-            {/* Detailed Feedback */}
-            <div className="grid gap-3">
-              <Card>
-                <CardHeader className="p-3 pb-1"><CardTitle className="text-xs font-semibold flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-blue-500" />Grammar</CardTitle></CardHeader>
-                <CardContent className="p-3 pt-0"><p className="text-xs text-muted-foreground">{feedback.grammar}</p></CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="p-3 pb-1"><CardTitle className="text-xs font-semibold flex items-center gap-1.5"><BookOpen className="h-3.5 w-3.5 text-purple-500" />Vocabulary</CardTitle></CardHeader>
-                <CardContent className="p-3 pt-0"><p className="text-xs text-muted-foreground">{feedback.vocabulary}</p></CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="p-3 pb-1"><CardTitle className="text-xs font-semibold flex items-center gap-1.5"><Sparkles className="h-3.5 w-3.5 text-amber-500" />Creativity</CardTitle></CardHeader>
-                <CardContent className="p-3 pt-0"><p className="text-xs text-muted-foreground">{feedback.creativity}</p></CardContent>
-              </Card>
+          <TabsContent value="prompts">
+            <div className="flex gap-2 overflow-x-auto pb-3 mb-4">
+              {categories.map(cat => (
+                <Button key={cat} variant={filterCategory === cat ? 'default' : 'outline'} size="sm" onClick={() => setFilterCategory(cat)} className="whitespace-nowrap shrink-0">{cat}</Button>
+              ))}
             </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {filtered.map((p) => (
+                <PromptCard key={p.id} prompt={p} onClick={() => setSelectedPrompt(p)} />
+              ))}
+            </div>
+          </TabsContent>
 
-            {/* Suggestions */}
-            {feedback.suggestions?.length > 0 && (
-              <Card>
-                <CardHeader className="p-3 pb-1"><CardTitle className="text-xs font-semibold flex items-center gap-1.5"><Lightbulb className="h-3.5 w-3.5 text-amber-500" />Tips to Improve</CardTitle></CardHeader>
-                <CardContent className="p-3 pt-1">
-                  <ul className="space-y-1.5">
-                    {feedback.suggestions.map((s, i) => (
-                      <li key={i} className="text-xs text-muted-foreground flex items-start gap-2">
-                        <AlertCircle className="h-3 w-3 text-primary mt-0.5 shrink-0" />
-                        {s}
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
+          <TabsContent value="history">
+            {loadingHistory ? (
+              <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+            ) : pastSubmissions.length === 0 ? (
+              <Card><CardContent className="p-8 text-center text-muted-foreground text-sm">No submissions yet. Pick a prompt and start writing!</CardContent></Card>
+            ) : (
+              <div className="space-y-3">
+                {pastSubmissions.map((sub) => (
+                  <Card key={sub.id}>
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="font-semibold text-sm">{sub.prompt_title}</h3>
+                        <div className="flex items-center gap-2">
+                          {sub.score !== null && (
+                            <Badge variant="outline" className={cn("text-[10px]", sub.score >= 70 ? "text-green-600 border-green-500/20" : sub.score >= 40 ? "text-amber-600 border-amber-500/20" : "text-red-600 border-red-500/20")}>
+                              {sub.score}/100
+                            </Badge>
+                          )}
+                          {sub.xp_awarded > 0 && <Badge variant="outline" className="text-[10px] text-primary border-primary/20">+{sub.xp_awarded} XP</Badge>}
+                        </div>
+                      </div>
+                      <p className="text-xs text-muted-foreground line-clamp-2">{sub.writing_text}</p>
+                      <p className="text-[10px] text-muted-foreground mt-2 flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {new Date(sub.created_at).toLocaleDateString()}
+                      </p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             )}
-
-            {/* Corrected Text */}
-            {feedback.correctedText && (
-              <Card className="bg-green-500/5 border-green-500/20">
-                <CardHeader className="p-3 pb-1"><CardTitle className="text-xs font-semibold text-green-700">✏️ Corrected Version</CardTitle></CardHeader>
-                <CardContent className="p-3 pt-1"><p className="text-xs leading-relaxed">{feedback.correctedText}</p></CardContent>
-              </Card>
-            )}
-          </div>
-        )}
+          </TabsContent>
+        </Tabs>
       </div>
       <BottomNav />
     </Layout>

@@ -845,6 +845,62 @@ export type Database = {
           },
         ]
       }
+      writing_submissions: {
+        Row: {
+          corrected_text: string | null
+          created_at: string
+          creativity_feedback: string | null
+          grammar_feedback: string | null
+          id: string
+          prompt_id: string
+          prompt_title: string
+          score: number | null
+          student_id: string
+          suggestions: Json | null
+          vocabulary_feedback: string | null
+          writing_text: string
+          xp_awarded: number | null
+        }
+        Insert: {
+          corrected_text?: string | null
+          created_at?: string
+          creativity_feedback?: string | null
+          grammar_feedback?: string | null
+          id?: string
+          prompt_id: string
+          prompt_title: string
+          score?: number | null
+          student_id: string
+          suggestions?: Json | null
+          vocabulary_feedback?: string | null
+          writing_text: string
+          xp_awarded?: number | null
+        }
+        Update: {
+          corrected_text?: string | null
+          created_at?: string
+          creativity_feedback?: string | null
+          grammar_feedback?: string | null
+          id?: string
+          prompt_id?: string
+          prompt_title?: string
+          score?: number | null
+          student_id?: string
+          suggestions?: Json | null
+          vocabulary_feedback?: string | null
+          writing_text?: string
+          xp_awarded?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "writing_submissions_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       xp_history: {
         Row: {
           created_at: string
