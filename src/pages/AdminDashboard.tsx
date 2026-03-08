@@ -366,14 +366,14 @@ export default function AdminDashboard() {
                       New Lesson
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="max-w-md">
+                  <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
                     <DialogHeader>
                       <DialogTitle>{editingLesson ? 'Edit Lesson' : 'Create Lesson'}</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4">
                       <div>
                         <Label>Title</Label>
-                        <Input value={lessonForm.title} onChange={(e) => setLessonForm({ ...lessonForm, title: e.target.value })} placeholder="Lesson title" />
+                        <Input value={lessonForm.title} onChange={(e) => setLessonForm({ ...lessonForm, title: e.target.value })} placeholder="Lesson title" maxLength={200} />
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
@@ -394,8 +394,77 @@ export default function AdminDashboard() {
                       </div>
                       <div>
                         <Label>Description</Label>
-                        <Textarea value={lessonForm.description} onChange={(e) => setLessonForm({ ...lessonForm, description: e.target.value })} placeholder="Lesson description" rows={3} />
+                        <Textarea value={lessonForm.description} onChange={(e) => setLessonForm({ ...lessonForm, description: e.target.value })} placeholder="Lesson description" rows={2} maxLength={500} />
                       </div>
+
+                      <Separator />
+
+                      {/* Vocabulary Section */}
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <Label className="text-base font-semibold">Vocabulary</Label>
+                          <Button type="button" variant="outline" size="sm" onClick={addVocabItem}>
+                            <Plus className="h-3 w-3 mr-1" /> Add Word
+                          </Button>
+                        </div>
+                        {lessonForm.vocabulary.length === 0 && (
+                          <p className="text-sm text-muted-foreground py-2">No vocabulary items yet. Click "Add Word" to start.</p>
+                        )}
+                        <div className="space-y-3">
+                          {lessonForm.vocabulary.map((item, i) => (
+                            <div key={i} className="flex gap-2 items-start bg-muted/30 rounded-lg p-3">
+                              <div className="flex-1 grid grid-cols-3 gap-2">
+                                <Input placeholder="Word" value={item.word} onChange={(e) => updateVocabItem(i, 'word', e.target.value)} maxLength={100} />
+                                <Input placeholder="Phonetic" value={item.phonetic} onChange={(e) => updateVocabItem(i, 'phonetic', e.target.value)} maxLength={100} />
+                                <Input placeholder="Meaning" value={item.meaning} onChange={(e) => updateVocabItem(i, 'meaning', e.target.value)} maxLength={200} />
+                              </div>
+                              <Button type="button" variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive shrink-0" onClick={() => removeVocabItem(i)}>
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <Separator />
+
+                      {/* Sentences Section */}
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <Label className="text-base font-semibold">Sentences</Label>
+                          <Button type="button" variant="outline" size="sm" onClick={addSentenceItem}>
+                            <Plus className="h-3 w-3 mr-1" /> Add Sentence
+                          </Button>
+                        </div>
+                        {lessonForm.sentences.length === 0 && (
+                          <p className="text-sm text-muted-foreground py-2">No sentences yet. Click "Add Sentence" to start.</p>
+                        )}
+                        <div className="space-y-2">
+                          {lessonForm.sentences.map((item, i) => (
+                            <div key={i} className="flex gap-2 items-center">
+                              <Input placeholder="Sentence text" value={item.text} onChange={(e) => updateSentenceItem(i, e.target.value)} className="flex-1" maxLength={500} />
+                              <Button type="button" variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive shrink-0" onClick={() => removeSentenceItem(i)}>
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <Separator />
+
+                      {/* Read Aloud Text */}
+                      <div>
+                        <Label className="text-base font-semibold">Read-Aloud Text</Label>
+                        <Textarea
+                          value={lessonForm.read_aloud_text}
+                          onChange={(e) => setLessonForm({ ...lessonForm, read_aloud_text: e.target.value })}
+                          placeholder="Enter a paragraph for students to read aloud..."
+                          rows={4}
+                          maxLength={2000}
+                        />
+                      </div>
+
                       <Button onClick={handleSaveLesson} className="w-full">
                         {editingLesson ? 'Update Lesson' : 'Create Lesson'}
                       </Button>
