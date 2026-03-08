@@ -33,6 +33,7 @@ export default function Chat() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const companion = useCompanion();
 
   useEffect(() => {
     if (!authLoading && !user) navigate('/auth');
