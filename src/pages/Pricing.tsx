@@ -1,15 +1,25 @@
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import pixoLogo from '@/assets/pixo-logo.png';
-import { Check, ArrowRight, Star, Sparkles, ArrowLeft } from 'lucide-react';
+import { Check, ArrowRight, Star, Sparkles, ArrowLeft, Loader2, Shield } from 'lucide-react';
+
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
 
 const plans = [
   {
     id: 'free',
     name: 'Explorer',
     price: 'Free',
+    priceAmount: 0,
     period: '',
     tagline: 'Try PIXO risk-free',
     features: [
@@ -18,13 +28,14 @@ const plans = [
       'Daily login rewards',
       'Limited AI chat',
     ],
-    cta: 'Start Free',
+    cta: 'Continue Free',
     highlighted: false,
   },
   {
     id: 'monthly',
     name: 'Adventurer',
     price: '₹499',
+    priceAmount: 499,
     period: '/month',
     tagline: 'Most flexible option',
     features: [
@@ -36,7 +47,7 @@ const plans = [
       'Weekly progress reports',
       'Priority support',
     ],
-    cta: 'Choose Plan',
+    cta: 'Subscribe Now',
     highlighted: true,
     badge: 'Popular',
   },
@@ -44,6 +55,7 @@ const plans = [
     id: 'yearly',
     name: 'Achiever',
     price: '₹2,999',
+    priceAmount: 2999,
     period: '/year',
     tagline: 'Save 50% • Best value',
     originalPrice: '₹5,988',
@@ -56,14 +68,147 @@ const plans = [
       'Family sharing (2 kids)',
       'Early feature access',
     ],
-    cta: 'Choose Plan',
+    cta: 'Subscribe Now',
     highlighted: false,
     badge: 'Best Value',
   },
 ];
 
 export default function Pricing() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+
+  const loadRazorpayScript = (): Promise<boolean> => {
+    return new Promise((resolve) => {
+      if (window.Razorpay) {
+        resolve(true);
+        return;
+      }
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
+  const handleSelectPlan = async (plan: typeof plans[0]) => {
+    if (plan.id === 'free') {
+      navigate('/student');
+      return;
+    }
+
+    if (!user) {
+      navigate('/auth?signup=true');
+      return;
+    }
+
+    setLoadingPlan(plan.id);
+
+    try {
+      // Load Razorpay script
+      const loaded = await loadRazorpayScript();
+      if (!loaded) {
+        throw new Error('Failed to load Razorpay. Please check your internet connection.');
+      }
+
+      // Create order via edge function
+      const { data, error } = await supabase.functions.invoke('create-razorpay-order', {
+        body: {
+          amount: plan.priceAmount,
+          currency: 'INR',
+          plan_id: plan.id,
+          user_id: user.id,
+          user_email: profile?.email,
+          user_name: profile?.full_name,
+        },
+      });
+
+      if (error || !data?.order_id) {
+        throw new Error(data?.error || error?.message || 'Failed to create order');
+      }
+
+      // Open Razorpay checkout
+      const options = {
+        key: data.key_id,
+        amount: data.amount,
+        currency: data.currency,
+        name: 'PIXO',
+        description: `${plan.name} Plan - ${plan.period ? plan.period.replace('/', '') : 'subscription'}`,
+        image: pixoLogo,
+        order_id: data.order_id,
+        handler: async (response: any) => {
+          try {
+            // Verify payment
+            const { data: verifyData, error: verifyError } = await supabase.functions.invoke('verify-razorpay-payment', {
+              body: {
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                user_id: user.id,
+                plan_id: plan.id,
+              },
+            });
+
+            if (verifyError || !verifyData?.success) {
+              throw new Error(verifyData?.error || 'Payment verification failed');
+            }
+
+            toast({
+              title: 'Payment Successful! 🎉',
+              description: `Welcome to PIXO ${plan.name}! Your premium features are now active.`,
+            });
+
+            // Navigate to dashboard
+            navigate('/student');
+          } catch (err: any) {
+            console.error('Verification error:', err);
+            toast({
+              title: 'Verification Issue',
+              description: 'Payment received but verification pending. Please contact support.',
+              variant: 'destructive',
+            });
+            navigate('/student');
+          }
+        },
+        prefill: {
+          name: profile?.full_name || '',
+          email: profile?.email || '',
+        },
+        theme: {
+          color: '#F97316',
+        },
+        modal: {
+          ondismiss: () => {
+            setLoadingPlan(null);
+          },
+        },
+      };
+
+      const razorpay = new window.Razorpay(options);
+      razorpay.on('payment.failed', (response: any) => {
+        console.error('Payment failed:', response.error);
+        toast({
+          title: 'Payment Failed',
+          description: response.error?.description || 'Something went wrong. Please try again.',
+          variant: 'destructive',
+        });
+        setLoadingPlan(null);
+      });
+      razorpay.open();
+    } catch (err: any) {
+      console.error('Payment error:', err);
+      toast({
+        title: 'Error',
+        description: err.message || 'Failed to initiate payment',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoadingPlan(null);
+    }
+  };
 
   return (
     <Layout>
@@ -131,16 +276,22 @@ export default function Pricing() {
                     ))}
                   </ul>
 
-                  <Link to={user ? '/student' : '/auth?signup=true'}>
-                    <Button
-                      variant={plan.highlighted ? 'gradient' : 'outline'}
-                      className="w-full"
-                      size="lg"
-                    >
-                      {plan.cta}
-                      <ArrowRight className="h-4 w-4 ml-2" />
-                    </Button>
-                  </Link>
+                  <Button
+                    variant={plan.highlighted ? 'gradient' : 'outline'}
+                    className="w-full"
+                    size="lg"
+                    disabled={loadingPlan === plan.id}
+                    onClick={() => handleSelectPlan(plan)}
+                  >
+                    {loadingPlan === plan.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <>
+                        {plan.cta}
+                        <ArrowRight className="h-4 w-4 ml-2" />
+                      </>
+                    )}
+                  </Button>
                 </div>
               ))}
             </div>
@@ -152,6 +303,11 @@ export default function Pricing() {
           <div className="container mx-auto px-4 text-center">
             <div className="flex items-center justify-center gap-6 flex-wrap text-sm text-muted-foreground">
               <div className="flex items-center gap-1">
+                <Shield className="h-4 w-4 text-pixo-green" />
+                <span>Secured by Razorpay</span>
+              </div>
+              <span>•</span>
+              <div className="flex items-center gap-1">
                 <Star className="h-4 w-4 text-pixo-yellow fill-pixo-yellow" />
                 <span>4.9/5 rating</span>
               </div>
@@ -159,8 +315,6 @@ export default function Pricing() {
               <span>30-day money-back guarantee</span>
               <span>•</span>
               <span>Cancel anytime</span>
-              <span>•</span>
-              <span>Secure payment</span>
             </div>
           </div>
         </section>
