@@ -7,6 +7,7 @@ import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { CelebrationOverlay } from './CelebrationOverlay';
+import { playLevelUpSound, playBadgeSound, playXPSound } from '@/lib/sounds';
 
 interface XPData {
   total_xp: number;
@@ -77,6 +78,7 @@ export function GamificationPanel() {
         const newLevel = xpRes.data.xp_level;
         if (prevLevelRef.current > 0 && newLevel > prevLevelRef.current) {
           setCelebration({ show: true, type: 'level_up', title: `Level ${newLevel}!`, subtitle: 'Keep up the amazing work! 🚀', icon: '🚀' });
+          playLevelUpSound();
         }
         prevLevelRef.current = newLevel;
         setXP(xpRes.data);
@@ -87,6 +89,7 @@ export function GamificationPanel() {
         if (prevBadgeCountRef.current > 0 && newCount > prevBadgeCountRef.current) {
           const latestBadge = badgesRes.data?.find((b: any) => b.id === earnedRes.data[earnedRes.data.length - 1]?.badge_id);
           setCelebration({ show: true, type: 'badge', title: 'Badge Earned!', subtitle: latestBadge?.name || 'New achievement!', icon: latestBadge?.icon || '🏆' });
+          playBadgeSound();
         }
         prevBadgeCountRef.current = newCount;
         setEarnedBadges(earnedRes.data as EarnedBadge[]);
@@ -117,6 +120,7 @@ export function GamificationPanel() {
       });
 
       toast({ title: `+${xpReward} XP! 🎉`, description: 'Challenge reward claimed!' });
+      playXPSound();
       fetchAll();
     } catch (e) {
       console.error('Claim XP error:', e);
