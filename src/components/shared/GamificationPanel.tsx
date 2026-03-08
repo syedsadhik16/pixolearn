@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Trophy, Zap, Target, Star, Gift } from 'lucide-react';
@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { CelebrationOverlay } from './CelebrationOverlay';
 
 interface XPData {
   total_xp: number;
