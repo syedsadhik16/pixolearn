@@ -363,6 +363,27 @@ export default function Pricing() {
           <PricingFAQ />
         </ScrollReveal>
 
+  const handleTrialClick = async () => {
+    if (!user) {
+      navigate('/auth?signup=true&trial=true');
+      return;
+    }
+    setLoadingPlan('trial');
+    try {
+      const { data, error } = await supabase.functions.invoke('activate-trial', {
+        body: { user_id: user.id },
+      });
+      if (error || !data?.success) {
+        throw new Error(data?.error || error?.message || 'Failed to activate trial');
+      }
+      toast({ title: '🎉 Free Trial Activated!', description: 'Enjoy 24 hours of full premium access.' });
+      navigate('/student');
+    } catch (err: any) {
+      toast({ title: 'Trial Error', description: err.message, variant: 'destructive' });
+    } finally {
+      setLoadingPlan(null);
+    }
+  };
 
         <section className="py-12 border-t border-border">
           <div className="container mx-auto px-4 text-center">
