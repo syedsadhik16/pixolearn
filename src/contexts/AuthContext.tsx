@@ -71,7 +71,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .single();
 
     if (!error && data) {
-      setProfile(data as Profile);
+      const profileData = data as Profile;
+      // Client-side trial expiry check
+      if (
+        profileData.subscription_type === 'premium' &&
+        profileData.trial_expires_at &&
+        new Date(profileData.trial_expires_at) < new Date()
+      ) {
+        profileData.subscription_type = 'free';
+        supabase
+          .from('profiles')
+          .update({ subscription_type: 'free' })
+          .eq('id', userId)
+          .then(() => {});
+      }
+      setProfile(profileData);
     }
   };
 
