@@ -45,6 +45,7 @@ declare global {
   }
 }
 import { useParams, useNavigate } from 'react-router-dom';
+import { trackChallengeProgress, checkAndAwardBadges } from '@/lib/gamification';
 import { Layout } from '@/components/layout/Layout';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -449,6 +450,10 @@ export default function LessonSession() {
           lesson_completed: true,
         });
       }
+
+      // Track daily challenge & check badges
+      trackChallengeProgress(user.id, 'lesson');
+      checkAndAwardBadges(user.id);
 
       setPhase('complete');
     } catch (error) {

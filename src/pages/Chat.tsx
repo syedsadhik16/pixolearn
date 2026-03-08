@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { trackChallengeProgress } from '@/lib/gamification';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -88,6 +89,9 @@ export default function Chat() {
     setMessages(prev => [...prev, userMessage]);
     setInputText('');
     setIsLoading(true);
+
+    // Track chat challenge
+    if (user) trackChallengeProgress(user.id, 'chat');
 
     try {
       const { data, error } = await supabase.functions.invoke('ai-practice', {

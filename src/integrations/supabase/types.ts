@@ -49,6 +49,72 @@ export type Database = {
           },
         ]
       }
+      badges: {
+        Row: {
+          created_at: string
+          description: string
+          icon: string
+          id: string
+          name: string
+          requirement_type: string
+          requirement_value: number
+          xp_reward: number
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          icon?: string
+          id?: string
+          name: string
+          requirement_type?: string
+          requirement_value?: number
+          xp_reward?: number
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: string
+          name?: string
+          requirement_type?: string
+          requirement_value?: number
+          xp_reward?: number
+        }
+        Relationships: []
+      }
+      daily_challenges: {
+        Row: {
+          challenge_type: string
+          created_at: string
+          description: string
+          id: string
+          is_active: boolean
+          target_count: number
+          title: string
+          xp_reward: number
+        }
+        Insert: {
+          challenge_type?: string
+          created_at?: string
+          description: string
+          id?: string
+          is_active?: boolean
+          target_count?: number
+          title: string
+          xp_reward?: number
+        }
+        Update: {
+          challenge_type?: string
+          created_at?: string
+          description?: string
+          id?: string
+          is_active?: boolean
+          target_count?: number
+          title?: string
+          xp_reward?: number
+        }
+        Relationships: []
+      }
       lesson_completions: {
         Row: {
           clarity_score: number | null
@@ -383,6 +449,90 @@ export type Database = {
           },
         ]
       }
+      student_badges: {
+        Row: {
+          badge_id: string
+          earned_at: string
+          id: string
+          student_id: string
+        }
+        Insert: {
+          badge_id: string
+          earned_at?: string
+          id?: string
+          student_id: string
+        }
+        Update: {
+          badge_id?: string
+          earned_at?: string
+          id?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_badges_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "badges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_badges_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      student_challenges: {
+        Row: {
+          challenge_date: string
+          challenge_id: string
+          completed: boolean
+          created_at: string
+          current_count: number
+          id: string
+          student_id: string
+          xp_claimed: boolean
+        }
+        Insert: {
+          challenge_date?: string
+          challenge_id: string
+          completed?: boolean
+          created_at?: string
+          current_count?: number
+          id?: string
+          student_id: string
+          xp_claimed?: boolean
+        }
+        Update: {
+          challenge_date?: string
+          challenge_id?: string
+          completed?: boolean
+          created_at?: string
+          current_count?: number
+          id?: string
+          student_id?: string
+          xp_claimed?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_challenges_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "daily_challenges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_challenges_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       student_progress: {
         Row: {
           created_at: string
@@ -418,11 +568,90 @@ export type Database = {
           },
         ]
       }
+      student_xp: {
+        Row: {
+          created_at: string
+          id: string
+          student_id: string
+          total_xp: number
+          updated_at: string
+          xp_level: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          student_id: string
+          total_xp?: number
+          updated_at?: string
+          xp_level?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          student_id?: string
+          total_xp?: number
+          updated_at?: string
+          xp_level?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_xp_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      xp_history: {
+        Row: {
+          created_at: string
+          id: string
+          source: string
+          source_id: string | null
+          student_id: string
+          xp_amount: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          source: string
+          source_id?: string | null
+          student_id: string
+          xp_amount: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          source?: string
+          source_id?: string | null
+          student_id?: string
+          xp_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "xp_history_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      award_xp: {
+        Args: {
+          _source: string
+          _source_id?: string
+          _student_id: string
+          _xp_amount: number
+        }
+        Returns: number
+      }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["user_role"]

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { trackChallengeProgress } from '@/lib/gamification';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -62,6 +63,8 @@ export default function Dictionary() {
       if (!res.ok) throw new Error('Word not found');
       const data = await res.json();
       setResult(data[0]);
+      // Track dictionary challenge
+      if (user) trackChallengeProgress(user.id, 'dictionary');
     } catch {
       toast({ title: 'Not Found', description: `"${query}" was not found in the dictionary.`, variant: 'destructive' });
     } finally {

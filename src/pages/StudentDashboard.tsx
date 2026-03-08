@@ -22,6 +22,8 @@ import {
   MessageCircle
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { GamificationPanel } from '@/components/shared/GamificationPanel';
+import { checkAndAwardBadges } from '@/lib/gamification';
 
 interface Lesson {
   id: string;
@@ -108,6 +110,9 @@ export default function StudentDashboard() {
 
       if (completionsError) throw completionsError;
       setCompletions(completionsData || []);
+
+      // Check and award badges
+      checkAndAwardBadges(user!.id);
 
       // Calculate streak from attendance
       const { data: attendanceData } = await supabase
@@ -417,6 +422,12 @@ export default function StudentDashboard() {
               );
             })}
           </div>
+        </div>
+
+        {/* Gamification Panel */}
+        <div className="mb-8 animate-fade-in" style={{ animationDelay: '0.65s' }}>
+          <h3 className="text-xl font-display font-bold mb-4">🎮 Your Progress & Rewards</h3>
+          <GamificationPanel />
         </div>
 
         {/* Premium Upsell */}
