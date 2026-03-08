@@ -11,6 +11,7 @@ import { ComparisonTable } from '@/components/pricing/ComparisonTable';
 import { PricingFAQ } from '@/components/pricing/PricingFAQ';
 import { Testimonials } from '@/components/pricing/Testimonials';
 import { ScrollReveal } from '@/components/shared/ScrollReveal';
+import { WhatsAppButton } from '@/components/shared/WhatsAppButton';
 
 declare global {
   interface Window {
@@ -382,6 +383,7 @@ export default function Pricing() {
           </div>
         </section>
       </div>
+      <WhatsAppButton />
     </Layout>
   );
 }
