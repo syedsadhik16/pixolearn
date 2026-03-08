@@ -7,6 +7,7 @@ import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { CelebrationOverlay } from './CelebrationOverlay';
+import { playLevelUpSound, playBadgeSound, playXPSound } from '@/lib/sounds';
 
 interface XPData {
   total_xp: number;
