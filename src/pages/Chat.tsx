@@ -151,9 +151,12 @@ Always be encouraging and provide clear, simple explanations.`,
                 className={`flex items-start gap-3 ${message.role === 'user' ? 'flex-row-reverse' : ''}`}
               >
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
-                  message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'
+                  message.role === 'user' ? 'bg-primary text-primary-foreground' : ''
                 }`}>
-                  {message.role === 'user' ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
+                  {message.role === 'user' 
+                    ? <User className="h-4 w-4" /> 
+                    : <img src={companion.image} alt={companion.name} className="w-8 h-8 object-contain" />
+                  }
                 </div>
                 <div className={`max-w-[80%] p-3 rounded-2xl ${
                   message.role === 'user'
