@@ -69,7 +69,7 @@ export default function Chat() {
       handleSend(transcript);
     };
     recognition.onerror = () => setIsRecording(false);
-    recognition.onend = () => setIsRecording(false);
+    (recognition as any).onend = () => setIsRecording(false);
     recognitionRef.current = recognition;
     recognition.start();
     setIsRecording(true);

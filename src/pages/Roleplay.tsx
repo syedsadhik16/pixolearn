@@ -82,7 +82,7 @@ export default function Roleplay() {
     const r = new API(); r.continuous = false; r.interimResults = false; r.lang = 'en-US';
     r.onresult = (e: any) => { const t = e.results[0][0].transcript; setInputText(t); handleSend(t); };
     r.onerror = () => setIsRecording(false);
-    r.onend = () => setIsRecording(false);
+    (r as any).onend = () => setIsRecording(false);
     recognitionRef.current = r; r.start(); setIsRecording(true);
   };
 

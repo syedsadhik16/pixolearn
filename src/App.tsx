@@ -36,6 +36,12 @@ const App = () => (
             <Route path="/student" element={<StudentDashboard />} />
             <Route path="/lesson/:lessonId" element={<LessonSession />} />
             <Route path="/practice" element={<AIPractice />} />
+            <Route path="/journey" element={<Journey />} />
+            <Route path="/chat" element={<Chat />} />
+            <Route path="/live" element={<Live />} />
+            <Route path="/roleplay" element={<Roleplay />} />
+            <Route path="/dictionary" element={<Dictionary />} />
+            <Route path="/studio" element={<Studio />} />
             <Route path="/parent" element={<ParentDashboard />} />
             <Route path="/admin" element={<AdminDashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

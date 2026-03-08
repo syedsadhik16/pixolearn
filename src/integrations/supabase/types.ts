@@ -348,6 +348,41 @@ export type Database = {
         }
         Relationships: []
       }
+      saved_words: {
+        Row: {
+          created_at: string
+          id: string
+          meaning: string
+          phonetic: string
+          student_id: string
+          word: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          meaning?: string
+          phonetic?: string
+          student_id: string
+          word: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          meaning?: string
+          phonetic?: string
+          student_id?: string
+          word?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_words_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       student_progress: {
         Row: {
           created_at: string

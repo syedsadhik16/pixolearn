@@ -104,7 +104,7 @@ export default function Dictionary() {
   };
 
   const removeWord = async (id: string) => {
-    await supabase.from('saved_words').delete().eq('id', id);
+    await supabase.from('saved_words' as any).delete().eq('id', id);
     loadSavedWords();
   };
 
