@@ -43,6 +43,23 @@ const levels = [
     color: 'from-accent to-secondary',
     ageGroup: 'Ages 10-18',
   },
+  {
+    id: 'advanced',
+    title: 'Level 3: Advanced Mastery',
+    subtitle: 'For fluent communicators',
+    description: 'Master professional English with creative writing, debate, critical thinking, and leadership communication.',
+    duration: '6 months • 180 lessons',
+    features: [
+      'Advanced essay & creative writing',
+      'Debate & persuasion techniques',
+      'Critical thinking & analysis',
+      'Leadership & professional speaking',
+      'Media literacy & journalism',
+    ],
+    icon: GraduationCap,
+    color: 'from-secondary to-primary',
+    ageGroup: 'Ages 12+',
+  },
 ];
 
 export default function LevelSelection() {
