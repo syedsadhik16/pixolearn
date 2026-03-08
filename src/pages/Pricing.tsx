@@ -82,6 +82,28 @@ export default function Pricing() {
   const { toast } = useToast();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
 
+  const handleTrialClick = async () => {
+    if (!user) {
+      navigate('/auth?signup=true&trial=true');
+      return;
+    }
+    setLoadingPlan('trial');
+    try {
+      const { data, error } = await supabase.functions.invoke('activate-trial', {
+        body: { user_id: user.id },
+      });
+      if (error || !data?.success) {
+        throw new Error(data?.error || error?.message || 'Failed to activate trial');
+      }
+      toast({ title: '🎉 Free Trial Activated!', description: 'Enjoy 24 hours of full premium access.' });
+      navigate('/student');
+    } catch (err: any) {
+      toast({ title: 'Trial Error', description: err.message, variant: 'destructive' });
+    } finally {
+      setLoadingPlan(null);
+    }
+  };
+
   const loadRazorpayScript = (): Promise<boolean> => {
     return new Promise((resolve) => {
       if (window.Razorpay) {
@@ -105,13 +127,11 @@ export default function Pricing() {
     setLoadingPlan(plan.id);
 
     try {
-      // Load Razorpay script
       const loaded = await loadRazorpayScript();
       if (!loaded) {
         throw new Error('Failed to load Razorpay. Please check your internet connection.');
       }
 
-      // Create order via edge function
       const { data, error } = await supabase.functions.invoke('create-razorpay-order', {
         body: {
           amount: plan.priceAmount,
@@ -127,7 +147,6 @@ export default function Pricing() {
         throw new Error(data?.error || error?.message || 'Failed to create order');
       }
 
-      // Open Razorpay checkout
       const options = {
         key: data.key_id,
         amount: data.amount,
@@ -138,7 +157,6 @@ export default function Pricing() {
         order_id: data.order_id,
         handler: async (response: any) => {
           try {
-            // Verify payment
             const { data: verifyData, error: verifyError } = await supabase.functions.invoke('verify-razorpay-payment', {
               body: {
                 razorpay_order_id: response.razorpay_order_id,
@@ -157,8 +175,6 @@ export default function Pricing() {
               title: 'Payment Successful! 🎉',
               description: `Welcome to PIXO ${plan.name}! Your premium features are now active.`,
             });
-
-            // Navigate to dashboard
             navigate('/student');
           } catch (err: any) {
             console.error('Verification error:', err);
@@ -174,13 +190,9 @@ export default function Pricing() {
           name: profile?.full_name || '',
           email: profile?.email || '',
         },
-        theme: {
-          color: '#F97316',
-        },
+        theme: { color: '#F97316' },
         modal: {
-          ondismiss: () => {
-            setLoadingPlan(null);
-          },
+          ondismiss: () => setLoadingPlan(null),
         },
       };
 
@@ -209,6 +221,7 @@ export default function Pricing() {
 
   return (
     <Layout>
+      <StickyPricingBar onTrialClick={handleTrialClick} loading={loadingPlan === 'trial'} />
       <div className="min-h-screen">
         {/* Hero */}
         <section className="py-16 md:py-24 text-center relative overflow-hidden">
@@ -246,27 +259,7 @@ export default function Pricing() {
                 size="lg"
                 className="w-full"
                 disabled={loadingPlan === 'trial'}
-                onClick={async () => {
-                  if (!user) {
-                    navigate('/auth?signup=true&trial=true');
-                    return;
-                  }
-                  setLoadingPlan('trial');
-                  try {
-                    const { data, error } = await supabase.functions.invoke('activate-trial', {
-                      body: { user_id: user.id },
-                    });
-                    if (error || !data?.success) {
-                      throw new Error(data?.error || error?.message || 'Failed to activate trial');
-                    }
-                    toast({ title: '🎉 Free Trial Activated!', description: 'Enjoy 24 hours of full premium access.' });
-                    navigate('/student');
-                  } catch (err: any) {
-                    toast({ title: 'Trial Error', description: err.message, variant: 'destructive' });
-                  } finally {
-                    setLoadingPlan(null);
-                  }
-                }}
+                onClick={handleTrialClick}
               >
                 {loadingPlan === 'trial' ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -289,9 +282,7 @@ export default function Pricing() {
                 <div
                   key={plan.id}
                   className={`relative pixo-card flex flex-col animate-slide-up ${
-                    plan.highlighted
-                      ? 'ring-2 ring-primary shadow-lg scale-[1.02]'
-                      : ''
+                    plan.highlighted ? 'ring-2 ring-primary shadow-lg scale-[1.02]' : ''
                   }`}
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
@@ -363,28 +354,7 @@ export default function Pricing() {
           <PricingFAQ />
         </ScrollReveal>
 
-  const handleTrialClick = async () => {
-    if (!user) {
-      navigate('/auth?signup=true&trial=true');
-      return;
-    }
-    setLoadingPlan('trial');
-    try {
-      const { data, error } = await supabase.functions.invoke('activate-trial', {
-        body: { user_id: user.id },
-      });
-      if (error || !data?.success) {
-        throw new Error(data?.error || error?.message || 'Failed to activate trial');
-      }
-      toast({ title: '🎉 Free Trial Activated!', description: 'Enjoy 24 hours of full premium access.' });
-      navigate('/student');
-    } catch (err: any) {
-      toast({ title: 'Trial Error', description: err.message, variant: 'destructive' });
-    } finally {
-      setLoadingPlan(null);
-    }
-  };
-
+        {/* Trust */}
         <section className="py-12 border-t border-border">
           <div className="container mx-auto px-4 text-center">
             <div className="flex items-center justify-center gap-6 flex-wrap text-sm text-muted-foreground">
