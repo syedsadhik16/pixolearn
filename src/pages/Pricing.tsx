@@ -12,6 +12,7 @@ import { PricingFAQ } from '@/components/pricing/PricingFAQ';
 import { Testimonials } from '@/components/pricing/Testimonials';
 import { ScrollReveal } from '@/components/shared/ScrollReveal';
 import { WhatsAppButton } from '@/components/shared/WhatsAppButton';
+import { StickyPricingBar } from '@/components/pricing/StickyPricingBar';
 
 declare global {
   interface Window {
