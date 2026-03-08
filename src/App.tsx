@@ -41,6 +41,9 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/level-selection" element={<LevelSelection />} />
+            <Route path="/onboarding" element={<Onboarding />} />
+            <Route path="/launch-check" element={<LaunchCheck />} />
+            <Route path="/pricing" element={<Pricing />} />
             <Route path="/student" element={<StudentDashboard />} />
             <Route path="/lesson/:lessonId" element={<LessonSession />} />
             <Route path="/practice" element={<AIPractice />} />
