@@ -128,6 +128,9 @@ export default function AdminDashboard() {
     day_number: 1,
     description: '',
     is_active: true,
+    vocabulary: [],
+    sentences: [],
+    read_aloud_text: '',
   });
 
   useEffect(() => {
