@@ -88,7 +88,7 @@ export default function Dictionary() {
     const meaning = result.meanings[0]?.definitions[0]?.definition || '';
     const phonetic = result.phonetic || '';
     
-    const { error } = await supabase.from('saved_words').insert({
+    const { error } = await supabase.from('saved_words' as any).insert({
       student_id: user.id,
       word: result.word,
       meaning,
