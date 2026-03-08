@@ -63,6 +63,8 @@ export default function Dictionary() {
       if (!res.ok) throw new Error('Word not found');
       const data = await res.json();
       setResult(data[0]);
+      // Track dictionary challenge
+      if (user) trackChallengeProgress(user.id, 'dictionary');
     } catch {
       toast({ title: 'Not Found', description: `"${query}" was not found in the dictionary.`, variant: 'destructive' });
     } finally {
