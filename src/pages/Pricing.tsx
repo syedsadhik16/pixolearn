@@ -239,17 +239,37 @@ export default function Pricing() {
                 variant="gradient"
                 size="lg"
                 className="w-full"
-                onClick={() => {
+                disabled={loadingPlan === 'trial'}
+                onClick={async () => {
                   if (!user) {
                     navigate('/auth?signup=true&trial=true');
-                  } else {
+                    return;
+                  }
+                  setLoadingPlan('trial');
+                  try {
+                    const { data, error } = await supabase.functions.invoke('activate-trial', {
+                      body: { user_id: user.id },
+                    });
+                    if (error || !data?.success) {
+                      throw new Error(data?.error || error?.message || 'Failed to activate trial');
+                    }
+                    toast({ title: '🎉 Free Trial Activated!', description: 'Enjoy 24 hours of full premium access.' });
                     navigate('/student');
-                    toast({ title: '🎉 Free Trial Activated!', description: 'Enjoy 24 hours of full access.' });
+                  } catch (err: any) {
+                    toast({ title: 'Trial Error', description: err.message, variant: 'destructive' });
+                  } finally {
+                    setLoadingPlan(null);
                   }
                 }}
               >
-                Start 1-Day Free Trial
-                <ArrowRight className="h-4 w-4 ml-2" />
+                {loadingPlan === 'trial' ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <>
+                    Start 1-Day Free Trial
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                  </>
+                )}
               </Button>
             </div>
           </div>
