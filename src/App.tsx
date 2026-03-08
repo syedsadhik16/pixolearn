@@ -10,6 +10,7 @@ import LevelSelection from "./pages/LevelSelection";
 import StudentDashboard from "./pages/StudentDashboard";
 import LessonSession from "./pages/LessonSession";
 import AIPractice from "./pages/AIPractice";
+import ParentDashboard from "./pages/ParentDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
