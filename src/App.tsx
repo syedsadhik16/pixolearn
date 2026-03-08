@@ -7,6 +7,9 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import LevelSelection from "./pages/LevelSelection";
+import Onboarding from "./pages/Onboarding";
+import LaunchCheck from "./pages/LaunchCheck";
+import Pricing from "./pages/Pricing";
 import StudentDashboard from "./pages/StudentDashboard";
 import LessonSession from "./pages/LessonSession";
 import AIPractice from "./pages/AIPractice";
@@ -38,6 +41,9 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/level-selection" element={<LevelSelection />} />
+            <Route path="/onboarding" element={<Onboarding />} />
+            <Route path="/launch-check" element={<LaunchCheck />} />
+            <Route path="/pricing" element={<Pricing />} />
             <Route path="/student" element={<StudentDashboard />} />
             <Route path="/lesson/:lessonId" element={<LessonSession />} />
             <Route path="/practice" element={<AIPractice />} />

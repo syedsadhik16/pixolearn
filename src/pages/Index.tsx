@@ -102,9 +102,9 @@ export default function Index() {
                         <ArrowRight className="h-5 w-5 ml-2" />
                       </Button>
                     </Link>
-                    <Link to="/auth">
+                    <Link to="/pricing">
                       <Button variant="outline" size="xl">
-                        Sign In
+                        View Pricing
                       </Button>
                     </Link>
                   </>

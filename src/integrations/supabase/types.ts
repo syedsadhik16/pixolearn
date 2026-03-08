@@ -14,6 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      assessment_results: {
+        Row: {
+          answers: Json | null
+          assigned_level: string
+          created_at: string
+          id: string
+          score: number
+          student_id: string
+          time_taken_seconds: number | null
+          total_questions: number
+        }
+        Insert: {
+          answers?: Json | null
+          assigned_level?: string
+          created_at?: string
+          id?: string
+          score?: number
+          student_id: string
+          time_taken_seconds?: number | null
+          total_questions?: number
+        }
+        Update: {
+          answers?: Json | null
+          assigned_level?: string
+          created_at?: string
+          id?: string
+          score?: number
+          student_id?: string
+          time_taken_seconds?: number | null
+          total_questions?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessment_results_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       attendance: {
         Row: {
           created_at: string
@@ -145,6 +186,50 @@ export type Database = {
             foreignKeyName: "daily_login_rewards_student_id_fkey"
             columns: ["student_id"]
             isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      learner_profiles: {
+        Row: {
+          age_group: string | null
+          avatar_character: string
+          created_at: string
+          id: string
+          learning_goals: string[] | null
+          onboarding_completed: boolean
+          school_stage: string | null
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          age_group?: string | null
+          avatar_character?: string
+          created_at?: string
+          id?: string
+          learning_goals?: string[] | null
+          onboarding_completed?: boolean
+          school_stage?: string | null
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          age_group?: string | null
+          avatar_character?: string
+          created_at?: string
+          id?: string
+          learning_goals?: string[] | null
+          onboarding_completed?: boolean
+          school_stage?: string | null
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learner_profiles_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: true
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
