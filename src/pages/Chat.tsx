@@ -12,6 +12,7 @@ import {
   Send, Bot, User, Loader2, Mic, MicOff, Volume2, Sparkles
 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useCompanion } from '@/hooks/useCompanion';
 
 interface Message {
   role: 'user' | 'assistant';
