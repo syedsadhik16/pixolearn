@@ -21,7 +21,7 @@ const plans = [
     price: '₹5,999',
     priceAmount: 5999,
     period: '',
-    tagline: '6 months curriculum',
+    tagline: '6 months program',
     originalPrice: '₹7,999',
     features: [
       'Goal: Sounds, phonics, 3-letter & 5-letter words',
@@ -38,7 +38,7 @@ const plans = [
     price: '₹9,999',
     priceAmount: 9999,
     period: '',
-    tagline: '6 months curriculum',
+    tagline: '12 months program',
     originalPrice: '₹12,999',
     features: [
       'Goal: Sentences, stories, daily speaking',
@@ -56,7 +56,7 @@ const plans = [
     price: '₹14,999',
     priceAmount: 14999,
     period: '',
-    tagline: '6 months curriculum',
+    tagline: '18 months program',
     originalPrice: '₹19,999',
     features: [
       'Goal: Fluency, storytelling, confidence',
