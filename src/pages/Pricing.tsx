@@ -16,61 +16,56 @@ declare global {
 
 const plans = [
   {
-    id: 'free',
-    name: 'Explorer',
-    price: 'Free',
-    priceAmount: 0,
+    id: 'beginner',
+    name: 'Level 1 – Beginner',
+    price: '₹5,999',
+    priceAmount: 5999,
     period: '',
-    tagline: 'Try PIXO risk-free',
+    tagline: '6 months curriculum',
+    originalPrice: '₹7,999',
     features: [
-      '3 lessons per level',
-      'Basic speech feedback',
-      'Daily login rewards',
-      'Limited AI chat',
+      'Goal: Sounds, phonics, 3-letter & 5-letter words',
+      'Master letter sounds',
+      'Read 2 & 3 letter words',
+      'Early pronunciation confidence',
     ],
-    cta: 'Continue Free',
+    cta: 'Choose Path',
     highlighted: false,
   },
   {
-    id: 'monthly',
-    name: 'Adventurer',
-    price: '₹499',
-    priceAmount: 499,
-    period: '/month',
-    tagline: 'Most flexible option',
+    id: 'intermediate',
+    name: 'Level 2 – Intermediate',
+    price: '₹9,999',
+    priceAmount: 9999,
+    period: '',
+    tagline: '6 months curriculum',
+    originalPrice: '₹12,999',
     features: [
-      'All 180 lessons per level',
-      'Advanced AI speech scoring',
-      'Unlimited AI practice',
-      'Parent Mastery Hub',
-      'Role play studio',
-      'Weekly progress reports',
-      'Priority support',
+      'Goal: Sentences, stories, daily speaking',
+      'Speak full sentences',
+      'Read short stories',
+      'Daily speaking practice',
     ],
-    cta: 'Subscribe Now',
+    cta: 'Choose Path',
     highlighted: true,
-    badge: 'Popular',
+    badge: 'Most Popular',
   },
   {
-    id: 'yearly',
-    name: 'Achiever',
-    price: '₹2,999',
-    priceAmount: 2999,
-    period: '/year',
-    tagline: 'Save 50% • Best value',
-    originalPrice: '₹5,988',
+    id: 'advanced',
+    name: 'Level 3 – Advanced',
+    price: '₹14,999',
+    priceAmount: 14999,
+    period: '',
+    tagline: '6 months curriculum',
+    originalPrice: '₹19,999',
     features: [
-      'Everything in Adventurer',
-      'All 3 levels unlocked',
-      'Creative Studio access',
-      'Expert PDF reports',
-      'Offline lesson download',
-      'Family sharing (2 kids)',
-      'Early feature access',
+      'Goal: Fluency, storytelling, confidence',
+      'Storytelling fluency',
+      'Independent reading',
+      'Real-life speaking confidence',
     ],
-    cta: 'Subscribe Now',
+    cta: 'Choose Path',
     highlighted: false,
-    badge: 'Best Value',
   },
 ];
 
@@ -95,11 +90,6 @@ export default function Pricing() {
   };
 
   const handleSelectPlan = async (plan: typeof plans[0]) => {
-    if (plan.id === 'free') {
-      navigate('/student');
-      return;
-    }
-
     if (!user) {
       navigate('/auth?signup=true');
       return;
