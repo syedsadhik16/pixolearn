@@ -13,6 +13,12 @@ import AIPractice from "./pages/AIPractice";
 import ParentDashboard from "./pages/ParentDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
+import Journey from "./pages/Journey";
+import Chat from "./pages/Chat";
+import Live from "./pages/Live";
+import Roleplay from "./pages/Roleplay";
+import Dictionary from "./pages/Dictionary";
+import Studio from "./pages/Studio";
 
 const queryClient = new QueryClient();
 
