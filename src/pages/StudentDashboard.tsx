@@ -26,6 +26,7 @@ import { useToast } from '@/hooks/use-toast';
 import { GamificationPanel } from '@/components/shared/GamificationPanel';
 import { DailyLoginReward } from '@/components/shared/DailyLoginReward';
 import { checkAndAwardBadges } from '@/lib/gamification';
+import { useCompanion } from '@/hooks/useCompanion';
 
 interface Lesson {
   id: string;
@@ -56,6 +57,7 @@ export default function StudentDashboard() {
   const { user, profile, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const companion = useCompanion();
   
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [progress, setProgress] = useState<StudentProgress | null>(null);
@@ -213,15 +215,22 @@ export default function StudentDashboard() {
         {/* Header */}
         <div className="mb-8 animate-fade-in">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-              <h1 className="text-3xl md:text-4xl font-display font-bold">
-                Welcome back, <span className="gradient-text">{profile?.full_name?.split(' ')[0] || 'Learner'}</span>! 👋
-              </h1>
-              <p className="text-muted-foreground mt-2">
-                {todaysLesson 
-                  ? "Ready to continue your English journey?" 
-                  : "Great job! You're all caught up!"}
-              </p>
+            <div className="flex items-center gap-4">
+              <img 
+                src={companion.image} 
+                alt={companion.name} 
+                className="w-16 h-16 object-contain animate-float hidden sm:block" 
+              />
+              <div>
+                <h1 className="text-3xl md:text-4xl font-display font-bold">
+                  Welcome back, <span className="gradient-text">{profile?.full_name?.split(' ')[0] || 'Learner'}</span>! 👋
+                </h1>
+                <p className="text-muted-foreground mt-2">
+                  {companion.name} says: {todaysLesson 
+                    ? "Let's keep learning today!" 
+                    : "Great job! You're all caught up!"}
+                </p>
+              </div>
             </div>
             <StreakDisplay streak={streak} />
           </div>

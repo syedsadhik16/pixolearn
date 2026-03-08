@@ -12,6 +12,7 @@ import {
   Send, Bot, User, Loader2, Mic, MicOff, Volume2, Sparkles
 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useCompanion } from '@/hooks/useCompanion';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -32,6 +33,7 @@ export default function Chat() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const companion = useCompanion();
 
   useEffect(() => {
     if (!authLoading && !user) navigate('/auth');
@@ -130,11 +132,9 @@ Always be encouraging and provide clear, simple explanations.`,
         {/* Header */}
         <div className="px-4 py-3 border-b border-border bg-card">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full gradient-bg flex items-center justify-center">
-              <Sparkles className="h-5 w-5 text-white" />
-            </div>
+            <img src={companion.image} alt={companion.name} className="w-10 h-10 object-contain" />
             <div>
-              <h1 className="font-display font-bold text-lg">AI English Tutor</h1>
+              <h1 className="font-display font-bold text-lg">{companion.name} – AI English Tutor</h1>
               <p className="text-xs text-muted-foreground">
                 {isSpeaking ? '🔊 Speaking...' : 'Ask me anything about English!'}
               </p>
@@ -151,9 +151,12 @@ Always be encouraging and provide clear, simple explanations.`,
                 className={`flex items-start gap-3 ${message.role === 'user' ? 'flex-row-reverse' : ''}`}
               >
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
-                  message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'
+                  message.role === 'user' ? 'bg-primary text-primary-foreground' : ''
                 }`}>
-                  {message.role === 'user' ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
+                  {message.role === 'user' 
+                    ? <User className="h-4 w-4" /> 
+                    : <img src={companion.image} alt={companion.name} className="w-8 h-8 object-contain" />
+                  }
                 </div>
                 <div className={`max-w-[80%] p-3 rounded-2xl ${
                   message.role === 'user'

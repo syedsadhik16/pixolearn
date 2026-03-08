@@ -144,9 +144,9 @@ export default function Onboarding() {
                     <button
                       key={avatar.id}
                       onClick={() => setSelectedAvatar(avatar.id)}
-                      className={`relative p-5 rounded-2xl border-2 transition-all duration-300 text-center group ${
+                      className={`relative p-5 rounded-2xl border-2 transition-all duration-300 text-center group hover:scale-105 ${
                         selectedAvatar === avatar.id
-                          ? 'border-white bg-white/20 scale-105 shadow-lg'
+                          ? 'border-white bg-white/20 scale-105 shadow-lg animate-glow-pulse'
                           : 'border-white/20 hover:border-white/50 hover:bg-white/10'
                       }`}
                     >
@@ -155,7 +155,13 @@ export default function Onboarding() {
                           <Check className="h-4 w-4 text-primary" />
                         </div>
                       )}
-                      <img src={avatar.image} alt={avatar.name} className="w-16 h-16 mx-auto mb-2 object-contain" />
+                      <img 
+                        src={avatar.image} 
+                        alt={avatar.name} 
+                        className={`w-20 h-20 mx-auto mb-2 object-contain transition-transform duration-300 group-hover:animate-bounce-gentle ${
+                          selectedAvatar === avatar.id ? 'animate-float' : ''
+                        }`}
+                      />
                       <p className="font-display font-bold text-white text-lg">{avatar.name}</p>
                       <p className="text-xs text-white/60 mt-1">{avatar.trait}</p>
                     </button>
