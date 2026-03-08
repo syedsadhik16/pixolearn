@@ -6,9 +6,10 @@ import { BottomNav } from '@/components/layout/BottomNav';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
+import { VoicePicker } from '@/components/shared/VoicePicker';
 import { 
   Mic2, Square, Play, Pause, RotateCcw, Volume2, Loader2, 
-  CheckCircle2, Timer
+  CheckCircle2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -28,6 +29,8 @@ export default function Studio() {
   const [selectedText, setSelectedText] = useState(sampleTexts[0]);
   const [customText, setCustomText] = useState('');
   const [useCustom, setUseCustom] = useState(false);
+  const [selectedVoice, setSelectedVoice] = useState<SpeechSynthesisVoice | null>(null);
+  const [selectedVoiceURI, setSelectedVoiceURI] = useState<string | undefined>();
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -39,7 +42,6 @@ export default function Studio() {
   const { toast } = useToast();
 
   useEffect(() => { if (!authLoading && !user) navigate('/auth'); }, [user, authLoading, navigate]);
-
   useEffect(() => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
@@ -52,14 +54,12 @@ export default function Studio() {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mediaRecorder = new MediaRecorder(stream);
       chunksRef.current = [];
-      
       mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
       mediaRecorder.onstop = () => {
         const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
         setAudioURL(URL.createObjectURL(blob));
         stream.getTracks().forEach(t => t.stop());
       };
-
       mediaRecorderRef.current = mediaRecorder;
       mediaRecorder.start();
       setIsRecording(true);
@@ -79,7 +79,7 @@ export default function Studio() {
 
   const playRecording = () => {
     if (!audioURL) return;
-    if (audioRef.current) { audioRef.current.pause(); }
+    if (audioRef.current) audioRef.current.pause();
     const audio = new Audio(audioURL);
     audioRef.current = audio;
     audio.onended = () => setIsPlaying(false);
@@ -87,10 +87,7 @@ export default function Studio() {
     setIsPlaying(true);
   };
 
-  const stopPlayback = () => {
-    audioRef.current?.pause();
-    setIsPlaying(false);
-  };
+  const stopPlayback = () => { audioRef.current?.pause(); setIsPlaying(false); };
 
   const resetRecording = () => {
     setAudioURL(null);
@@ -104,12 +101,17 @@ export default function Studio() {
       window.speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(text);
       u.rate = 0.85;
+      if (selectedVoice) u.voice = selectedVoice;
       window.speechSynthesis.speak(u);
     }
   };
 
-  const formatTime = (s: number) => `${Math.floor(s / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`;
+  const handleVoiceChange = (voice: SpeechSynthesisVoice | null) => {
+    setSelectedVoice(voice);
+    setSelectedVoiceURI(voice?.voiceURI);
+  };
 
+  const formatTime = (s: number) => `${Math.floor(s / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`;
   const activeText = useCustom ? customText : selectedText.text;
 
   if (authLoading) return <Layout><div className="min-h-screen flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div></Layout>;
@@ -125,38 +127,24 @@ export default function Studio() {
           <p className="text-sm text-muted-foreground">Record, playback, and compare your pronunciation</p>
         </div>
 
+        {/* Voice Selection */}
+        <Card className="mb-4">
+          <CardContent className="p-3">
+            <VoicePicker onVoiceChange={handleVoiceChange} selectedVoiceURI={selectedVoiceURI} />
+          </CardContent>
+        </Card>
+
         {/* Text Selection */}
         <div className="mb-6">
           <h3 className="text-sm font-semibold mb-3">Choose a text to practice:</h3>
           <div className="flex gap-2 overflow-x-auto pb-2 mb-3">
             {sampleTexts.map((t) => (
-              <Button
-                key={t.id}
-                variant={!useCustom && selectedText.id === t.id ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => { setSelectedText(t); setUseCustom(false); }}
-                className="whitespace-nowrap shrink-0"
-              >
-                {t.title}
-              </Button>
+              <Button key={t.id} variant={!useCustom && selectedText.id === t.id ? 'default' : 'outline'} size="sm" onClick={() => { setSelectedText(t); setUseCustom(false); }} className="whitespace-nowrap shrink-0">{t.title}</Button>
             ))}
-            <Button
-              variant={useCustom ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setUseCustom(true)}
-              className="whitespace-nowrap shrink-0"
-            >
-              Custom
-            </Button>
+            <Button variant={useCustom ? 'default' : 'outline'} size="sm" onClick={() => setUseCustom(true)} className="whitespace-nowrap shrink-0">Custom</Button>
           </div>
-
           {useCustom ? (
-            <Textarea
-              value={customText}
-              onChange={(e) => setCustomText(e.target.value)}
-              placeholder="Type or paste your own text here..."
-              rows={3}
-            />
+            <Textarea value={customText} onChange={(e) => setCustomText(e.target.value)} placeholder="Type or paste your own text here..." rows={3} />
           ) : (
             <Card className="bg-muted/50">
               <CardContent className="p-4">
@@ -173,52 +161,17 @@ export default function Studio() {
 
         {/* Recording Controls */}
         <div className="flex flex-col items-center gap-6">
-          {/* Timer */}
-          <div className={cn(
-            "text-4xl font-mono font-bold transition-colors",
-            isRecording ? "text-destructive" : "text-foreground"
-          )}>
-            {formatTime(recordingTime)}
-          </div>
-
-          {/* Record Button */}
-          <button
-            onClick={isRecording ? stopRecording : startRecording}
-            disabled={!activeText}
-            className={cn(
-              "w-24 h-24 rounded-full flex items-center justify-center transition-all duration-300 shadow-lg",
-              isRecording
-                ? "bg-destructive text-white scale-110 animate-pulse shadow-destructive/30"
-                : "gradient-bg text-white hover:scale-105 shadow-primary/30"
-            )}
-          >
-            {isRecording ? (
-              <Square className="h-10 w-10" />
-            ) : (
-              <Mic2 className="h-10 w-10" />
-            )}
+          <div className={cn("text-4xl font-mono font-bold transition-colors", isRecording ? "text-destructive" : "text-foreground")}>{formatTime(recordingTime)}</div>
+          <button onClick={isRecording ? stopRecording : startRecording} disabled={!activeText} className={cn("w-24 h-24 rounded-full flex items-center justify-center transition-all duration-300 shadow-lg", isRecording ? "bg-destructive text-white scale-110 animate-pulse shadow-destructive/30" : "gradient-bg text-white hover:scale-105 shadow-primary/30")}>
+            {isRecording ? <Square className="h-10 w-10" /> : <Mic2 className="h-10 w-10" />}
           </button>
-          <p className="text-sm text-muted-foreground">
-            {isRecording ? 'Tap to stop' : 'Tap to record'}
-          </p>
+          <p className="text-sm text-muted-foreground">{isRecording ? 'Tap to stop' : 'Tap to record'}</p>
 
-          {/* Playback Controls */}
           {audioURL && (
             <div className="flex items-center gap-3 animate-slide-up">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={isPlaying ? stopPlayback : playRecording}
-              >
-                {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
-              </Button>
-              <Button variant="outline" size="icon" onClick={resetRecording}>
-                <RotateCcw className="h-5 w-5" />
-              </Button>
-              <Button variant="outline" onClick={() => speakText(activeText)} className="gap-2">
-                <Volume2 className="h-4 w-4" />
-                Hear Native
-              </Button>
+              <Button variant="outline" size="icon" onClick={isPlaying ? stopPlayback : playRecording}>{isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}</Button>
+              <Button variant="outline" size="icon" onClick={resetRecording}><RotateCcw className="h-5 w-5" /></Button>
+              <Button variant="outline" onClick={() => speakText(activeText)} className="gap-2"><Volume2 className="h-4 w-4" />Hear Native</Button>
             </div>
           )}
 
