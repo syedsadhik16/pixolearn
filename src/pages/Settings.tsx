@@ -54,7 +54,25 @@ export default function Settings() {
   useEffect(() => {
     if (profile) setDisplayName(profile.full_name || '');
     if (user && profile?.role === 'parent') fetchNotifPrefs();
+    if (user) fetchPayments();
   }, [user, profile]);
+
+  const fetchPayments = async () => {
+    if (!user) return;
+    setPaymentsLoading(true);
+    try {
+      const { data } = await supabase
+        .from('payment_history')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+      setPayments((data as any) || []);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setPaymentsLoading(false);
+    }
+  };
 
   const fetchNotifPrefs = async () => {
     const { data } = await supabase
