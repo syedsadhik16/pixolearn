@@ -29,6 +29,8 @@ import {
 import { NotificationBell } from '@/components/shared/NotificationBell';
 import { NotificationPreferences } from '@/components/shared/NotificationPreferences';
 import { useToast } from '@/hooks/use-toast';
+import { Bell } from 'lucide-react';
+import { requestPushPermission, isNotificationEnabled, isNotificationSupported } from '@/lib/pushNotifications';
 import { Input } from '@/components/ui/input';
 import {
   Dialog,
@@ -94,6 +96,36 @@ export default function ParentDashboard() {
   const [addingChild, setAddingChild] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [removingChildId, setRemovingChildId] = useState<string | null>(null);
+  const [pushEnabled, setPushEnabled] = useState(isNotificationEnabled());
+
+  // Listen for realtime notifications and show browser notifications
+  useEffect(() => {
+    if (!user || !pushEnabled) return;
+    const channel = supabase
+      .channel('parent-notifications')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'notifications', filter: `parent_id=eq.${user.id}` },
+        (payload) => {
+          const n = payload.new as { title: string; message: string };
+          if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification(n.title, { body: n.message, icon: '/favicon.ico' });
+          }
+        }
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user, pushEnabled]);
+
+  const handleEnablePush = async () => {
+    await requestPushPermission();
+    setPushEnabled(isNotificationEnabled());
+    if (isNotificationEnabled()) {
+      toast({ title: 'Notifications enabled! 🔔', description: "You'll get browser alerts when your child completes a lesson." });
+    } else {
+      toast({ title: 'Permission denied', description: 'Please enable notifications in your browser settings.', variant: 'destructive' });
+    }
+  };
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -306,6 +338,12 @@ export default function ParentDashboard() {
               </p>
             </div>
             <div className="flex items-center gap-2">
+              {isNotificationSupported() && !pushEnabled && (
+                <Button variant="outline" size="sm" onClick={handleEnablePush}>
+                  <Bell className="h-4 w-4 mr-1.5" />
+                  Enable Alerts
+                </Button>
+              )}
               {user && <NotificationPreferences userId={user.id} />}
               {user && <NotificationBell userId={user.id} />}
               <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

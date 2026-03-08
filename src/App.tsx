@@ -19,6 +19,7 @@ import Live from "./pages/Live";
 import Roleplay from "./pages/Roleplay";
 import Dictionary from "./pages/Dictionary";
 import Studio from "./pages/Studio";
+import Leaderboard from "./pages/Leaderboard";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +43,7 @@ const App = () => (
             <Route path="/roleplay" element={<Roleplay />} />
             <Route path="/dictionary" element={<Dictionary />} />
             <Route path="/studio" element={<Studio />} />
+            <Route path="/leaderboard" element={<Leaderboard />} />
             <Route path="/parent" element={<ParentDashboard />} />
             <Route path="/admin" element={<AdminDashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
