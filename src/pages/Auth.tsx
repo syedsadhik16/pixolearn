@@ -52,16 +52,16 @@ export default function Auth() {
   const checkStudentProgress = async () => {
     if (!user) return;
     
-    const { data: progress } = await supabase
-      .from('student_progress')
-      .select('current_day')
+    // Check if onboarding is completed
+    const { data: learnerProfile } = await supabase
+      .from('learner_profiles')
+      .select('onboarding_completed')
       .eq('student_id', user.id)
-      .single();
-    
-    // If current_day is 1 and this is a new signup, go to level selection
-    // Otherwise go to dashboard
-    if (progress?.current_day === 1 && isSignUp) {
-      navigate('/level-selection');
+      .maybeSingle();
+
+    if (!learnerProfile || !learnerProfile.onboarding_completed) {
+      // New student or onboarding not completed → go to onboarding
+      navigate('/onboarding');
     } else {
       navigate('/student');
     }
