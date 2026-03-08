@@ -120,6 +120,7 @@ export function GamificationPanel() {
       });
 
       toast({ title: `+${xpReward} XP! 🎉`, description: 'Challenge reward claimed!' });
+      playXPSound();
       fetchAll();
     } catch (e) {
       console.error('Claim XP error:', e);
