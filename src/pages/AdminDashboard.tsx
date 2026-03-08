@@ -182,16 +182,21 @@ export default function AdminDashboard() {
         return;
       }
 
+      const lessonData = {
+        title: lessonForm.title.trim(),
+        level: lessonForm.level as 'beginner' | 'intermediate' | 'advanced',
+        day_number: lessonForm.day_number,
+        description: lessonForm.description.trim() || null,
+        is_active: lessonForm.is_active,
+        vocabulary: JSON.parse(JSON.stringify(lessonForm.vocabulary.filter(v => v.word.trim()))),
+        sentences: JSON.parse(JSON.stringify(lessonForm.sentences.filter(s => s.text.trim()))),
+        read_aloud_text: lessonForm.read_aloud_text.trim() || null,
+      };
+
       if (editingLesson) {
         const { error } = await supabase
           .from('lessons')
-          .update({
-            title: lessonForm.title,
-            level: lessonForm.level as 'beginner' | 'intermediate' | 'advanced',
-            day_number: lessonForm.day_number,
-            description: lessonForm.description || null,
-            is_active: lessonForm.is_active,
-          })
+          .update(lessonData)
           .eq('id', editingLesson.id);
 
         if (error) throw error;
@@ -199,13 +204,7 @@ export default function AdminDashboard() {
       } else {
         const { error } = await supabase
           .from('lessons')
-          .insert({
-            title: lessonForm.title,
-            level: lessonForm.level as 'beginner' | 'intermediate' | 'advanced',
-            day_number: lessonForm.day_number,
-            description: lessonForm.description || null,
-            is_active: lessonForm.is_active,
-          });
+          .insert(lessonData);
 
         if (error) throw error;
         toast({ title: 'Created', description: 'Lesson created successfully.' });
