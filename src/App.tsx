@@ -31,6 +31,7 @@ const App = () => (
             <Route path="/lesson/:lessonId" element={<LessonSession />} />
             <Route path="/practice" element={<AIPractice />} />
             <Route path="/parent" element={<ParentDashboard />} />
+            <Route path="/admin" element={<AdminDashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
