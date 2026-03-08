@@ -111,6 +111,9 @@ export default function StudentDashboard() {
       if (completionsError) throw completionsError;
       setCompletions(completionsData || []);
 
+      // Check and award badges
+      checkAndAwardBadges(user!.id);
+
       // Calculate streak from attendance
       const { data: attendanceData } = await supabase
         .from('attendance')
