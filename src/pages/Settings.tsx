@@ -11,8 +11,19 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import {
   Moon, Sun, Bell, BellOff, ChevronRight, Shield, Info,
-  ArrowLeft, User, Palette, Eye, Lock, Users, Settings2, Loader2, Save
+  ArrowLeft, User, Palette, Eye, Lock, Users, Settings2, Loader2, Save,
+  CreditCard, Receipt, Crown
 } from 'lucide-react';
+
+interface PaymentRecord {
+  id: string;
+  razorpay_payment_id: string;
+  plan_id: string;
+  amount: number;
+  currency: string;
+  status: string;
+  created_at: string;
+}
 
 export default function Settings() {
   const { user, profile, loading: authLoading } = useAuth();
