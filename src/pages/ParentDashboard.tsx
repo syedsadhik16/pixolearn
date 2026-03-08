@@ -406,6 +406,41 @@ export default function ParentDashboard() {
           </div>
         )}
 
+        {/* AI Insights Summary */}
+        {children.length > 0 && (
+          <div className="pixo-card mb-8 animate-fade-in bg-gradient-to-r from-pixo-purple/5 to-pixo-blue/5 border-pixo-purple/20" style={{ animationDelay: '0.5s' }}>
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-xl gradient-bg flex items-center justify-center flex-shrink-0">
+                <Sparkles className="h-6 w-6 text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-display font-bold text-lg mb-2">PIXO AI Insight</h3>
+                {children.map(child => {
+                  const avg = getAvgScore(child.completions);
+                  const recentScores = child.completions.slice(0, 3);
+                  const improving = recentScores.length >= 2 && 
+                    ((recentScores[0]?.pronunciation_score ?? 0) > (recentScores[1]?.pronunciation_score ?? 0));
+                  return (
+                    <div key={child.profile.id} className="mb-3 last:mb-0">
+                      <p className="text-sm font-semibold">{child.profile.full_name || child.profile.email}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {child.completions.length === 0
+                          ? "Hasn't started lessons yet. Encourage them to begin their first mission!"
+                          : improving
+                          ? `Showing great improvement! Average score is ${avg}% with a ${child.streak}-day streak. Keep the momentum going! 🚀`
+                          : avg >= 70
+                          ? `Performing well with ${avg}% average. ${child.streak > 0 ? `${child.streak}-day streak is fantastic!` : 'Encourage daily practice for streak building.'}`
+                          : `Average score is ${avg}%. Focus on pronunciation practice and daily consistency for improvement.`
+                        }
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Per-Child Cards */}
         {children.map((child, idx) => {
           const avgScore = getAvgScore(child.completions);
