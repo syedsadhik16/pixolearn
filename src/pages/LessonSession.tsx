@@ -427,14 +427,28 @@ export default function LessonSession() {
           .eq('student_id', user.id);
       }
 
-      // Mark attendance
+      // Mark attendance - use insert with conflict handling
       const today = new Date().toISOString().split('T')[0];
-      await supabase.from('attendance').upsert({
-        student_id: user.id,
-        date: today,
-        is_present: true,
-        lesson_completed: true,
-      }, { onConflict: 'student_id,date' });
+      const { data: existingAttendance } = await supabase
+        .from('attendance')
+        .select('id')
+        .eq('student_id', user.id)
+        .eq('date', today)
+        .maybeSingle();
+
+      if (existingAttendance) {
+        await supabase
+          .from('attendance')
+          .update({ lesson_completed: true, is_present: true })
+          .eq('id', existingAttendance.id);
+      } else {
+        await supabase.from('attendance').insert({
+          student_id: user.id,
+          date: today,
+          is_present: true,
+          lesson_completed: true,
+        });
+      }
 
       setPhase('complete');
     } catch (error) {
