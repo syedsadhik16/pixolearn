@@ -99,6 +99,7 @@ export default function LessonSession() {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
   const { toast } = useToast();
+  const companion = useCompanion();
 
   const [lesson, setLesson] = useState<Lesson | null>(null);
   const [phase, setPhase] = useState<SessionPhase>('intro');
