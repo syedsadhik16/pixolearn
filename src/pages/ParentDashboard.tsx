@@ -29,6 +29,8 @@ import {
 import { NotificationBell } from '@/components/shared/NotificationBell';
 import { NotificationPreferences } from '@/components/shared/NotificationPreferences';
 import { useToast } from '@/hooks/use-toast';
+import { Bell } from 'lucide-react';
+import { requestPushPermission, isNotificationEnabled, isNotificationSupported } from '@/lib/pushNotifications';
 import { Input } from '@/components/ui/input';
 import {
   Dialog,
