@@ -101,12 +101,27 @@ export default {
           "0%, 100%": { transform: "rotate(-3deg)" },
           "50%": { transform: "rotate(3deg)" },
         },
+        bounce_gentle: {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-8px)" },
+        },
+        glow_pulse: {
+          "0%, 100%": { boxShadow: "0 0 8px 2px hsl(var(--pixo-orange) / 0.3)" },
+          "50%": { boxShadow: "0 0 20px 6px hsl(var(--pixo-orange) / 0.5)" },
+        },
+        float: {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-6px)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         shimmer: "shimmer 2s linear infinite",
         wiggle: "wiggle 0.5s ease-in-out infinite",
+        "bounce-gentle": "bounce_gentle 1s ease-in-out infinite",
+        "glow-pulse": "glow_pulse 2s ease-in-out infinite",
+        float: "float 3s ease-in-out infinite",
       },
     },
   },
