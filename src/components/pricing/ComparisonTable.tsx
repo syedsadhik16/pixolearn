@@ -1,28 +1,32 @@
 import { Check, X } from 'lucide-react';
 
 const features = [
-  { name: 'Phonics & Letter Sounds', beginner: true, intermediate: true, advanced: true },
-  { name: '3-Letter Word Reading', beginner: true, intermediate: true, advanced: true },
-  { name: '5-Letter Word Reading', beginner: true, intermediate: true, advanced: true },
-  { name: 'Pronunciation Practice', beginner: true, intermediate: true, advanced: true },
-  { name: 'AI Speech Evaluation', beginner: true, intermediate: true, advanced: true },
-  { name: 'Sentence Formation', beginner: false, intermediate: true, advanced: true },
-  { name: 'Short Story Reading', beginner: false, intermediate: true, advanced: true },
-  { name: 'Daily Speaking Practice', beginner: false, intermediate: true, advanced: true },
-  { name: 'Storytelling & Narration', beginner: false, intermediate: false, advanced: true },
-  { name: 'Independent Reading', beginner: false, intermediate: false, advanced: true },
-  { name: 'Real-life Conversation Skills', beginner: false, intermediate: false, advanced: true },
-  { name: 'Parent Progress Reports', beginner: true, intermediate: true, advanced: true },
-  { name: 'Gamification & Rewards', beginner: true, intermediate: true, advanced: true },
-  { name: 'Dedicated Support', beginner: false, intermediate: true, advanced: true },
+  { name: 'Lessons per level', explorer: '3', adventurer: '180', achiever: '180' },
+  { name: 'Speech feedback', explorer: 'Basic', adventurer: 'Advanced AI', achiever: 'Advanced AI' },
+  { name: 'AI practice', explorer: 'Limited', adventurer: 'Unlimited', achiever: 'Unlimited' },
+  { name: 'Daily login rewards', explorer: true, adventurer: true, achiever: true },
+  { name: 'Parent Mastery Hub', explorer: false, adventurer: true, achiever: true },
+  { name: 'Role play studio', explorer: false, adventurer: true, achiever: true },
+  { name: 'Weekly progress reports', explorer: false, adventurer: true, achiever: true },
+  { name: 'Priority support', explorer: false, adventurer: true, achiever: true },
+  { name: 'All 3 levels unlocked', explorer: false, adventurer: false, achiever: true },
+  { name: 'Creative Studio access', explorer: false, adventurer: false, achiever: true },
+  { name: 'Expert PDF reports', explorer: false, adventurer: false, achiever: true },
+  { name: 'Offline lesson download', explorer: false, adventurer: false, achiever: true },
+  { name: 'Family sharing', explorer: false, adventurer: false, achiever: '2 kids' },
+  { name: 'Early feature access', explorer: false, adventurer: false, achiever: true },
 ];
 
-const FeatureIcon = ({ available }: { available: boolean }) =>
-  available ? (
+const FeatureCell = ({ value }: { value: boolean | string }) => {
+  if (typeof value === 'string') {
+    return <span className="text-xs font-medium text-foreground">{value}</span>;
+  }
+  return value ? (
     <Check className="h-4 w-4 text-pixo-green mx-auto" />
   ) : (
     <X className="h-4 w-4 text-muted-foreground/40 mx-auto" />
   );
+};
 
 export function ComparisonTable() {
   return (
@@ -37,16 +41,16 @@ export function ComparisonTable() {
               <tr className="border-b border-border">
                 <th className="text-left py-3 px-4 font-semibold text-foreground">Feature</th>
                 <th className="text-center py-3 px-2 font-semibold text-foreground whitespace-nowrap">
-                  Level 1<br />
-                  <span className="text-xs font-normal text-muted-foreground">Beginner</span>
+                  Explorer<br />
+                  <span className="text-xs font-normal text-muted-foreground">Free</span>
                 </th>
                 <th className="text-center py-3 px-2 font-semibold text-primary whitespace-nowrap">
-                  Level 2<br />
-                  <span className="text-xs font-normal text-muted-foreground">Intermediate</span>
+                  Adventurer<br />
+                  <span className="text-xs font-normal text-muted-foreground">₹499/mo</span>
                 </th>
                 <th className="text-center py-3 px-2 font-semibold text-foreground whitespace-nowrap">
-                  Level 3<br />
-                  <span className="text-xs font-normal text-muted-foreground">Advanced</span>
+                  Achiever<br />
+                  <span className="text-xs font-normal text-muted-foreground">₹2,999/yr</span>
                 </th>
               </tr>
             </thead>
@@ -57,26 +61,12 @@ export function ComparisonTable() {
                   className={`border-b border-border/50 ${i % 2 === 0 ? 'bg-muted/30' : ''}`}
                 >
                   <td className="py-3 px-4 text-foreground">{feature.name}</td>
-                  <td className="py-3 px-2"><FeatureIcon available={feature.beginner} /></td>
-                  <td className="py-3 px-2"><FeatureIcon available={feature.intermediate} /></td>
-                  <td className="py-3 px-2"><FeatureIcon available={feature.advanced} /></td>
+                  <td className="py-3 px-2 text-center"><FeatureCell value={feature.explorer} /></td>
+                  <td className="py-3 px-2 text-center"><FeatureCell value={feature.adventurer} /></td>
+                  <td className="py-3 px-2 text-center"><FeatureCell value={feature.achiever} /></td>
                 </tr>
               ))}
             </tbody>
-            <tfoot>
-              <tr className="border-t-2 border-border">
-                <td className="py-4 px-4 font-semibold text-foreground">Price</td>
-                <td className="py-4 px-2 text-center font-bold text-foreground">₹5,999</td>
-                <td className="py-4 px-2 text-center font-bold text-primary">₹9,999</td>
-                <td className="py-4 px-2 text-center font-bold text-foreground">₹14,999</td>
-              </tr>
-              <tr>
-                <td className="py-2 px-4 text-muted-foreground">Duration</td>
-                <td className="py-2 px-2 text-center text-muted-foreground">6 months</td>
-                <td className="py-2 px-2 text-center text-muted-foreground">12 months</td>
-                <td className="py-2 px-2 text-center text-muted-foreground">18 months</td>
-              </tr>
-            </tfoot>
           </table>
         </div>
       </div>
