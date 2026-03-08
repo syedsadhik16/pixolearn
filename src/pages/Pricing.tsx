@@ -9,6 +9,8 @@ import pixoLogo from '@/assets/pixo-logo.png';
 import { Check, ArrowRight, Star, Sparkles, ArrowLeft, Loader2, Shield } from 'lucide-react';
 import { ComparisonTable } from '@/components/pricing/ComparisonTable';
 import { PricingFAQ } from '@/components/pricing/PricingFAQ';
+import { Testimonials } from '@/components/pricing/Testimonials';
+import { ScrollReveal } from '@/components/shared/ScrollReveal';
 
 declare global {
   interface Window {
