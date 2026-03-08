@@ -424,6 +424,12 @@ export default function StudentDashboard() {
           </div>
         </div>
 
+        {/* Gamification Panel */}
+        <div className="mb-8 animate-fade-in" style={{ animationDelay: '0.65s' }}>
+          <h3 className="text-xl font-display font-bold mb-4">🎮 Your Progress & Rewards</h3>
+          <GamificationPanel />
+        </div>
+
         {/* Premium Upsell */}
         {profile?.subscription_type === 'free' && (
           <div className="mt-8 animate-fade-in">
