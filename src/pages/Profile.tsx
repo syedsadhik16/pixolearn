@@ -11,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import {
   User, Zap, Trophy, Calendar, Edit3, Save, LogOut,
-  ShoppingBag, Star, Flame
+  ShoppingBag, Star, Flame, Settings
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
