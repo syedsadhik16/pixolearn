@@ -119,6 +119,7 @@ export default function Settings() {
 
   const sections = [
     { id: 'identity', label: 'Identity', icon: User },
+    { id: 'subscription', label: 'Subscription', icon: Crown },
     { id: 'appearance', label: 'Visual Comfort', icon: Eye },
     ...(profile?.role === 'parent' ? [{ id: 'notifications', label: 'Notifications', icon: Bell }] : []),
     { id: 'security', label: 'Security', icon: Lock },
