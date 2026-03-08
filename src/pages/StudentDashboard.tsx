@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { GamificationPanel } from '@/components/shared/GamificationPanel';
+import { DailyLoginReward } from '@/components/shared/DailyLoginReward';
 import { checkAndAwardBadges } from '@/lib/gamification';
 
 interface Lesson {
