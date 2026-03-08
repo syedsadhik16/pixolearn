@@ -27,6 +27,7 @@ import {
   UserMinus,
 } from 'lucide-react';
 import { NotificationBell } from '@/components/shared/NotificationBell';
+import { NotificationPreferences } from '@/components/shared/NotificationPreferences';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import {
@@ -305,6 +306,7 @@ export default function ParentDashboard() {
               </p>
             </div>
             <div className="flex items-center gap-2">
+              {user && <NotificationPreferences userId={user.id} />}
               {user && <NotificationBell userId={user.id} />}
               <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                 <DialogTrigger asChild>
