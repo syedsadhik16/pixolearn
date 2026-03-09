@@ -235,6 +235,44 @@ export type Database = {
           },
         ]
       }
+      learning_sessions: {
+        Row: {
+          created_at: string
+          duration_seconds: number | null
+          ended_at: string | null
+          id: string
+          session_type: string
+          started_at: string
+          student_id: string
+        }
+        Insert: {
+          created_at?: string
+          duration_seconds?: number | null
+          ended_at?: string | null
+          id?: string
+          session_type?: string
+          started_at?: string
+          student_id: string
+        }
+        Update: {
+          created_at?: string
+          duration_seconds?: number | null
+          ended_at?: string | null
+          id?: string
+          session_type?: string
+          started_at?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_sessions_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lesson_completions: {
         Row: {
           clarity_score: number | null
@@ -446,6 +484,57 @@ export type Database = {
           },
           {
             foreignKeyName: "parent_children_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      parent_goals: {
+        Row: {
+          child_id: string
+          created_at: string
+          daily_lessons_goal: number | null
+          daily_minutes_goal: number | null
+          daily_practice_goal: number | null
+          id: string
+          notes: string | null
+          parent_id: string
+          updated_at: string
+        }
+        Insert: {
+          child_id: string
+          created_at?: string
+          daily_lessons_goal?: number | null
+          daily_minutes_goal?: number | null
+          daily_practice_goal?: number | null
+          id?: string
+          notes?: string | null
+          parent_id: string
+          updated_at?: string
+        }
+        Update: {
+          child_id?: string
+          created_at?: string
+          daily_lessons_goal?: number | null
+          daily_minutes_goal?: number | null
+          daily_practice_goal?: number | null
+          id?: string
+          notes?: string | null
+          parent_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "parent_goals_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "parent_goals_parent_id_fkey"
             columns: ["parent_id"]
             isOneToOne: false
             referencedRelation: "profiles"
