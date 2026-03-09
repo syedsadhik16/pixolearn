@@ -242,7 +242,7 @@ Evaluate their writing and respond ONLY with valid JSON (no markdown, no code fe
             ) : (
               <div className="space-y-3">
                 {pastSubmissions.map((sub) => (
-                  <Card key={sub.id}>
+                  <Card key={sub.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setViewingSubmission(sub)}>
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between mb-2">
                         <h3 className="font-semibold text-sm">{sub.prompt_title}</h3>
