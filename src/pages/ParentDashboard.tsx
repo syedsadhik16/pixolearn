@@ -187,6 +187,13 @@ export default function ParentDashboard() {
       case 'controls': return <ParentControls child={selectedChild} parentId={user!.id} />;
       case 'notifications': return <ParentNotifications userId={user!.id} />;
       case 'report': return <WeeklyParentReport child={selectedChild} />;
+      case 'ai-intelligence': return <AILearningIntelligence child={selectedChild} />;
+      case 'habits': return <LearningHabitTracker child={selectedChild} />;
+      case 'focus': return <FocusAttentionScore child={selectedChild} />;
+      case 'timeline': return <ChildGrowthTimeline child={selectedChild} />;
+      case 'practice-plan': return <SmartPracticePlan child={selectedChild} />;
+      case 'benchmark': return <ParentBenchmark child={selectedChild} />;
+      case 'engagement': return <ParentEngagementScore userId={user!.id} />;
       default: return <ParentOverview children={children} selectedChild={selectedChild} onRefresh={fetchChildren} userId={user!.id} />;
     }
   };
