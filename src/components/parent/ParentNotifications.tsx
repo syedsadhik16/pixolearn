@@ -1,5 +1,4 @@
 import { NotificationPreferences } from '@/components/shared/NotificationPreferences';
-import { NotificationBell } from '@/components/shared/NotificationBell';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Bell, Settings2 } from 'lucide-react';
 
@@ -15,19 +14,10 @@ export function ParentNotifications({ userId }: Props) {
 
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-lg flex items-center gap-2"><Bell className="h-5 w-5 text-primary" />Recent Notifications</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <NotificationBell userId={userId} expanded />
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="pb-3">
           <CardTitle className="text-lg flex items-center gap-2"><Settings2 className="h-5 w-5 text-primary" />Notification Preferences</CardTitle>
         </CardHeader>
         <CardContent>
-          <NotificationPreferences userId={userId} inline />
+          <NotificationPreferences userId={userId} />
         </CardContent>
       </Card>
     </div>

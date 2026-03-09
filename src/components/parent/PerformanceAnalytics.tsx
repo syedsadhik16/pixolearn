@@ -9,12 +9,76 @@ import { Progress } from '@/components/ui/progress';
 
 interface Props { child: ChildData | null; }
 
+const getAvg = (scores: (number | null)[]) => {
+  const valid = scores.filter((s): s is number => s !== null);
+  return valid.length ? Math.round(valid.reduce((a, b) => a + b, 0) / valid.length) : 0;
+};
+
 export function PerformanceAnalytics({ child }: Props) {
   const [period, setPeriod] = useState<'daily' | 'weekly' | 'monthly'>('weekly');
 
+  // Daily data: last 14 days
+  const dailyData = useMemo(() => {
+    if (!child) return [];
+    const days: { date: string; score: number; lessons: number }[] = [];
+    for (let i = 13; i >= 0; i--) {
+      const d = format(subDays(new Date(), i), 'yyyy-MM-dd');
+      const dayCompletions = child.completions.filter(c => format(new Date(c.completed_at), 'yyyy-MM-dd') === d);
+      const scores = dayCompletions.flatMap(c => [c.pronunciation_score, c.fluency_score, c.clarity_score, c.confidence_score]);
+      days.push({ date: format(new Date(d), 'MMM d'), score: getAvg(scores), lessons: dayCompletions.length });
+    }
+    return days;
+  }, [child]);
+
+  // Weekly data: last 8 weeks
+  const weeklyData = useMemo(() => {
+    if (!child) return [];
+    const weeks: { date: string; score: number; lessons: number }[] = [];
+    for (let i = 7; i >= 0; i--) {
+      const weekStart = startOfWeek(subDays(new Date(), i * 7));
+      const weekEnd = subDays(new Date(), (i - 1) * 7);
+      const weekCompletions = child.completions.filter(c => {
+        const d = new Date(c.completed_at);
+        return d >= weekStart && d < weekEnd;
+      });
+      const scores = weekCompletions.flatMap(c => [c.pronunciation_score, c.fluency_score, c.clarity_score, c.confidence_score]);
+      weeks.push({ date: format(weekStart, 'MMM d'), score: getAvg(scores), lessons: weekCompletions.length });
+    }
+    return weeks;
+  }, [child]);
+
+  // Monthly data: last 6 months
+  const monthlyData = useMemo(() => {
+    if (!child) return [];
+    const months: { date: string; score: number; lessons: number }[] = [];
+    for (let i = 5; i >= 0; i--) {
+      const monthStart = startOfMonth(subMonths(new Date(), i));
+      const monthEnd = startOfMonth(subMonths(new Date(), i - 1));
+      const monthCompletions = child.completions.filter(c => {
+        const d = new Date(c.completed_at);
+        return d >= monthStart && d < monthEnd;
+      });
+      const scores = monthCompletions.flatMap(c => [c.pronunciation_score, c.fluency_score, c.clarity_score, c.confidence_score]);
+      months.push({ date: format(monthStart, 'MMM yyyy'), score: getAvg(scores), lessons: monthCompletions.length });
+    }
+    return months;
+  }, [child]);
+
+  // Score trend line chart
+  const trendData = useMemo(() => {
+    if (!child) return [];
+    return [...child.completions].reverse().map(c => ({
+      date: format(new Date(c.completed_at), 'MMM d'),
+      Pronunciation: c.pronunciation_score ?? 0,
+      Fluency: c.fluency_score ?? 0,
+      Clarity: c.clarity_score ?? 0,
+      Confidence: c.confidence_score ?? 0,
+    }));
+  }, [child]);
+
   if (!child) return <p className="text-muted-foreground">Select a child to view performance.</p>;
 
-  const getAvg = (scores: (number | null)[]) => {
+  const getAvgFn = getAvg;
     const valid = scores.filter((s): s is number => s !== null);
     return valid.length ? Math.round(valid.reduce((a, b) => a + b, 0) / valid.length) : 0;
   };
