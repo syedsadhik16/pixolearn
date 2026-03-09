@@ -18,6 +18,7 @@ import {
 import { cn } from '@/lib/utils';
 import { PromptCard, difficultyColors, type WritingPrompt } from '@/components/creative-writing/PromptCard';
 import { FeedbackDisplay, type Feedback } from '@/components/creative-writing/FeedbackDisplay';
+import { SubmissionDetail } from '@/components/creative-writing/SubmissionDetail';
 
 const prompts: WritingPrompt[] = [
   { id: '1', title: 'My Best Day', prompt: 'Write about the best day you ever had. What happened? How did you feel?', difficulty: 'easy', category: 'Personal', icon: BookOpen, wordTarget: 50 },
