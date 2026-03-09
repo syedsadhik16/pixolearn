@@ -79,7 +79,7 @@ export default function CreativeWriting() {
     setLoadingHistory(true);
     const { data } = await supabase
       .from('writing_submissions')
-      .select('id, prompt_title, score, xp_awarded, created_at, writing_text')
+      .select('id, prompt_title, score, xp_awarded, created_at, writing_text, grammar_feedback, vocabulary_feedback, creativity_feedback, suggestions, corrected_text')
       .eq('student_id', user.id)
       .order('created_at', { ascending: false })
       .limit(20);
