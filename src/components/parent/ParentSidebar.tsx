@@ -1,5 +1,6 @@
 import {
-  LayoutDashboard, BarChart3, Clock, Sparkles, Settings2, Bell, FileText, ChevronDown,
+  LayoutDashboard, BarChart3, Clock, Sparkles, Settings2, Bell, FileText,
+  Brain, CalendarDays, Eye, GitBranch, Wand2, Users, Heart,
 } from 'lucide-react';
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
@@ -10,13 +11,23 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const sections = [
-  { id: 'overview', label: 'Overview', icon: LayoutDashboard },
-  { id: 'performance', label: 'Performance', icon: BarChart3 },
-  { id: 'time', label: 'Time Analytics', icon: Clock },
-  { id: 'recommendations', label: 'AI Insights', icon: Sparkles },
-  { id: 'controls', label: 'Parent Controls', icon: Settings2 },
-  { id: 'notifications', label: 'Notifications', icon: Bell },
-  { id: 'report', label: 'Weekly Report', icon: FileText },
+  { id: 'overview', label: 'Overview', icon: LayoutDashboard, group: 'main' },
+  { id: 'performance', label: 'Performance', icon: BarChart3, group: 'main' },
+  { id: 'time', label: 'Time Analytics', icon: Clock, group: 'main' },
+  { id: 'recommendations', label: 'AI Insights', icon: Sparkles, group: 'main' },
+  { id: 'controls', label: 'Parent Controls', icon: Settings2, group: 'main' },
+  { id: 'notifications', label: 'Notifications', icon: Bell, group: 'main' },
+  { id: 'report', label: 'Weekly Report', icon: FileText, group: 'main' },
+];
+
+const advancedSections = [
+  { id: 'ai-intelligence', label: 'AI Intelligence', icon: Brain, group: 'advanced' },
+  { id: 'habits', label: 'Habit Tracker', icon: CalendarDays, group: 'advanced' },
+  { id: 'focus', label: 'Focus Score', icon: Eye, group: 'advanced' },
+  { id: 'timeline', label: 'Growth Timeline', icon: GitBranch, group: 'advanced' },
+  { id: 'practice-plan', label: 'Practice Plan', icon: Wand2, group: 'advanced' },
+  { id: 'benchmark', label: 'Benchmarks', icon: Users, group: 'advanced' },
+  { id: 'engagement', label: 'Engagement', icon: Heart, group: 'advanced' },
 ];
 
 interface ParentSidebarProps {
@@ -65,6 +76,26 @@ export function ParentSidebar({ activeSection, onSectionChange, children: childr
           <SidebarGroupContent>
             <SidebarMenu>
               {sections.map(s => (
+                <SidebarMenuItem key={s.id}>
+                  <SidebarMenuButton
+                    onClick={() => onSectionChange(s.id)}
+                    isActive={activeSection === s.id}
+                    tooltip={s.label}
+                  >
+                    <s.icon className="h-4 w-4" />
+                    {!collapsed && <span>{s.label}</span>}
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Advanced Insights</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {advancedSections.map(s => (
                 <SidebarMenuItem key={s.id}>
                   <SidebarMenuButton
                     onClick={() => onSectionChange(s.id)}

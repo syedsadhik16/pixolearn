@@ -12,6 +12,13 @@ import { AIRecommendations } from '@/components/parent/AIRecommendations';
 import { ParentControls } from '@/components/parent/ParentControls';
 import { ParentNotifications } from '@/components/parent/ParentNotifications';
 import { WeeklyParentReport } from '@/components/parent/WeeklyParentReport';
+import { AILearningIntelligence } from '@/components/parent/AILearningIntelligence';
+import { LearningHabitTracker } from '@/components/parent/LearningHabitTracker';
+import { FocusAttentionScore } from '@/components/parent/FocusAttentionScore';
+import { ChildGrowthTimeline } from '@/components/parent/ChildGrowthTimeline';
+import { SmartPracticePlan } from '@/components/parent/SmartPracticePlan';
+import { ParentBenchmark } from '@/components/parent/ParentBenchmark';
+import { ParentEngagementScore } from '@/components/parent/ParentEngagementScore';
 import { NotificationBell } from '@/components/shared/NotificationBell';
 import { requestPushPermission, isNotificationEnabled, isNotificationSupported } from '@/lib/pushNotifications';
 import { Button } from '@/components/ui/button';
@@ -180,6 +187,13 @@ export default function ParentDashboard() {
       case 'controls': return <ParentControls child={selectedChild} parentId={user!.id} />;
       case 'notifications': return <ParentNotifications userId={user!.id} />;
       case 'report': return <WeeklyParentReport child={selectedChild} />;
+      case 'ai-intelligence': return <AILearningIntelligence child={selectedChild} />;
+      case 'habits': return <LearningHabitTracker child={selectedChild} />;
+      case 'focus': return <FocusAttentionScore child={selectedChild} />;
+      case 'timeline': return <ChildGrowthTimeline child={selectedChild} />;
+      case 'practice-plan': return <SmartPracticePlan child={selectedChild} />;
+      case 'benchmark': return <ParentBenchmark child={selectedChild} />;
+      case 'engagement': return <ParentEngagementScore userId={user!.id} />;
       default: return <ParentOverview children={children} selectedChild={selectedChild} onRefresh={fetchChildren} userId={user!.id} />;
     }
   };
