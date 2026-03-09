@@ -90,6 +90,26 @@ export function ParentSidebar({ activeSection, onSectionChange, children: childr
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Advanced Insights</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {advancedSections.map(s => (
+                <SidebarMenuItem key={s.id}>
+                  <SidebarMenuButton
+                    onClick={() => onSectionChange(s.id)}
+                    isActive={activeSection === s.id}
+                    tooltip={s.label}
+                  >
+                    <s.icon className="h-4 w-4" />
+                    {!collapsed && <span>{s.label}</span>}
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
     </Sidebar>
   );
