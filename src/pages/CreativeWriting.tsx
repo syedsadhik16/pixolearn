@@ -18,6 +18,7 @@ import {
 import { cn } from '@/lib/utils';
 import { PromptCard, difficultyColors, type WritingPrompt } from '@/components/creative-writing/PromptCard';
 import { FeedbackDisplay, type Feedback } from '@/components/creative-writing/FeedbackDisplay';
+import { SubmissionDetail } from '@/components/creative-writing/SubmissionDetail';
 
 const prompts: WritingPrompt[] = [
   { id: '1', title: 'My Best Day', prompt: 'Write about the best day you ever had. What happened? How did you feel?', difficulty: 'easy', category: 'Personal', icon: BookOpen, wordTarget: 50 },
@@ -37,6 +38,11 @@ interface PastSubmission {
   xp_awarded: number;
   created_at: string;
   writing_text: string;
+  grammar_feedback: string | null;
+  vocabulary_feedback: string | null;
+  creativity_feedback: string | null;
+  suggestions: unknown;
+  corrected_text: string | null;
 }
 
 function calculateXP(score: number): number {
@@ -56,6 +62,7 @@ export default function CreativeWriting() {
   const [filterCategory, setFilterCategory] = useState<string>('All');
   const [pastSubmissions, setPastSubmissions] = useState<PastSubmission[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
+  const [viewingSubmission, setViewingSubmission] = useState<PastSubmission | null>(null);
 
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -72,7 +79,7 @@ export default function CreativeWriting() {
     setLoadingHistory(true);
     const { data } = await supabase
       .from('writing_submissions')
-      .select('id, prompt_title, score, xp_awarded, created_at, writing_text')
+      .select('id, prompt_title, score, xp_awarded, created_at, writing_text, grammar_feedback, vocabulary_feedback, creativity_feedback, suggestions, corrected_text')
       .eq('student_id', user.id)
       .order('created_at', { ascending: false })
       .limit(20);
@@ -228,14 +235,16 @@ Evaluate their writing and respond ONLY with valid JSON (no markdown, no code fe
           </TabsContent>
 
           <TabsContent value="history">
-            {loadingHistory ? (
+            {viewingSubmission ? (
+              <SubmissionDetail submission={viewingSubmission} onBack={() => setViewingSubmission(null)} />
+            ) : loadingHistory ? (
               <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
             ) : pastSubmissions.length === 0 ? (
               <Card><CardContent className="p-8 text-center text-muted-foreground text-sm">No submissions yet. Pick a prompt and start writing!</CardContent></Card>
             ) : (
               <div className="space-y-3">
                 {pastSubmissions.map((sub) => (
-                  <Card key={sub.id}>
+                  <Card key={sub.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setViewingSubmission(sub)}>
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between mb-2">
                         <h3 className="font-semibold text-sm">{sub.prompt_title}</h3>
