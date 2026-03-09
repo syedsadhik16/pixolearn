@@ -62,6 +62,7 @@ export default function CreativeWriting() {
   const [filterCategory, setFilterCategory] = useState<string>('All');
   const [pastSubmissions, setPastSubmissions] = useState<PastSubmission[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
+  const [viewingSubmission, setViewingSubmission] = useState<PastSubmission | null>(null);
 
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
