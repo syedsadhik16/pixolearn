@@ -235,7 +235,9 @@ Evaluate their writing and respond ONLY with valid JSON (no markdown, no code fe
           </TabsContent>
 
           <TabsContent value="history">
-            {loadingHistory ? (
+            {viewingSubmission ? (
+              <SubmissionDetail submission={viewingSubmission} onBack={() => setViewingSubmission(null)} />
+            ) : loadingHistory ? (
               <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
             ) : pastSubmissions.length === 0 ? (
               <Card><CardContent className="p-8 text-center text-muted-foreground text-sm">No submissions yet. Pick a prompt and start writing!</CardContent></Card>
