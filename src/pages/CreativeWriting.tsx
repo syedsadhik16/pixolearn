@@ -38,6 +38,11 @@ interface PastSubmission {
   xp_awarded: number;
   created_at: string;
   writing_text: string;
+  grammar_feedback: string | null;
+  vocabulary_feedback: string | null;
+  creativity_feedback: string | null;
+  suggestions: unknown;
+  corrected_text: string | null;
 }
 
 function calculateXP(score: number): number {
