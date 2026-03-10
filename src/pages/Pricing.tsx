@@ -101,9 +101,101 @@ const plans = [
 export default function Pricing() {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
 
+  // Handle return from Launch Check with proceed=payment
+  useEffect(() => {
+    if (searchParams.get('proceed') === 'payment' && user) {
+      const stored = sessionStorage.getItem('selectedPlan');
+      if (stored) {
+        try {
+          const plan = JSON.parse(stored);
+          initiatePayment(plan.id, plan.name, plan.priceAmount, plan.duration);
+        } catch {}
+      }
+    }
+  }, [searchParams, user]);
+
+  const loadRazorpayScript = (): Promise<boolean> => {
+    return new Promise((resolve) => {
+      if (window.Razorpay) { resolve(true); return; }
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
+  const initiatePayment = async (planId: string, planName: string, priceAmount: number, duration: string) => {
+    if (!user) return;
+    setLoadingPlan(planId);
+    try {
+      const loaded = await loadRazorpayScript();
+      if (!loaded) throw new Error('Failed to load Razorpay. Please check your internet connection.');
+
+      const { data, error } = await supabase.functions.invoke('create-razorpay-order', {
+        body: {
+          amount: priceAmount,
+          currency: 'INR',
+          plan_id: planId,
+          user_id: user.id,
+          user_email: profile?.email,
+          user_name: profile?.full_name,
+        },
+      });
+      if (error || !data?.order_id) throw new Error(data?.error || error?.message || 'Failed to create order');
+
+      const options = {
+        key: data.key_id,
+        amount: data.amount,
+        currency: data.currency,
+        name: 'PIXO',
+        description: `${planName} Plan - ${duration}`,
+        image: pixoLogo,
+        order_id: data.order_id,
+        handler: async (response: any) => {
+          try {
+            const { data: verifyData, error: verifyError } = await supabase.functions.invoke('verify-razorpay-payment', {
+              body: {
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                user_id: user.id,
+                plan_id: planId,
+              },
+            });
+            if (verifyError || !verifyData?.success) throw new Error(verifyData?.error || 'Payment verification failed');
+            sessionStorage.removeItem('selectedPlan');
+            toast({ title: 'Payment Successful! 🎉', description: `Welcome to PIXO ${planName}! Your premium features are now active.` });
+            navigate('/student');
+          } catch (err: any) {
+            console.error('Verification error:', err);
+            toast({ title: 'Verification Issue', description: 'Payment received but verification pending. Please contact support.', variant: 'destructive' });
+            navigate('/student');
+          }
+        },
+        prefill: { name: profile?.full_name || '', email: profile?.email || '' },
+        theme: { color: '#F97316' },
+        modal: { ondismiss: () => setLoadingPlan(null) },
+      };
+
+      const razorpay = new window.Razorpay(options);
+      razorpay.on('payment.failed', (response: any) => {
+        console.error('Payment failed:', response.error);
+        toast({ title: 'Payment Failed', description: response.error?.description || 'Something went wrong. Please try again.', variant: 'destructive' });
+        setLoadingPlan(null);
+      });
+      razorpay.open();
+    } catch (err: any) {
+      console.error('Payment error:', err);
+      toast({ title: 'Error', description: err.message || 'Failed to initiate payment', variant: 'destructive' });
+    } finally {
+      setLoadingPlan(null);
+    }
+  };
   const handleTrialClick = async () => {
     if (!user) {
       navigate('/auth?signup=true&trial=true');
