@@ -57,6 +57,20 @@ export default function LaunchCheck() {
   const [started, setStarted] = useState(false);
   const [showReview, setShowReview] = useState(false);
   const [expandedQ, setExpandedQ] = useState<number | null>(null);
+  const fromPricing = new URLSearchParams(window.location.search).get('from') === 'pricing';
+  const selectedPlan = (() => {
+    try { return JSON.parse(sessionStorage.getItem('selectedPlan') || 'null'); } catch { return null; }
+  })();
+
+  const getLevelRecommendation = (level: string, levelCount: number) => {
+    const levelMap: Record<string, string[]> = {
+      beginner: ['Level 1', 'Level 2', 'Level 3'],
+      intermediate: ['Level 2', 'Level 3', 'Level 1'],
+      advanced: ['Level 3', 'Level 1', 'Level 2'],
+    };
+    const ordered = levelMap[level] || levelMap.beginner;
+    return ordered.slice(0, levelCount);
+  };
 
   useEffect(() => {
     if (!started || isFinished) return;
