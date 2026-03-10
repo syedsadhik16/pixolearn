@@ -354,27 +354,73 @@ export default function LaunchCheck() {
               </div>
             )}
 
-            {/* CTA - Go to Subscription */}
+            {/* CTA */}
             <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-6 border border-white/20 text-center space-y-4">
               <img src={companion.image} alt={companion.name} className="w-16 h-16 mx-auto object-contain animate-float" />
-              <h3 className="text-xl font-display font-bold text-white">
-                Ready to start your journey? 🚀
-              </h3>
-              <p className="text-white/70 text-sm">
-                Choose a plan to unlock all lessons and features tailored to your level.
-              </p>
-              <Button
-                className="w-full bg-white text-primary hover:bg-white/90 font-bold text-lg py-6"
-                disabled={loading}
-                onClick={() => navigate('/pricing')}
-              >
-                {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : (
-                  <>
-                    Choose Your Plan
-                    <ArrowRight className="h-5 w-5 ml-2" />
-                  </>
-                )}
-              </Button>
+              {fromPricing && selectedPlan ? (
+                <>
+                  <h3 className="text-xl font-display font-bold text-white">
+                    Your recommended levels 🎯
+                  </h3>
+                  <div className="bg-white/10 rounded-xl p-4 space-y-2">
+                    <p className="text-sm text-white/70">
+                      Based on your score, we recommend starting with:
+                    </p>
+                    <div className="flex flex-wrap gap-2 justify-center">
+                      {getLevelRecommendation(assignedLevel, selectedPlan.levelCount).map((lvl: string) => (
+                        <span key={lvl} className="bg-white/20 text-white text-sm font-semibold px-3 py-1.5 rounded-full">
+                          {lvl}
+                        </span>
+                      ))}
+                    </div>
+                    <p className="text-xs text-white/50 mt-2">
+                      {selectedPlan.name} Plan • {selectedPlan.levelCount} level{selectedPlan.levelCount > 1 ? 's' : ''} included
+                    </p>
+                  </div>
+                  <Button
+                    className="w-full bg-white text-primary hover:bg-white/90 font-bold text-lg py-6"
+                    disabled={loading}
+                    onClick={() => {
+                      // Store the recommended levels alongside the plan
+                      const levels = getLevelRecommendation(assignedLevel, selectedPlan.levelCount);
+                      sessionStorage.setItem('selectedPlan', JSON.stringify({
+                        ...selectedPlan,
+                        recommendedLevels: levels,
+                        assessedLevel: assignedLevel,
+                      }));
+                      navigate('/pricing?proceed=payment');
+                    }}
+                  >
+                    {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : (
+                      <>
+                        Continue to Payment
+                        <ArrowRight className="h-5 w-5 ml-2" />
+                      </>
+                    )}
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <h3 className="text-xl font-display font-bold text-white">
+                    Ready to start your journey? 🚀
+                  </h3>
+                  <p className="text-white/70 text-sm">
+                    Choose a plan to unlock all lessons and features tailored to your level.
+                  </p>
+                  <Button
+                    className="w-full bg-white text-primary hover:bg-white/90 font-bold text-lg py-6"
+                    disabled={loading}
+                    onClick={() => navigate('/pricing')}
+                  >
+                    {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : (
+                      <>
+                        Choose Your Plan
+                        <ArrowRight className="h-5 w-5 ml-2" />
+                      </>
+                    )}
+                  </Button>
+                </>
+              )}
               <button
                 onClick={() => navigate('/student')}
                 className="text-white/50 text-sm hover:text-white/80 transition-colors underline"
