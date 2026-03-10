@@ -22,60 +22,76 @@ declare global {
 
 const plans = [
   {
-    id: 'explorer',
-    name: 'Explorer',
-    price: 'Free',
-    priceAmount: 0,
-    period: '',
-    tagline: 'Try PIXO risk-free',
+    id: '6-months',
+    name: '6 Months',
+    price: '₹5,999',
+    priceAmount: 5999,
+    duration: '6 Months',
+    tagline: 'Access any 1 level',
     originalPrice: null,
+    levelCount: 1,
+    levelOptions: ['Level 1', 'Level 2', 'Level 3'],
     features: [
-      '3 lessons per level',
-      'Basic speech feedback',
-      'Daily login rewards',
-      'Limited AI chat',
-    ],
-    cta: 'Start Free',
-    highlighted: false,
-  },
-  {
-    id: 'adventurer',
-    name: 'Adventurer',
-    price: '₹499',
-    priceAmount: 499,
-    period: '/month',
-    tagline: 'Most flexible option',
-    originalPrice: null,
-    features: [
-      'All 180 lessons per level',
+      '6 months of full access',
+      'Any 1 level of your choice',
+      '180 lessons in chosen level',
       'Advanced AI speech scoring',
       'Unlimited AI practice',
       'Parent Mastery Hub',
       'Role play studio',
+    ],
+    supportingLine: 'Best for parents who want to begin with one focused level',
+    cta: 'Choose Plan',
+    highlighted: false,
+  },
+  {
+    id: '12-months',
+    name: '12 Months',
+    price: '₹9,999',
+    priceAmount: 9999,
+    duration: '12 Months',
+    tagline: 'Access any 2 levels',
+    originalPrice: null,
+    levelCount: 2,
+    levelOptions: ['Level 1 + Level 2', 'Level 2 + Level 3', 'Level 1 + Level 3'],
+    features: [
+      '12 months of full access',
+      'Any 2 levels of your choice',
+      '360 lessons across 2 levels',
+      'Advanced AI speech scoring',
+      'Unlimited AI practice',
+      'Parent Mastery Hub',
       'Weekly progress reports',
       'Priority support',
     ],
+    supportingLine: 'Best for deeper structured learning',
     cta: 'Choose Plan',
     highlighted: true,
     badge: 'Popular',
   },
   {
-    id: 'achiever',
-    name: 'Achiever',
-    price: '₹2,999',
-    priceAmount: 2999,
-    period: '/year',
-    tagline: 'Save 50% • Best value',
-    originalPrice: '₹5,988',
+    id: '18-months',
+    name: '18 Months',
+    price: '₹14,999',
+    priceAmount: 14999,
+    duration: '18 Months',
+    tagline: 'Access all 3 levels',
+    originalPrice: null,
+    levelCount: 3,
+    levelOptions: ['Level 1 + Level 2 + Level 3'],
     features: [
-      'Everything in Adventurer',
-      'All 3 levels unlocked',
+      '18 months of full access',
+      'All 3 levels included',
+      '540 lessons — complete curriculum',
+      'Advanced AI speech scoring',
+      'Unlimited AI practice',
+      'Parent Mastery Hub',
       'Creative Studio access',
       'Expert PDF reports',
-      'Offline lesson download',
       'Family sharing (2 kids)',
       'Early feature access',
     ],
+    supportingLine: 'Best for the complete learning journey',
     cta: 'Choose Plan',
     highlighted: false,
     badge: 'Best Value',
@@ -110,119 +126,29 @@ export default function Pricing() {
     }
   };
 
-  const loadRazorpayScript = (): Promise<boolean> => {
-    return new Promise((resolve) => {
-      if (window.Razorpay) {
-        resolve(true);
-        return;
-      }
-      const script = document.createElement('script');
-      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-      script.onload = () => resolve(true);
-      script.onerror = () => resolve(false);
-      document.body.appendChild(script);
-    });
-  };
-
-  const handleSelectPlan = async (plan: typeof plans[0]) => {
+  const handleSelectPlan = (plan: typeof plans[0]) => {
     if (!user) {
-      navigate('/auth?signup=true');
+      // Store selected plan in sessionStorage, redirect to auth then back
+      sessionStorage.setItem('selectedPlan', JSON.stringify({
+        id: plan.id,
+        name: plan.name,
+        priceAmount: plan.priceAmount,
+        duration: plan.duration,
+        levelCount: plan.levelCount,
+      }));
+      navigate('/auth?signup=true&redirect=launch-check');
       return;
     }
 
-    setLoadingPlan(plan.id);
-
-    try {
-      const loaded = await loadRazorpayScript();
-      if (!loaded) {
-        throw new Error('Failed to load Razorpay. Please check your internet connection.');
-      }
-
-      const { data, error } = await supabase.functions.invoke('create-razorpay-order', {
-        body: {
-          amount: plan.priceAmount,
-          currency: 'INR',
-          plan_id: plan.id,
-          user_id: user.id,
-          user_email: profile?.email,
-          user_name: profile?.full_name,
-        },
-      });
-
-      if (error || !data?.order_id) {
-        throw new Error(data?.error || error?.message || 'Failed to create order');
-      }
-
-      const options = {
-        key: data.key_id,
-        amount: data.amount,
-        currency: data.currency,
-        name: 'PIXO',
-        description: `${plan.name} Plan - ${plan.period ? plan.period.replace('/', '') : 'subscription'}`,
-        image: pixoLogo,
-        order_id: data.order_id,
-        handler: async (response: any) => {
-          try {
-            const { data: verifyData, error: verifyError } = await supabase.functions.invoke('verify-razorpay-payment', {
-              body: {
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-                user_id: user.id,
-                plan_id: plan.id,
-              },
-            });
-
-            if (verifyError || !verifyData?.success) {
-              throw new Error(verifyData?.error || 'Payment verification failed');
-            }
-
-            toast({
-              title: 'Payment Successful! 🎉',
-              description: `Welcome to PIXO ${plan.name}! Your premium features are now active.`,
-            });
-            navigate('/student');
-          } catch (err: any) {
-            console.error('Verification error:', err);
-            toast({
-              title: 'Verification Issue',
-              description: 'Payment received but verification pending. Please contact support.',
-              variant: 'destructive',
-            });
-            navigate('/student');
-          }
-        },
-        prefill: {
-          name: profile?.full_name || '',
-          email: profile?.email || '',
-        },
-        theme: { color: '#F97316' },
-        modal: {
-          ondismiss: () => setLoadingPlan(null),
-        },
-      };
-
-      const razorpay = new window.Razorpay(options);
-      razorpay.on('payment.failed', (response: any) => {
-        console.error('Payment failed:', response.error);
-        toast({
-          title: 'Payment Failed',
-          description: response.error?.description || 'Something went wrong. Please try again.',
-          variant: 'destructive',
-        });
-        setLoadingPlan(null);
-      });
-      razorpay.open();
-    } catch (err: any) {
-      console.error('Payment error:', err);
-      toast({
-        title: 'Error',
-        description: err.message || 'Failed to initiate payment',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoadingPlan(null);
-    }
+    // Store selected plan and redirect to Learning Launch Check
+    sessionStorage.setItem('selectedPlan', JSON.stringify({
+      id: plan.id,
+      name: plan.name,
+      priceAmount: plan.priceAmount,
+      duration: plan.duration,
+      levelCount: plan.levelCount,
+    }));
+    navigate('/launch-check?from=pricing');
   };
 
   return (
@@ -244,7 +170,7 @@ export default function Pricing() {
               Invest in Your Child's <span className="gradient-text">Confidence</span>
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Choose the plan that works for your family. Cancel anytime, no questions asked.
+              Choose a plan that works for your family. Each plan includes a Learning Launch Check to find the perfect starting level.
             </p>
           </div>
         </section>
@@ -295,7 +221,7 @@ export default function Pricing() {
                   {plan.badge && (
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                       <span className={`text-white text-xs font-bold px-4 py-1.5 rounded-full ${
-                        plan.badge === 'Most Value'
+                        plan.badge === 'Best Value'
                           ? 'bg-gradient-to-r from-emerald-500 to-teal-500'
                           : 'gradient-bg'
                       }`}>
@@ -308,15 +234,12 @@ export default function Pricing() {
                     <h3 className="text-xl font-display font-bold mb-1">{plan.name}</h3>
                     <p className="text-sm text-muted-foreground mb-4">{plan.tagline}</p>
                     <div className="flex items-baseline justify-center gap-1">
-                      {plan.originalPrice && (
-                        <span className="text-lg text-muted-foreground line-through mr-2">{plan.originalPrice}</span>
-                      )}
                       <span className="text-4xl font-display font-bold">{plan.price}</span>
-                      {plan.period && <span className="text-muted-foreground">{plan.period}</span>}
                     </div>
+                    <p className="text-xs text-muted-foreground mt-1">for {plan.duration}</p>
                   </div>
 
-                  <ul className="space-y-3 mb-8 flex-1">
+                  <ul className="space-y-3 mb-4 flex-1">
                     {plan.features.map((feature, i) => (
                       <li key={i} className="flex items-start gap-2.5 text-sm">
                         <Check className="h-4 w-4 text-pixo-green flex-shrink-0 mt-0.5" />
@@ -325,12 +248,16 @@ export default function Pricing() {
                     ))}
                   </ul>
 
+                  <p className="text-xs text-muted-foreground text-center mb-4 italic">
+                    {plan.supportingLine}
+                  </p>
+
                   <Button
                     variant={plan.highlighted ? 'gradient' : 'outline'}
                     className="w-full"
                     size="lg"
                     disabled={loadingPlan === plan.id}
-                    onClick={() => plan.priceAmount === 0 ? handleTrialClick() : handleSelectPlan(plan)}
+                    onClick={() => handleSelectPlan(plan)}
                   >
                     {loadingPlan === plan.id ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -366,7 +293,7 @@ export default function Pricing() {
             <div className="flex items-center justify-center gap-6 flex-wrap text-sm text-muted-foreground">
               <div className="flex items-center gap-1">
                 <Shield className="h-4 w-4 text-pixo-green" />
-                <span>Secured by Razorpay</span>
+                <span>Secure payment</span>
               </div>
               <span>•</span>
               <div className="flex items-center gap-1">

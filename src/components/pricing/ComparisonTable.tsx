@@ -1,20 +1,20 @@
 import { Check, X } from 'lucide-react';
 
 const features = [
-  { name: 'Lessons per level', explorer: '3', adventurer: '180', achiever: '180' },
-  { name: 'Speech feedback', explorer: 'Basic', adventurer: 'Advanced AI', achiever: 'Advanced AI' },
-  { name: 'AI practice', explorer: 'Limited', adventurer: 'Unlimited', achiever: 'Unlimited' },
-  { name: 'Daily login rewards', explorer: true, adventurer: true, achiever: true },
-  { name: 'Parent Mastery Hub', explorer: false, adventurer: true, achiever: true },
-  { name: 'Role play studio', explorer: false, adventurer: true, achiever: true },
-  { name: 'Weekly progress reports', explorer: false, adventurer: true, achiever: true },
-  { name: 'Priority support', explorer: false, adventurer: true, achiever: true },
-  { name: 'All 3 levels unlocked', explorer: false, adventurer: false, achiever: true },
-  { name: 'Creative Studio access', explorer: false, adventurer: false, achiever: true },
-  { name: 'Expert PDF reports', explorer: false, adventurer: false, achiever: true },
-  { name: 'Offline lesson download', explorer: false, adventurer: false, achiever: true },
-  { name: 'Family sharing', explorer: false, adventurer: false, achiever: '2 kids' },
-  { name: 'Early feature access', explorer: false, adventurer: false, achiever: true },
+  { name: 'Duration', sixMonths: '6 Months', twelveMonths: '12 Months', eighteenMonths: '18 Months' },
+  { name: 'Level access', sixMonths: '1 Level', twelveMonths: '2 Levels', eighteenMonths: 'All 3 Levels' },
+  { name: 'Total lessons', sixMonths: '180', twelveMonths: '360', eighteenMonths: '540' },
+  { name: 'Speech feedback', sixMonths: 'Advanced AI', twelveMonths: 'Advanced AI', eighteenMonths: 'Advanced AI' },
+  { name: 'AI practice', sixMonths: 'Unlimited', twelveMonths: 'Unlimited', eighteenMonths: 'Unlimited' },
+  { name: 'Daily login rewards', sixMonths: true, twelveMonths: true, eighteenMonths: true },
+  { name: 'Parent Mastery Hub', sixMonths: true, twelveMonths: true, eighteenMonths: true },
+  { name: 'Role play studio', sixMonths: true, twelveMonths: true, eighteenMonths: true },
+  { name: 'Weekly progress reports', sixMonths: false, twelveMonths: true, eighteenMonths: true },
+  { name: 'Priority support', sixMonths: false, twelveMonths: true, eighteenMonths: true },
+  { name: 'Creative Studio access', sixMonths: false, twelveMonths: false, eighteenMonths: true },
+  { name: 'Expert PDF reports', sixMonths: false, twelveMonths: false, eighteenMonths: true },
+  { name: 'Family sharing', sixMonths: false, twelveMonths: false, eighteenMonths: '2 kids' },
+  { name: 'Early feature access', sixMonths: false, twelveMonths: false, eighteenMonths: true },
 ];
 
 const FeatureCell = ({ value }: { value: boolean | string }) => {
@@ -41,16 +41,16 @@ export function ComparisonTable() {
               <tr className="border-b border-border">
                 <th className="text-left py-3 px-4 font-semibold text-foreground">Feature</th>
                 <th className="text-center py-3 px-2 font-semibold text-foreground whitespace-nowrap">
-                  Explorer<br />
-                  <span className="text-xs font-normal text-muted-foreground">Free</span>
+                  6 Months<br />
+                  <span className="text-xs font-normal text-muted-foreground">₹5,999</span>
                 </th>
                 <th className="text-center py-3 px-2 font-semibold text-primary whitespace-nowrap">
-                  Adventurer<br />
-                  <span className="text-xs font-normal text-muted-foreground">₹499/mo</span>
+                  12 Months<br />
+                  <span className="text-xs font-normal text-muted-foreground">₹9,999</span>
                 </th>
                 <th className="text-center py-3 px-2 font-semibold text-foreground whitespace-nowrap">
-                  Achiever<br />
-                  <span className="text-xs font-normal text-muted-foreground">₹2,999/yr</span>
+                  18 Months<br />
+                  <span className="text-xs font-normal text-muted-foreground">₹14,999</span>
                 </th>
               </tr>
             </thead>
@@ -61,9 +61,9 @@ export function ComparisonTable() {
                   className={`border-b border-border/50 ${i % 2 === 0 ? 'bg-muted/30' : ''}`}
                 >
                   <td className="py-3 px-4 text-foreground">{feature.name}</td>
-                  <td className="py-3 px-2 text-center"><FeatureCell value={feature.explorer} /></td>
-                  <td className="py-3 px-2 text-center"><FeatureCell value={feature.adventurer} /></td>
-                  <td className="py-3 px-2 text-center"><FeatureCell value={feature.achiever} /></td>
+                  <td className="py-3 px-2 text-center"><FeatureCell value={feature.sixMonths} /></td>
+                  <td className="py-3 px-2 text-center"><FeatureCell value={feature.twelveMonths} /></td>
+                  <td className="py-3 px-2 text-center"><FeatureCell value={feature.eighteenMonths} /></td>
                 </tr>
               ))}
             </tbody>
