@@ -392,7 +392,6 @@ export default function LaunchCheck() {
                     className="w-full bg-white text-primary hover:bg-white/90 font-bold text-lg py-6"
                     disabled={loading}
                     onClick={() => {
-                      // Store the recommended levels alongside the plan
                       const levels = getLevelRecommendation(assignedLevel, selectedPlan.levelCount);
                       sessionStorage.setItem('selectedPlan', JSON.stringify({
                         ...selectedPlan,
@@ -404,11 +403,21 @@ export default function LaunchCheck() {
                   >
                     {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : (
                       <>
-                        Continue to Payment
+                        ✅ Choose Recommended Level
                         <ArrowRight className="h-5 w-5 ml-2" />
                       </>
                     )}
                   </Button>
+                  <Button
+                    variant="ghost"
+                    className="w-full text-white/80 hover:text-white hover:bg-white/10 font-semibold py-5"
+                    onClick={() => navigate('/pricing')}
+                  >
+                    Choose Another Level
+                  </Button>
+                  <p className="text-xs text-white/40 italic">
+                    PIXO recommends the best level after assessment, but the final choice is yours.
+                  </p>
                 </>
               ) : (
                 <>
