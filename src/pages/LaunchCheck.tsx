@@ -253,12 +253,15 @@ export default function LaunchCheck() {
               </p>
               <p className="text-white/70 text-sm max-w-md mx-auto">{comment.message}</p>
 
-              {/* Level Assignment */}
+              {/* Level Recommendation */}
               <div className="bg-white/20 rounded-2xl p-5">
-                <p className="text-sm text-white/70 mb-2">Your assigned level:</p>
+                <p className="text-sm text-white/70 mb-2">Recommended Level:</p>
                 <h2 className="text-2xl font-display font-bold text-white flex items-center justify-center gap-2">
                   {getLevelEmoji(assignedLevel)} {getLevelName(assignedLevel)}
                 </h2>
+                <p className="text-xs text-white/60 mt-2">
+                  Based on phonics recognition, listening response, and reading confidence
+                </p>
               </div>
 
               {/* Difficulty Breakdown */}
