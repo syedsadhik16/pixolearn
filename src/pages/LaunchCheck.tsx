@@ -514,24 +514,32 @@ export default function LaunchCheck() {
 
             <div className="space-y-3">
               {q.options.map((option, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => selectAnswer(idx)}
-                  className={`w-full p-4 rounded-xl border-2 text-left transition-all duration-200 flex items-center gap-3 ${
-                    answers[currentQ] === idx
-                      ? 'border-primary bg-primary/5 shadow-md'
-                      : 'border-border hover:border-primary/50 hover:bg-muted/50'
-                  }`}
-                >
-                  <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center text-sm font-bold flex-shrink-0 ${
-                    answers[currentQ] === idx
-                      ? 'border-primary bg-primary text-primary-foreground'
-                      : 'border-muted-foreground/30 text-muted-foreground'
-                  }`}>
-                    {String.fromCharCode(65 + idx)}
-                  </div>
-                  <span className="font-medium">{option}</span>
-                </button>
+                <div key={idx} className="flex items-center gap-2">
+                  <button
+                    onClick={() => selectAnswer(idx)}
+                    className={`flex-1 p-4 rounded-xl border-2 text-left transition-all duration-200 flex items-center gap-3 ${
+                      answers[currentQ] === idx
+                        ? 'border-primary bg-primary/5 shadow-md'
+                        : 'border-border hover:border-primary/50 hover:bg-muted/50'
+                    }`}
+                  >
+                    <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center text-sm font-bold flex-shrink-0 ${
+                      answers[currentQ] === idx
+                        ? 'border-primary bg-primary text-primary-foreground'
+                        : 'border-muted-foreground/30 text-muted-foreground'
+                    }`}>
+                      {String.fromCharCode(65 + idx)}
+                    </div>
+                    <span className="font-medium">{option}</span>
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); speakText(option); }}
+                    className="flex-shrink-0 w-9 h-9 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center transition-colors"
+                    title="Listen before you answer"
+                  >
+                    <Volume2 className="h-4 w-4 text-muted-foreground" />
+                  </button>
+                </div>
               ))}
             </div>
 
