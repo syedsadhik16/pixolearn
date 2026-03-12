@@ -7,7 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Layout } from '@/components/layout/Layout';
 import pixoLogo from '@/assets/pixo-logo.png';
 import { useCompanion } from '@/hooks/useCompanion';
-import { Check, X, Clock, ArrowRight, ArrowLeft, Loader2, Trophy, ChevronDown, ChevronUp } from 'lucide-react';
+import { Check, X, Clock, ArrowRight, ArrowLeft, Loader2, Trophy, ChevronDown, ChevronUp, Volume2 } from 'lucide-react';
 
 interface Question {
   id: number;
