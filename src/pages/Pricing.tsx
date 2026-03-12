@@ -10,6 +10,8 @@ import { Check, ArrowRight, Star, Sparkles, ArrowLeft, Loader2, Shield } from 'l
 import { ComparisonTable } from '@/components/pricing/ComparisonTable';
 import { PricingFAQ } from '@/components/pricing/PricingFAQ';
 import { Testimonials } from '@/components/pricing/Testimonials';
+import { WhyParentsChoose } from '@/components/pricing/WhyParentsChoose';
+import { ComingSoonTracks } from '@/components/pricing/ComingSoonTracks';
 import { ScrollReveal } from '@/components/shared/ScrollReveal';
 import { WhatsAppButton } from '@/components/shared/WhatsAppButton';
 import { StickyPricingBar } from '@/components/pricing/StickyPricingBar';
@@ -105,7 +107,6 @@ export default function Pricing() {
   const { toast } = useToast();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
 
-  // Handle return from Launch Check with proceed=payment
   useEffect(() => {
     if (searchParams.get('proceed') === 'payment' && user) {
       const stored = sessionStorage.getItem('selectedPlan');
@@ -196,6 +197,7 @@ export default function Pricing() {
       setLoadingPlan(null);
     }
   };
+
   const handleTrialClick = async () => {
     if (!user) {
       navigate('/auth?signup=true&trial=true');
@@ -220,7 +222,6 @@ export default function Pricing() {
 
   const handleSelectPlan = (plan: typeof plans[0]) => {
     if (!user) {
-      // Store selected plan in sessionStorage, redirect to auth then back
       sessionStorage.setItem('selectedPlan', JSON.stringify({
         id: plan.id,
         name: plan.name,
@@ -232,7 +233,6 @@ export default function Pricing() {
       return;
     }
 
-    // Store selected plan and redirect to Learning Launch Check
     sessionStorage.setItem('selectedPlan', JSON.stringify({
       id: plan.id,
       name: plan.name,
@@ -261,8 +261,11 @@ export default function Pricing() {
             <h1 className="text-4xl md:text-5xl font-display font-bold mb-4">
               Invest in Your Child's <span className="gradient-text">Confidence</span>
             </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-3">
               Choose a plan that works for your family. Each plan includes a Learning Launch Check to find the perfect starting level.
+            </p>
+            <p className="text-sm text-muted-foreground/80 max-w-xl mx-auto italic">
+              Choose freely. Start wisely. PIXO recommends the best level after assessment, but the final choice is yours.
             </p>
           </div>
         </section>
@@ -275,8 +278,11 @@ export default function Pricing() {
                 <Sparkles className="h-5 w-5 text-primary" />
                 <h2 className="text-lg font-display font-bold">Not sure yet?</h2>
               </div>
-              <p className="text-sm text-muted-foreground mb-4">
-                Try PIXO free for 24 hours — no payment required!
+              <p className="text-sm text-muted-foreground mb-1">
+                Try PIXO free for 24 hours — no payment required.
+              </p>
+              <p className="text-xs text-muted-foreground/70 mb-4">
+                Explore a real lesson experience before choosing a plan.
               </p>
               <Button
                 variant="gradient"
@@ -289,11 +295,25 @@ export default function Pricing() {
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   <>
-                    Start 1-Day Free Trial
+                    Try PIXO Free for 24 Hours
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </>
                 )}
               </Button>
+            </div>
+          </div>
+        </section>
+
+        {/* Level Selection Guidance */}
+        <section className="pb-6">
+          <div className="container mx-auto px-4 text-center">
+            <div className="max-w-lg mx-auto bg-primary/5 border border-primary/10 rounded-2xl p-5">
+              <p className="text-sm font-semibold text-foreground mb-1">
+                Choose your child's level manually or follow PIXO's recommended level based on the assessment.
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Not sure where to begin? Take the Learning Launch Check and PIXO will recommend the best starting level for your child.
+              </p>
             </div>
           </div>
         </section>
@@ -371,8 +391,16 @@ export default function Pricing() {
           <ComparisonTable />
         </ScrollReveal>
 
+        {/* Why Parents Choose PIXO */}
+        <ScrollReveal>
+          <WhyParentsChoose />
+        </ScrollReveal>
+
         {/* Testimonials */}
         <Testimonials />
+
+        {/* Coming Soon Tracks */}
+        <ComingSoonTracks />
 
         {/* FAQ */}
         <ScrollReveal>
@@ -392,10 +420,6 @@ export default function Pricing() {
                 <Star className="h-4 w-4 text-pixo-yellow fill-pixo-yellow" />
                 <span>4.9/5 rating</span>
               </div>
-              <span>•</span>
-              <span>30-day money-back guarantee</span>
-              <span>•</span>
-              <span>Cancel anytime</span>
             </div>
           </div>
         </section>
