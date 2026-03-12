@@ -1,69 +1,46 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Quicksand:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Quicksand:wght@400;500;600;700&display=swap');
-
 @layer base {
   :root {
-    /* PIXO Brand Colors - Vibrant Gradient Palette */
     --background: 48 100% 98%;
     --foreground: 25 20% 15%;
-
     --card: 0 0% 100%;
     --card-foreground: 25 20% 15%;
-
     --popover: 0 0% 100%;
     --popover-foreground: 25 20% 15%;
-
-    /* Primary: Warm Orange (from logo) */
     --primary: 25 95% 53%;
     --primary-foreground: 0 0% 100%;
-
-    /* Secondary: Fresh Green */
     --secondary: 142 60% 45%;
     --secondary-foreground: 0 0% 100%;
-
-    /* Muted: Soft cream */
     --muted: 45 40% 94%;
     --muted-foreground: 25 15% 45%;
-
-    /* Accent: Golden Yellow */
     --accent: 45 100% 55%;
     --accent-foreground: 25 20% 15%;
-
-    /* Destructive: Warm Red */
     --destructive: 0 75% 55%;
     --destructive-foreground: 0 0% 100%;
-
     --border: 35 30% 88%;
     --input: 35 30% 88%;
     --ring: 25 95% 53%;
-
     --radius: 1rem;
-
-    /* Extended PIXO Palette */
     --pixo-red: 0 80% 50%;
     --pixo-orange: 25 95% 53%;
     --pixo-yellow: 45 100% 55%;
     --pixo-green: 142 60% 45%;
     --pixo-blue: 210 80% 55%;
     --pixo-purple: 280 70% 55%;
-
-    /* Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(0, 80%, 50%), hsl(25, 95%, 53%), hsl(45, 100%, 55%));
     --gradient-secondary: linear-gradient(135deg, hsl(45, 100%, 55%), hsl(142, 60%, 45%));
     --gradient-hero: linear-gradient(135deg, hsl(25, 95%, 53%), hsl(45, 100%, 55%), hsl(142, 60%, 45%));
     --gradient-card: linear-gradient(180deg, hsl(48, 100%, 98%), hsl(45, 40%, 96%));
     --gradient-success: linear-gradient(135deg, hsl(142, 60%, 45%), hsl(160, 70%, 40%));
-
-    /* Shadows */
     --shadow-sm: 0 2px 8px -2px hsl(25 95% 53% / 0.15);
     --shadow-md: 0 8px 24px -8px hsl(25 95% 53% / 0.2);
     --shadow-lg: 0 16px 48px -12px hsl(25 95% 53% / 0.25);
     --shadow-glow: 0 0 40px hsl(45 100% 55% / 0.3);
-
-    /* Sidebar */
     --sidebar-background: 48 100% 98%;
     --sidebar-foreground: 25 20% 25%;
     --sidebar-primary: 25 95% 53%;
@@ -77,32 +54,23 @@
   .dark {
     --background: 25 25% 8%;
     --foreground: 48 60% 95%;
-
     --card: 25 20% 12%;
     --card-foreground: 48 60% 95%;
-
     --popover: 25 20% 12%;
     --popover-foreground: 48 60% 95%;
-
     --primary: 25 95% 58%;
     --primary-foreground: 25 20% 8%;
-
     --secondary: 142 50% 40%;
     --secondary-foreground: 0 0% 100%;
-
     --muted: 25 15% 18%;
     --muted-foreground: 45 20% 65%;
-
     --accent: 45 90% 50%;
     --accent-foreground: 25 20% 8%;
-
     --destructive: 0 65% 45%;
     --destructive-foreground: 0 0% 100%;
-
     --border: 25 15% 20%;
     --input: 25 15% 20%;
     --ring: 25 95% 58%;
-
     --sidebar-background: 25 20% 10%;
     --sidebar-foreground: 48 60% 90%;
     --sidebar-primary: 25 95% 58%;
@@ -118,11 +86,9 @@
   * {
     @apply border-border;
   }
-
   body {
     @apply bg-background text-foreground font-sans antialiased;
   }
-
   h1, h2, h3, h4, h5, h6 {
     @apply font-display font-bold tracking-tight;
   }
@@ -133,40 +99,32 @@
     @apply bg-clip-text text-transparent;
     background-image: var(--gradient-primary);
   }
-
   .gradient-bg {
     background-image: var(--gradient-hero);
   }
-
   .gradient-card {
     background-image: var(--gradient-card);
   }
-
   .shadow-glow {
     box-shadow: var(--shadow-glow);
   }
-
   .pixo-card {
     @apply bg-card rounded-2xl p-6 shadow-md border border-border/50;
     box-shadow: var(--shadow-md);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
-
   .pixo-card:hover {
     box-shadow: var(--shadow-lg);
     transform: translateY(-2px);
   }
-
   .pixo-button {
     @apply font-semibold rounded-xl px-6 py-3 transition-all duration-300;
     box-shadow: var(--shadow-sm);
   }
-
   .pixo-button:hover {
     box-shadow: var(--shadow-md);
     transform: translateY(-1px);
   }
-
   .pixo-button:active {
     transform: translateY(0);
   }
@@ -176,32 +134,25 @@
   .safe-area-bottom {
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
-
   .animate-float {
     animation: float 6s ease-in-out infinite;
   }
-
   .animate-pulse-slow {
     animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
-
   .animate-bounce-gentle {
     animation: bounce-gentle 2s ease-in-out infinite;
   }
-
   .animate-gradient {
     background-size: 200% 200%;
     animation: gradient-shift 8s ease infinite;
   }
-
   .animate-slide-up {
     animation: slide-up 0.5s ease-out;
   }
-
   .animate-fade-in {
     animation: fade-in 0.6s ease-out;
   }
-
   .animate-scale-in {
     animation: scale-in 0.4s ease-out;
   }
@@ -210,28 +161,23 @@
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-10px); }
   }
-
   @keyframes bounce-gentle {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-5px); }
   }
-
   @keyframes gradient-shift {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
   }
-
   @keyframes slide-up {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
   }
-
   @keyframes fade-in {
     from { opacity: 0; }
     to { opacity: 1; }
   }
-
   @keyframes scale-in {
     from { opacity: 0; transform: scale(0.95); }
     to { opacity: 1; transform: scale(1); }
