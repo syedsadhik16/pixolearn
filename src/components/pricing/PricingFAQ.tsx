@@ -12,14 +12,14 @@ const faqs = [
       'PIXO is designed for children aged 4–12 who are learning to read and speak English. The curriculum adapts to your child\'s current level, starting from basic phonics all the way to fluent storytelling.',
   },
   {
-    question: 'How does the 1-day free trial work?',
+    question: 'How does the free trial work?',
     answer:
       'The free trial gives your child 24 hours of full premium access — all lessons, AI practice, and features are unlocked. No payment is required. After 24 hours, the account reverts to the free plan automatically.',
   },
   {
-    question: 'Can I switch between levels?',
+    question: 'Can I choose my child\'s level manually?',
     answer:
-      'Each level is a structured curriculum designed to build on the previous one. We recommend starting with the level that matches your child\'s current ability. Our initial assessment helps determine the right starting point.',
+      'Absolutely! You can choose your child\'s level manually or follow PIXO\'s recommended level based on the assessment. The recommendation is there to guide you, but the final choice is always yours.',
   },
   {
     question: 'How much time should my child spend daily?',
@@ -32,14 +32,14 @@ const faqs = [
       'Parents get a dedicated dashboard with detailed progress reports, pronunciation scores, streak tracking, and weekly summaries. You\'ll also receive notifications when your child completes lessons or hits milestones.',
   },
   {
-    question: 'Is there a money-back guarantee?',
+    question: 'Does PIXO have audio support for young learners?',
     answer:
-      'Yes! We offer a 30-day money-back guarantee on all plans. If you\'re not satisfied with your child\'s progress, contact us for a full refund — no questions asked.',
+      'Yes! Every lesson, question, and instruction can be listened to aloud. Children can tap the speaker icon to hear questions and answer options read out, making the experience accessible for early readers.',
   },
   {
     question: 'What makes PIXO different from other apps?',
     answer:
-      'PIXO uses AI-powered speech evaluation to give real-time pronunciation feedback, gamified learning with rewards and streaks, and a structured curriculum designed by language experts — not just random exercises.',
+      'PIXO uses AI-powered speech evaluation to give real-time pronunciation feedback, gamified learning with rewards and streaks, audio-assisted learning, and a structured curriculum designed by language experts — not just random exercises.',
   },
 ];
 

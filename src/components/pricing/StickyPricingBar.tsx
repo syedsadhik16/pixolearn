@@ -12,7 +12,6 @@ export function StickyPricingBar({ onTrialClick, loading }: StickyPricingBarProp
 
   useEffect(() => {
     const handleScroll = () => {
-      // Show after scrolling past ~700px (roughly past the pricing cards)
       setVisible(window.scrollY > 700);
     };
 
@@ -28,7 +27,7 @@ export function StickyPricingBar({ onTrialClick, loading }: StickyPricingBarProp
         <div className="flex items-center gap-2 min-w-0">
           <Sparkles className="h-4 w-4 text-primary flex-shrink-0" />
           <span className="text-sm font-semibold truncate">
-            Start your child's English journey today
+            Try PIXO free for 24 hours
           </span>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">

@@ -7,7 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Layout } from '@/components/layout/Layout';
 import pixoLogo from '@/assets/pixo-logo.png';
 import { useCompanion } from '@/hooks/useCompanion';
-import { Check, X, Clock, ArrowRight, ArrowLeft, Loader2, Trophy, ChevronDown, ChevronUp } from 'lucide-react';
+import { Check, X, Clock, ArrowRight, ArrowLeft, Loader2, Trophy, ChevronDown, ChevronUp, Volume2 } from 'lucide-react';
 
 interface Question {
   id: number;
@@ -151,6 +151,14 @@ export default function LaunchCheck() {
     }
   }, [answers, isFinished, timeLeft, user]);
 
+  const speakText = (text: string) => {
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 0.85;
+    utterance.lang = 'en-US';
+    window.speechSynthesis.speak(utterance);
+  };
+
   const getLevelEmoji = (level: string) => {
     if (level === 'beginner') return '🌱';
     if (level === 'intermediate') return '🚀';
@@ -245,12 +253,15 @@ export default function LaunchCheck() {
               </p>
               <p className="text-white/70 text-sm max-w-md mx-auto">{comment.message}</p>
 
-              {/* Level Assignment */}
+              {/* Level Recommendation */}
               <div className="bg-white/20 rounded-2xl p-5">
-                <p className="text-sm text-white/70 mb-2">Your assigned level:</p>
+                <p className="text-sm text-white/70 mb-2">Recommended Level:</p>
                 <h2 className="text-2xl font-display font-bold text-white flex items-center justify-center gap-2">
                   {getLevelEmoji(assignedLevel)} {getLevelName(assignedLevel)}
                 </h2>
+                <p className="text-xs text-white/60 mt-2">
+                  Based on phonics recognition, listening response, and reading confidence
+                </p>
               </div>
 
               {/* Difficulty Breakdown */}
@@ -381,7 +392,6 @@ export default function LaunchCheck() {
                     className="w-full bg-white text-primary hover:bg-white/90 font-bold text-lg py-6"
                     disabled={loading}
                     onClick={() => {
-                      // Store the recommended levels alongside the plan
                       const levels = getLevelRecommendation(assignedLevel, selectedPlan.levelCount);
                       sessionStorage.setItem('selectedPlan', JSON.stringify({
                         ...selectedPlan,
@@ -393,11 +403,21 @@ export default function LaunchCheck() {
                   >
                     {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : (
                       <>
-                        Continue to Payment
+                        ✅ Choose Recommended Level
                         <ArrowRight className="h-5 w-5 ml-2" />
                       </>
                     )}
                   </Button>
+                  <Button
+                    variant="ghost"
+                    className="w-full text-white/80 hover:text-white hover:bg-white/10 font-semibold py-5"
+                    onClick={() => navigate('/pricing')}
+                  >
+                    Choose Another Level
+                  </Button>
+                  <p className="text-xs text-white/40 italic">
+                    PIXO recommends the best level after assessment, but the final choice is yours.
+                  </p>
                 </>
               ) : (
                 <>
@@ -468,38 +488,58 @@ export default function LaunchCheck() {
         <div className="max-w-2xl mx-auto px-4 py-8">
           <div className="space-y-8 animate-fade-in" key={currentQ}>
             <div className="space-y-2">
-              <span className={`inline-block text-xs font-semibold px-2.5 py-1 rounded-full ${
-                q.difficulty === 'easy' ? 'bg-pixo-green/10 text-pixo-green' :
-                q.difficulty === 'medium' ? 'bg-pixo-yellow/10 text-pixo-yellow' :
-                'bg-pixo-orange/10 text-pixo-orange'
-              }`}>
-                {q.difficulty === 'easy' ? '⭐ Easy' : q.difficulty === 'medium' ? '⭐⭐ Medium' : '⭐⭐⭐ Hard'}
-              </span>
-              <h2 className="text-xl md:text-2xl font-display font-bold">
-                {q.question}
-              </h2>
+              <div className="flex items-center gap-2">
+                <span className={`inline-block text-xs font-semibold px-2.5 py-1 rounded-full ${
+                  q.difficulty === 'easy' ? 'bg-pixo-green/10 text-pixo-green' :
+                  q.difficulty === 'medium' ? 'bg-pixo-yellow/10 text-pixo-yellow' :
+                  'bg-pixo-orange/10 text-pixo-orange'
+                }`}>
+                  {q.difficulty === 'easy' ? '⭐ Easy' : q.difficulty === 'medium' ? '⭐⭐ Medium' : '⭐⭐⭐ Hard'}
+                </span>
+              </div>
+              <div className="flex items-start gap-3">
+                <h2 className="text-xl md:text-2xl font-display font-bold flex-1">
+                  {q.question}
+                </h2>
+                <button
+                  onClick={(e) => { e.stopPropagation(); speakText(q.question); }}
+                  className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 hover:bg-primary/20 flex items-center justify-center transition-colors mt-1"
+                  title="Tap the speaker to hear the question"
+                >
+                  <Volume2 className="h-5 w-5 text-primary" />
+                </button>
+              </div>
+              <p className="text-xs text-muted-foreground">Tap the speaker to listen</p>
             </div>
 
             <div className="space-y-3">
               {q.options.map((option, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => selectAnswer(idx)}
-                  className={`w-full p-4 rounded-xl border-2 text-left transition-all duration-200 flex items-center gap-3 ${
-                    answers[currentQ] === idx
-                      ? 'border-primary bg-primary/5 shadow-md'
-                      : 'border-border hover:border-primary/50 hover:bg-muted/50'
-                  }`}
-                >
-                  <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center text-sm font-bold flex-shrink-0 ${
-                    answers[currentQ] === idx
-                      ? 'border-primary bg-primary text-primary-foreground'
-                      : 'border-muted-foreground/30 text-muted-foreground'
-                  }`}>
-                    {String.fromCharCode(65 + idx)}
-                  </div>
-                  <span className="font-medium">{option}</span>
-                </button>
+                <div key={idx} className="flex items-center gap-2">
+                  <button
+                    onClick={() => selectAnswer(idx)}
+                    className={`flex-1 p-4 rounded-xl border-2 text-left transition-all duration-200 flex items-center gap-3 ${
+                      answers[currentQ] === idx
+                        ? 'border-primary bg-primary/5 shadow-md'
+                        : 'border-border hover:border-primary/50 hover:bg-muted/50'
+                    }`}
+                  >
+                    <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center text-sm font-bold flex-shrink-0 ${
+                      answers[currentQ] === idx
+                        ? 'border-primary bg-primary text-primary-foreground'
+                        : 'border-muted-foreground/30 text-muted-foreground'
+                    }`}>
+                      {String.fromCharCode(65 + idx)}
+                    </div>
+                    <span className="font-medium">{option}</span>
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); speakText(option); }}
+                    className="flex-shrink-0 w-9 h-9 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center transition-colors"
+                    title="Listen before you answer"
+                  >
+                    <Volume2 className="h-4 w-4 text-muted-foreground" />
+                  </button>
+                </div>
               ))}
             </div>
 
