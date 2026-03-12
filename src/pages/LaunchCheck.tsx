@@ -488,16 +488,28 @@ export default function LaunchCheck() {
         <div className="max-w-2xl mx-auto px-4 py-8">
           <div className="space-y-8 animate-fade-in" key={currentQ}>
             <div className="space-y-2">
-              <span className={`inline-block text-xs font-semibold px-2.5 py-1 rounded-full ${
-                q.difficulty === 'easy' ? 'bg-pixo-green/10 text-pixo-green' :
-                q.difficulty === 'medium' ? 'bg-pixo-yellow/10 text-pixo-yellow' :
-                'bg-pixo-orange/10 text-pixo-orange'
-              }`}>
-                {q.difficulty === 'easy' ? '⭐ Easy' : q.difficulty === 'medium' ? '⭐⭐ Medium' : '⭐⭐⭐ Hard'}
-              </span>
-              <h2 className="text-xl md:text-2xl font-display font-bold">
-                {q.question}
-              </h2>
+              <div className="flex items-center gap-2">
+                <span className={`inline-block text-xs font-semibold px-2.5 py-1 rounded-full ${
+                  q.difficulty === 'easy' ? 'bg-pixo-green/10 text-pixo-green' :
+                  q.difficulty === 'medium' ? 'bg-pixo-yellow/10 text-pixo-yellow' :
+                  'bg-pixo-orange/10 text-pixo-orange'
+                }`}>
+                  {q.difficulty === 'easy' ? '⭐ Easy' : q.difficulty === 'medium' ? '⭐⭐ Medium' : '⭐⭐⭐ Hard'}
+                </span>
+              </div>
+              <div className="flex items-start gap-3">
+                <h2 className="text-xl md:text-2xl font-display font-bold flex-1">
+                  {q.question}
+                </h2>
+                <button
+                  onClick={(e) => { e.stopPropagation(); speakText(q.question); }}
+                  className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 hover:bg-primary/20 flex items-center justify-center transition-colors mt-1"
+                  title="Tap the speaker to hear the question"
+                >
+                  <Volume2 className="h-5 w-5 text-primary" />
+                </button>
+              </div>
+              <p className="text-xs text-muted-foreground">Tap the speaker to listen</p>
             </div>
 
             <div className="space-y-3">
