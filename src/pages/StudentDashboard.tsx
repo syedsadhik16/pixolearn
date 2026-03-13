@@ -519,6 +519,7 @@ export default function StudentDashboard() {
           </div>
         )}
       </div>
+      <HamburgerMenu />
       <BottomNav />
     </Layout>
   );
