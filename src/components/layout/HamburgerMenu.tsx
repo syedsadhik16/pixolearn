@@ -51,7 +51,7 @@ export function HamburgerMenu() {
       {/* Trigger button — positioned in top-right */}
       <button
         onClick={() => setOpen(true)}
-        className="fixed top-4 right-4 z-[60] p-2.5 rounded-xl bg-card/90 backdrop-blur-md border border-border shadow-md hover:shadow-lg transition-shadow"
+        className="fixed top-[1.125rem] right-4 z-[60] p-2 rounded-xl bg-card/90 backdrop-blur-md border border-border shadow-sm hover:shadow-md transition-shadow"
         aria-label="Open menu"
       >
         <Menu className="h-5 w-5 text-foreground" />
