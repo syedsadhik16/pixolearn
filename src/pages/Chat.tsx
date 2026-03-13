@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Layout } from '@/components/layout/Layout';
 import { BottomNav } from '@/components/layout/BottomNav';
+import { HamburgerMenu } from '@/components/layout/HamburgerMenu';
 import { 
   Send, Bot, User, Loader2, Mic, MicOff, Volume2, Sparkles
 } from 'lucide-react';
