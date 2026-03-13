@@ -199,6 +199,7 @@ Evaluate their writing and respond ONLY with valid JSON (no markdown, no code fe
 
           {feedback && <FeedbackDisplay feedback={feedback} xpAwarded={xpAwarded} />}
         </div>
+        <HamburgerMenu />
         <BottomNav />
       </Layout>
     );
