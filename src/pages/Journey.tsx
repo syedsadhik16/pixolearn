@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Layout } from '@/components/layout/Layout';
 import { BottomNav } from '@/components/layout/BottomNav';
+import { HamburgerMenu } from '@/components/layout/HamburgerMenu';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { CheckCircle2, Lock, Star, Trophy, Sparkles, Play } from 'lucide-react';
