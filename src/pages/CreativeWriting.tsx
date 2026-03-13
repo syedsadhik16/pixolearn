@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Layout } from '@/components/layout/Layout';
 import { BottomNav } from '@/components/layout/BottomNav';
+import { HamburgerMenu } from '@/components/layout/HamburgerMenu';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -198,6 +199,7 @@ Evaluate their writing and respond ONLY with valid JSON (no markdown, no code fe
 
           {feedback && <FeedbackDisplay feedback={feedback} xpAwarded={xpAwarded} />}
         </div>
+        <HamburgerMenu />
         <BottomNav />
       </Layout>
     );
@@ -270,6 +272,7 @@ Evaluate their writing and respond ONLY with valid JSON (no markdown, no code fe
           </TabsContent>
         </Tabs>
       </div>
+      <HamburgerMenu />
       <BottomNav />
     </Layout>
   );

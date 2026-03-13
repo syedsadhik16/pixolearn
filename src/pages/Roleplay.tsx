@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Layout } from '@/components/layout/Layout';
 import { BottomNav } from '@/components/layout/BottomNav';
+import { HamburgerMenu } from '@/components/layout/HamburgerMenu';
 import { VoicePicker } from '@/components/shared/VoicePicker';
 import { 
   ArrowLeft, Mic, MicOff, Volume2, Loader2, Send, Bot, User,
@@ -229,6 +230,7 @@ export default function Roleplay() {
             <Button onClick={() => handleSend()} disabled={!inputText.trim() || isLoading} size="icon" className="shrink-0"><Send className="h-5 w-5" /></Button>
           </div>
         </div>
+        <HamburgerMenu />
         <BottomNav />
       </div>
     </Layout>
