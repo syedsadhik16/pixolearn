@@ -249,6 +249,7 @@ export default function Leaderboard() {
           </TabsContent>
         </Tabs>
       </div>
+      <HamburgerMenu />
       <BottomNav />
     </Layout>
   );

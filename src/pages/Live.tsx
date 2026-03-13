@@ -176,6 +176,7 @@ export default function Live() {
           </div>
         )}
       </div>
+      <HamburgerMenu />
       <BottomNav />
     </Layout>
   );

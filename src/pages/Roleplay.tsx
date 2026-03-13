@@ -230,6 +230,7 @@ export default function Roleplay() {
             <Button onClick={() => handleSend()} disabled={!inputText.trim() || isLoading} size="icon" className="shrink-0"><Send className="h-5 w-5" /></Button>
           </div>
         </div>
+        <HamburgerMenu />
         <BottomNav />
       </div>
     </Layout>

@@ -234,6 +234,7 @@ export default function Dictionary() {
           </TabsContent>
         </Tabs>
       </div>
+      <HamburgerMenu />
       <BottomNav />
     </Layout>
   );

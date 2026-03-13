@@ -236,6 +236,7 @@ export default function WeeklyReport() {
           </div>
         </div>
       </div>
+      <HamburgerMenu />
       <BottomNav />
     </Layout>
   );

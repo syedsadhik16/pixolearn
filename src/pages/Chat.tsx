@@ -207,6 +207,7 @@ Always be encouraging and provide clear, simple explanations.`,
           </div>
         </div>
       </div>
+      <HamburgerMenu />
       <BottomNav />
     </Layout>
   );

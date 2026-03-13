@@ -187,6 +187,7 @@ export default function Studio() {
           )}
         </div>
       </div>
+      <HamburgerMenu />
       <BottomNav />
     </Layout>
   );

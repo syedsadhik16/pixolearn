@@ -335,6 +335,7 @@ export default function Profile() {
           </Button>
         </div>
       </div>
+      <HamburgerMenu />
       <BottomNav />
     </Layout>
   );

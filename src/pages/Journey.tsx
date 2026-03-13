@@ -183,6 +183,7 @@ export default function Journey() {
           })}
         </div>
       </div>
+      <HamburgerMenu />
       <BottomNav />
     </Layout>
   );
