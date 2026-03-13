@@ -272,6 +272,7 @@ Evaluate their writing and respond ONLY with valid JSON (no markdown, no code fe
           </TabsContent>
         </Tabs>
       </div>
+      <HamburgerMenu />
       <BottomNav />
     </Layout>
   );
