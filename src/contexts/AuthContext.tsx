@@ -10,7 +10,7 @@ interface Profile {
   full_name: string | null;
   avatar_url: string | null;
   role: UserRole;
-  subscription_type: 'free' | 'premium';
+  subscription_status: 'free' | 'premium';
   trial_started_at: string | null;
   trial_expires_at: string | null;
 }
@@ -67,7 +67,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, email, full_name, avatar_url, role, subscription_type, trial_started_at, trial_expires_at')
+        .select('id, email, full_name, avatar_url, role, subscription_status, trial_started_at, trial_expires_at')
         .eq('id', userId)
         .single();
 
@@ -75,14 +75,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const profileData = data as unknown as Profile;
         // Client-side trial expiry check
         if (
-          profileData.subscription_type === 'premium' &&
+          profileData.subscription_status === 'premium' &&
           profileData.trial_expires_at &&
           new Date(profileData.trial_expires_at) < new Date()
         ) {
-          profileData.subscription_type = 'free';
+          profileData.subscription_status = 'free';
           supabase
             .from('profiles')
-            .update({ subscription_type: 'free' } as any)
+            .update({ subscription_status: 'free' } as any)
             .eq('id', userId)
             .then(() => {});
         }
@@ -158,3 +158,4 @@ export function useAuth() {
   }
   return context;
 }
+
