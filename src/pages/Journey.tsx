@@ -202,7 +202,13 @@ export default function Journey() {
                       return (
                         <button
                           key={node.id}
-                          onClick={() => node.accessible && !node.id.startsWith('placeholder') && navigate(`/lesson/${node.id}`)}
+                          onClick={() => {
+                            if (node.premiumLocked) {
+                              navigate('/pricing');
+                              return;
+                            }
+                            if (node.accessible && !node.id.startsWith('placeholder')) navigate(`/lesson/${node.id}`);
+                          }}
                           disabled={!node.accessible || node.id.startsWith('placeholder')}
                           className={cn(
                             "w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-all",
