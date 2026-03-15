@@ -203,6 +203,11 @@ export default function Pricing() {
       navigate('/auth?signup=true&trial=true');
       return;
     }
+    if (profile?.subscription_type === 'premium') {
+      // Already premium — don't show error, just redirect
+      navigate('/student');
+      return;
+    }
     setLoadingPlan('trial');
     try {
       const { data, error } = await supabase.functions.invoke('activate-trial', {
