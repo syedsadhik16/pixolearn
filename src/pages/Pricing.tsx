@@ -203,6 +203,11 @@ export default function Pricing() {
       navigate('/auth?signup=true&trial=true');
       return;
     }
+    if (profile?.subscription_type === 'premium') {
+      // Already premium — don't show error, just redirect
+      navigate('/student');
+      return;
+    }
     setLoadingPlan('trial');
     try {
       const { data, error } = await supabase.functions.invoke('activate-trial', {
@@ -243,9 +248,11 @@ export default function Pricing() {
     navigate('/launch-check?from=pricing');
   };
 
+  const isPremium = profile?.subscription_type === 'premium';
+
   return (
     <Layout>
-      <StickyPricingBar onTrialClick={handleTrialClick} loading={loadingPlan === 'trial'} />
+      {!isPremium && <StickyPricingBar onTrialClick={handleTrialClick} loading={loadingPlan === 'trial'} />}
       <div className="min-h-screen">
         {/* Hero */}
         <section className="py-16 md:py-24 text-center relative overflow-hidden">
@@ -270,37 +277,58 @@ export default function Pricing() {
           </div>
         </section>
 
-        {/* Free Trial CTA */}
+        {/* Premium Active or Free Trial CTA */}
         <section className="pb-10">
           <div className="container mx-auto px-4 text-center">
-            <div className="max-w-md mx-auto pixo-card p-6 animate-slide-up">
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <Sparkles className="h-5 w-5 text-primary" />
-                <h2 className="text-lg font-display font-bold">Not sure yet?</h2>
+            {isPremium ? (
+              <div className="max-w-md mx-auto pixo-card p-6 animate-slide-up bg-gradient-to-r from-pixo-green/10 to-pixo-blue/10 border-pixo-green/30">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <Shield className="h-5 w-5 text-pixo-green" />
+                  <h2 className="text-lg font-display font-bold">Premium Plan Active ✨</h2>
+                </div>
+                <p className="text-sm text-muted-foreground mb-4">
+                  You have access to the full learning program. Keep learning!
+                </p>
+                <Button
+                  variant="gradient"
+                  size="lg"
+                  className="w-full"
+                  onClick={() => navigate('/student')}
+                >
+                  Go to Dashboard
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
               </div>
-              <p className="text-sm text-muted-foreground mb-1">
-                Try PIXO free for 24 hours — no payment required.
-              </p>
-              <p className="text-xs text-muted-foreground/70 mb-4">
-                Explore a real lesson experience before choosing a plan.
-              </p>
-              <Button
-                variant="gradient"
-                size="lg"
-                className="w-full"
-                disabled={loadingPlan === 'trial'}
-                onClick={handleTrialClick}
-              >
-                {loadingPlan === 'trial' ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <>
-                    Try PIXO Free for 24 Hours
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </>
-                )}
-              </Button>
-            </div>
+            ) : (
+              <div className="max-w-md mx-auto pixo-card p-6 animate-slide-up">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <Sparkles className="h-5 w-5 text-primary" />
+                  <h2 className="text-lg font-display font-bold">Not sure yet?</h2>
+                </div>
+                <p className="text-sm text-muted-foreground mb-1">
+                  Try PIXO free for 24 hours — no payment required.
+                </p>
+                <p className="text-xs text-muted-foreground/70 mb-4">
+                  Explore a real lesson experience before choosing a plan.
+                </p>
+                <Button
+                  variant="gradient"
+                  size="lg"
+                  className="w-full"
+                  disabled={loadingPlan === 'trial'}
+                  onClick={handleTrialClick}
+                >
+                  {loadingPlan === 'trial' ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <>
+                      Try PIXO Free for 24 Hours
+                      <ArrowRight className="h-4 w-4 ml-2" />
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
           </div>
         </section>
 
@@ -368,11 +396,13 @@ export default function Pricing() {
                     variant={plan.highlighted ? 'gradient' : 'outline'}
                     className="w-full"
                     size="lg"
-                    disabled={loadingPlan === plan.id}
+                    disabled={loadingPlan === plan.id || isPremium}
                     onClick={() => handleSelectPlan(plan)}
                   >
                     {loadingPlan === plan.id ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : isPremium ? (
+                      'You already have an active premium subscription'
                     ) : (
                       <>
                         {plan.cta}
