@@ -5,8 +5,9 @@ import { BottomNav } from '@/components/layout/BottomNav';
 import { HamburgerMenu } from '@/components/layout/HamburgerMenu';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { CheckCircle2, Lock, Star, Trophy, Sparkles, Play, ChevronDown, ChevronUp } from 'lucide-react';
+import { CheckCircle2, Lock, Star, Trophy, Sparkles, Play, ChevronDown, ChevronUp, Crown } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 import { useCompanion } from '@/hooks/useCompanion';
 
 interface LessonNode {
