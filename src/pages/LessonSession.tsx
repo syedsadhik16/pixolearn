@@ -92,7 +92,7 @@ interface SentenceItem {
   tip: string;
 }
 
-type SessionPhase = 'intro' | 'vocabulary' | 'sentences' | 'read_aloud' | 'complete';
+type SessionPhase = 'intro' | 'vocabulary' | 'sentences' | 'read_aloud' | 'mini_game' | 'complete';
 
 export default function LessonSession() {
   const { lessonId } = useParams();
