@@ -1,6 +1,6 @@
 import {
   LayoutDashboard, BarChart3, Clock, Sparkles, Settings2, Bell, FileText,
-  Brain, CalendarDays, Eye, GitBranch, Wand2, Users, Heart,
+  Brain, CalendarDays, Eye, GitBranch, Wand2, Users, Heart, BookOpen,
 } from 'lucide-react';
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
