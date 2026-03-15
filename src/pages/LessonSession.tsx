@@ -538,38 +538,24 @@ export default function LessonSession() {
         </div>
 
         {/* Phase Indicators */}
-        <div className="flex justify-center gap-2 mb-8">
-          {['intro', 'vocabulary', 'sentences', 'read_aloud', 'mini_game', 'complete'].map((p, i) => (
-            <div
-              key={p}
-              className={`flex items-center ${i < 4 ? 'flex-1' : ''}`}
-            >
-              <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all ${
-                  phase === p
-                    ? 'gradient-bg text-white scale-110'
-                    : ['intro', 'vocabulary', 'sentences', 'read_aloud', 'complete'].indexOf(phase) > i
-                    ? 'bg-pixo-green text-white'
+        <div className="flex justify-center gap-1.5 mb-8">
+          {['intro', 'vocabulary', 'sentences', 'read_aloud', 'mini_game', 'complete'].map((p, i, arr) => {
+            const currentIdx = arr.indexOf(phase);
+            return (
+              <div key={p} className={`flex items-center ${i < arr.length - 1 ? 'flex-1' : ''}`}>
+                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold transition-all ${
+                  phase === p ? 'gradient-bg text-white scale-110'
+                    : currentIdx > i ? 'bg-pixo-green text-white'
                     : 'bg-muted text-muted-foreground'
-                }`}
-              >
-                {['intro', 'vocabulary', 'sentences', 'read_aloud', 'complete'].indexOf(phase) > i ? (
-                  <CheckCircle2 className="h-4 w-4" />
-                ) : (
-                  i + 1
+                }`}>
+                  {currentIdx > i ? <CheckCircle2 className="h-3.5 w-3.5" /> : i + 1}
+                </div>
+                {i < arr.length - 1 && (
+                  <div className={`flex-1 h-1 mx-1 rounded ${currentIdx > i ? 'bg-pixo-green' : 'bg-muted'}`} />
                 )}
               </div>
-              {i < 4 && (
-                <div
-                  className={`flex-1 h-1 mx-2 rounded ${
-                    ['intro', 'vocabulary', 'sentences', 'read_aloud', 'complete'].indexOf(phase) > i
-                      ? 'bg-pixo-green'
-                      : 'bg-muted'
-                  }`}
-                />
-              )}
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Content Area */}
