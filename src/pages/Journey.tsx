@@ -18,6 +18,7 @@ interface LessonNode {
   completed: boolean;
   accessible: boolean;
   isCurrent: boolean;
+  premiumLocked?: boolean;
 }
 
 const phases = [
