@@ -46,6 +46,7 @@ declare global {
 }
 import { useParams, useNavigate } from 'react-router-dom';
 import { trackChallengeProgress, checkAndAwardBadges } from '@/lib/gamification';
+import { MiniGameSelector } from '@/components/games/MiniGameSelector';
 import { Layout } from '@/components/layout/Layout';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
