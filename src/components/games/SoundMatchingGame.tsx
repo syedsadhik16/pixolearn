@@ -93,7 +93,13 @@ export function SoundMatchingGame({ words, onComplete }: SoundMatchingGameProps)
         <Volume2 className="h-5 w-5 text-pixo-purple" />
         <h3 className="font-display font-bold text-lg">Sound Matching 🎵</h3>
       </div>
-      <p className="text-sm text-muted-foreground mb-4">Match each word with its sound!</p>
+      <p className="text-sm text-muted-foreground mb-1">Match each word with its sound!</p>
+      <button
+        onClick={() => speak('Match each word with its sound! Tap a word, then tap its matching sound.')}
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium mb-4 hover:bg-primary/20 transition-colors mx-auto"
+      >
+        <Volume2 className="h-3.5 w-3.5" /> Hear Instructions
+      </button>
 
       <div className="flex items-center gap-1 mb-4">
         {Array.from({ length: totalPairs }).map((_, i) => (
