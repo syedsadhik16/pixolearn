@@ -5,8 +5,9 @@ import { BottomNav } from '@/components/layout/BottomNav';
 import { HamburgerMenu } from '@/components/layout/HamburgerMenu';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { CheckCircle2, Lock, Star, Trophy, Sparkles, Play, ChevronDown, ChevronUp } from 'lucide-react';
+import { CheckCircle2, Lock, Star, Trophy, Sparkles, Play, ChevronDown, ChevronUp, Crown } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 import { useCompanion } from '@/hooks/useCompanion';
 
 interface LessonNode {
@@ -17,6 +18,7 @@ interface LessonNode {
   completed: boolean;
   accessible: boolean;
   isCurrent: boolean;
+  premiumLocked?: boolean;
 }
 
 const phases = [
@@ -89,6 +91,7 @@ export default function Journey() {
         completed: completedIds.has(l.id),
         accessible: l.day_number <= day,
         isCurrent: l.day_number === day,
+        premiumLocked: profile?.subscription_type === 'free' && l.day_number > 2,
       }));
 
       setNodes(lessonNodes);
@@ -152,6 +155,20 @@ export default function Journey() {
           </div>
         </div>
 
+        {/* Premium Paywall Banner for Free Users */}
+        {profile?.subscription_type === 'free' && (
+          <div className="mb-4 rounded-2xl border border-pixo-orange/30 bg-gradient-to-r from-pixo-orange/5 to-pixo-yellow/5 p-4 flex items-center gap-3">
+            <Crown className="h-5 w-5 text-pixo-orange shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold">Free plan: First 2 lessons available</p>
+              <p className="text-xs text-muted-foreground">Upgrade to unlock the full 180-day learning journey</p>
+            </div>
+            <Button variant="gradient" size="sm" onClick={() => navigate('/pricing')}>
+              Upgrade
+            </Button>
+          </div>
+        )}
+
         {/* Phase Accordion */}
         <div className="space-y-3">
           {phases.map((phase, phaseIndex) => {
@@ -199,7 +216,13 @@ export default function Journey() {
                       return (
                         <button
                           key={node.id}
-                          onClick={() => node.accessible && !node.id.startsWith('placeholder') && navigate(`/lesson/${node.id}`)}
+                          onClick={() => {
+                            if (node.premiumLocked) {
+                              navigate('/pricing');
+                              return;
+                            }
+                            if (node.accessible && !node.id.startsWith('placeholder')) navigate(`/lesson/${node.id}`);
+                          }}
                           disabled={!node.accessible || node.id.startsWith('placeholder')}
                           className={cn(
                             "w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-all",
@@ -220,6 +243,8 @@ export default function Journey() {
                           )}>
                             {node.completed ? (
                               <CheckCircle2 className="h-5 w-5" />
+                            ) : node.premiumLocked ? (
+                              <Crown className="h-4 w-4 text-pixo-orange" />
                             ) : node.isCurrent ? (
                               <Play className="h-4 w-4" />
                             ) : !node.accessible ? (

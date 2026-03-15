@@ -1,6 +1,6 @@
 import {
   LayoutDashboard, BarChart3, Clock, Sparkles, Settings2, Bell, FileText,
-  Brain, CalendarDays, Eye, GitBranch, Wand2, Users, Heart,
+  Brain, CalendarDays, Eye, GitBranch, Wand2, Users, Heart, BookOpen,
 } from 'lucide-react';
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 const sections = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard, group: 'main' },
+  { id: 'phonics', label: 'Phonics Progress', icon: BookOpen, group: 'main' },
   { id: 'performance', label: 'Performance', icon: BarChart3, group: 'main' },
   { id: 'time', label: 'Time Analytics', icon: Clock, group: 'main' },
   { id: 'recommendations', label: 'AI Insights', icon: Sparkles, group: 'main' },

@@ -46,6 +46,7 @@ declare global {
 }
 import { useParams, useNavigate } from 'react-router-dom';
 import { trackChallengeProgress, checkAndAwardBadges } from '@/lib/gamification';
+import { MiniGameSelector } from '@/components/games/MiniGameSelector';
 import { Layout } from '@/components/layout/Layout';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -92,7 +93,7 @@ interface SentenceItem {
   tip: string;
 }
 
-type SessionPhase = 'intro' | 'vocabulary' | 'sentences' | 'read_aloud' | 'complete';
+type SessionPhase = 'intro' | 'vocabulary' | 'sentences' | 'read_aloud' | 'mini_game' | 'complete';
 
 export default function LessonSession() {
   const { lessonId } = useParams();
@@ -370,6 +371,9 @@ export default function LessonSession() {
       if (skipped) {
         setScores(prev => ({ ...prev, readAloud: prev.readAloud ?? 0 }));
       }
+      // Go to mini-game before completing
+      setPhase('mini_game');
+    } else if (phase === 'mini_game') {
       completeLesson();
     }
   };
@@ -470,7 +474,7 @@ export default function LessonSession() {
 
   const getProgress = () => {
     if (!lesson) return 0;
-    const totalItems = lesson.vocabulary.length + lesson.sentences.length + 1;
+    const totalItems = lesson.vocabulary.length + lesson.sentences.length + 2; // +1 read_aloud +1 mini_game
     let completedItems = 0;
 
     if (phase === 'vocabulary') {
@@ -479,6 +483,8 @@ export default function LessonSession() {
       completedItems = lesson.vocabulary.length + currentIndex;
     } else if (phase === 'read_aloud') {
       completedItems = lesson.vocabulary.length + lesson.sentences.length;
+    } else if (phase === 'mini_game') {
+      completedItems = lesson.vocabulary.length + lesson.sentences.length + 1;
     } else if (phase === 'complete') {
       completedItems = totalItems;
     }
@@ -534,38 +540,24 @@ export default function LessonSession() {
         </div>
 
         {/* Phase Indicators */}
-        <div className="flex justify-center gap-2 mb-8">
-          {['intro', 'vocabulary', 'sentences', 'read_aloud', 'complete'].map((p, i) => (
-            <div
-              key={p}
-              className={`flex items-center ${i < 4 ? 'flex-1' : ''}`}
-            >
-              <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all ${
-                  phase === p
-                    ? 'gradient-bg text-white scale-110'
-                    : ['intro', 'vocabulary', 'sentences', 'read_aloud', 'complete'].indexOf(phase) > i
-                    ? 'bg-pixo-green text-white'
+        <div className="flex justify-center gap-1.5 mb-8">
+          {['intro', 'vocabulary', 'sentences', 'read_aloud', 'mini_game', 'complete'].map((p, i, arr) => {
+            const currentIdx = arr.indexOf(phase);
+            return (
+              <div key={p} className={`flex items-center ${i < arr.length - 1 ? 'flex-1' : ''}`}>
+                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold transition-all ${
+                  phase === p ? 'gradient-bg text-white scale-110'
+                    : currentIdx > i ? 'bg-pixo-green text-white'
                     : 'bg-muted text-muted-foreground'
-                }`}
-              >
-                {['intro', 'vocabulary', 'sentences', 'read_aloud', 'complete'].indexOf(phase) > i ? (
-                  <CheckCircle2 className="h-4 w-4" />
-                ) : (
-                  i + 1
+                }`}>
+                  {currentIdx > i ? <CheckCircle2 className="h-3.5 w-3.5" /> : i + 1}
+                </div>
+                {i < arr.length - 1 && (
+                  <div className={`flex-1 h-1 mx-1 rounded ${currentIdx > i ? 'bg-pixo-green' : 'bg-muted'}`} />
                 )}
               </div>
-              {i < 4 && (
-                <div
-                  className={`flex-1 h-1 mx-2 rounded ${
-                    ['intro', 'vocabulary', 'sentences', 'read_aloud', 'complete'].indexOf(phase) > i
-                      ? 'bg-pixo-green'
-                      : 'bg-muted'
-                  }`}
-                />
-              )}
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Content Area */}
@@ -899,6 +891,23 @@ export default function LessonSession() {
                   <CheckCircle2 className="h-4 w-4 ml-2" />
                 </Button>
               </div>
+            </div>
+          )}
+
+          {/* Mini Game Phase */}
+          {phase === 'mini_game' && lesson && (
+            <div className="flex-1 flex flex-col items-center justify-center">
+              <MiniGameSelector
+                words={lesson.vocabulary}
+                onComplete={(gameScore) => {
+                  toast({
+                    title: gameScore >= 80 ? 'Amazing! 🌟' : gameScore >= 60 ? 'Well done! 👍' : 'Great try! 💪',
+                    description: `Game score: ${gameScore}%`,
+                  });
+                  completeLesson();
+                }}
+                onSkip={() => completeLesson()}
+              />
             </div>
           )}
 

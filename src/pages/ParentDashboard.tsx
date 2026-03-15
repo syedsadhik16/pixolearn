@@ -19,6 +19,7 @@ import { ChildGrowthTimeline } from '@/components/parent/ChildGrowthTimeline';
 import { SmartPracticePlan } from '@/components/parent/SmartPracticePlan';
 import { ParentBenchmark } from '@/components/parent/ParentBenchmark';
 import { ParentEngagementScore } from '@/components/parent/ParentEngagementScore';
+import { PhonicsProgressDiagnostics } from '@/components/parent/PhonicsProgressDiagnostics';
 import { NotificationBell } from '@/components/shared/NotificationBell';
 import { requestPushPermission, isNotificationEnabled, isNotificationSupported } from '@/lib/pushNotifications';
 import { Button } from '@/components/ui/button';
@@ -194,6 +195,7 @@ export default function ParentDashboard() {
       case 'practice-plan': return <SmartPracticePlan child={selectedChild} />;
       case 'benchmark': return <ParentBenchmark child={selectedChild} />;
       case 'engagement': return <ParentEngagementScore userId={user!.id} />;
+      case 'phonics': return <PhonicsProgressDiagnostics child={selectedChild} />;
       default: return <ParentOverview children={children} selectedChild={selectedChild} onRefresh={fetchChildren} userId={user!.id} />;
     }
   };

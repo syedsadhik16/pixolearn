@@ -189,4 +189,15 @@
     0%, 100% { box-shadow: 0 0 5px rgba(255,255,255,0.2); }
     50% { box-shadow: 0 0 20px rgba(255,255,255,0.4), 0 0 40px rgba(255,255,255,0.1); }
   }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+  }
+  .animate-shake {
+    animation: shake 0.4s ease-in-out;
+  }
+  .animate-bounce-gentle {
+    animation: bounce-gentle 1s ease-in-out infinite;
+  }
 }
