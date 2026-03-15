@@ -248,9 +248,11 @@ export default function Pricing() {
     navigate('/launch-check?from=pricing');
   };
 
+  const isPremium = profile?.subscription_type === 'premium';
+
   return (
     <Layout>
-      <StickyPricingBar onTrialClick={handleTrialClick} loading={loadingPlan === 'trial'} />
+      {!isPremium && <StickyPricingBar onTrialClick={handleTrialClick} loading={loadingPlan === 'trial'} />}
       <div className="min-h-screen">
         {/* Hero */}
         <section className="py-16 md:py-24 text-center relative overflow-hidden">
