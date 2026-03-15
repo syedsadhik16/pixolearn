@@ -906,6 +906,23 @@ export default function LessonSession() {
             </div>
           )}
 
+          {/* Mini Game Phase */}
+          {phase === 'mini_game' && lesson && (
+            <div className="flex-1 flex flex-col items-center justify-center">
+              <MiniGameSelector
+                words={lesson.vocabulary}
+                onComplete={(gameScore) => {
+                  toast({
+                    title: gameScore >= 80 ? 'Amazing! 🌟' : gameScore >= 60 ? 'Well done! 👍' : 'Great try! 💪',
+                    description: `Game score: ${gameScore}%`,
+                  });
+                  completeLesson();
+                }}
+                onSkip={() => completeLesson()}
+              />
+            </div>
+          )}
+
           {/* Complete Phase */}
           {phase === 'complete' && (
             <div className="flex-1 flex flex-col items-center justify-center p-8 animate-scale-in">
