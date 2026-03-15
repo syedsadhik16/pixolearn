@@ -539,7 +539,7 @@ export default function LessonSession() {
 
         {/* Phase Indicators */}
         <div className="flex justify-center gap-2 mb-8">
-          {['intro', 'vocabulary', 'sentences', 'read_aloud', 'complete'].map((p, i) => (
+          {['intro', 'vocabulary', 'sentences', 'read_aloud', 'mini_game', 'complete'].map((p, i) => (
             <div
               key={p}
               className={`flex items-center ${i < 4 ? 'flex-1' : ''}`}
