@@ -40,6 +40,13 @@ export function SoundMatchingGame({ words, onComplete }: SoundMatchingGameProps)
     }
   };
 
+  // Auto-speak instruction when game loads
+  useEffect(() => {
+    if (pairs.length > 0) {
+      setTimeout(() => speak('Tap the letter that makes the matching sound! Match each word with its sound.'), 400);
+    }
+  }, [pairs.length > 0]);
+
   const handleSelect = (id: number) => {
     const item = pairs.find(p => p.id === id);
     if (!item || item.matched) return;

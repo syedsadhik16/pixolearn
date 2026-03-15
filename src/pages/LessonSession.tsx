@@ -125,6 +125,9 @@ export default function LessonSession() {
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const transcriptRef = useRef<string>('');
 
+  // Auto-speak when phase or index changes
+  const autoSpokenRef = useRef<string>('');
+
   useEffect(() => {
     if (!user) {
       navigate('/auth');
@@ -132,6 +135,28 @@ export default function LessonSession() {
     }
     fetchLesson();
   }, [user, lessonId]);
+
+  // Auto-play audio for current phase content
+  useEffect(() => {
+    if (!lesson) return;
+    const key = `${phase}-${currentIndex}`;
+    if (autoSpokenRef.current === key) return;
+    autoSpokenRef.current = key;
+
+    const delay = setTimeout(() => {
+      if (phase === 'intro') {
+        speak(`Let's learn! ${lesson.title}. ${lesson.description || ''}`);
+      } else if (phase === 'vocabulary' && lesson.vocabulary[currentIndex]) {
+        const w = lesson.vocabulary[currentIndex];
+        speak(`Listen and repeat. ${w.word}. ${w.meaning}`);
+      } else if (phase === 'sentences' && lesson.sentences[currentIndex]) {
+        speak(`Listen and repeat. ${lesson.sentences[currentIndex].text}`);
+      } else if (phase === 'read_aloud' && lesson.read_aloud_text) {
+        speak(`Read along with me. ${lesson.read_aloud_text}`);
+      }
+    }, 500);
+    return () => clearTimeout(delay);
+  }, [phase, currentIndex, lesson]);
 
   const fetchLesson = async () => {
     try {
