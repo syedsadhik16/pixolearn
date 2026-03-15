@@ -90,6 +90,7 @@ export default function Journey() {
         completed: completedIds.has(l.id),
         accessible: l.day_number <= day,
         isCurrent: l.day_number === day,
+        premiumLocked: profile?.subscription_type === 'free' && l.day_number > 2,
       }));
 
       setNodes(lessonNodes);
