@@ -155,6 +155,20 @@ export default function Journey() {
           </div>
         </div>
 
+        {/* Premium Paywall Banner for Free Users */}
+        {profile?.subscription_type === 'free' && (
+          <div className="mb-4 rounded-2xl border border-pixo-orange/30 bg-gradient-to-r from-pixo-orange/5 to-pixo-yellow/5 p-4 flex items-center gap-3">
+            <Crown className="h-5 w-5 text-pixo-orange shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold">Free plan: First 2 lessons available</p>
+              <p className="text-xs text-muted-foreground">Upgrade to unlock the full 180-day learning journey</p>
+            </div>
+            <Button variant="gradient" size="sm" onClick={() => navigate('/pricing')}>
+              Upgrade
+            </Button>
+          </div>
+        )}
+
         {/* Phase Accordion */}
         <div className="space-y-3">
           {phases.map((phase, phaseIndex) => {
