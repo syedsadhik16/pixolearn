@@ -10,7 +10,7 @@ interface Profile {
   full_name: string | null;
   avatar_url: string | null;
   role: UserRole;
-  subscription_status: 'free' | 'premium';
+  subscription_type: 'free' | 'premium';
   trial_started_at: string | null;
   trial_expires_at: string | null;
 }
