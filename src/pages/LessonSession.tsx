@@ -474,7 +474,7 @@ export default function LessonSession() {
 
   const getProgress = () => {
     if (!lesson) return 0;
-    const totalItems = lesson.vocabulary.length + lesson.sentences.length + 1;
+    const totalItems = lesson.vocabulary.length + lesson.sentences.length + 2; // +1 read_aloud +1 mini_game
     let completedItems = 0;
 
     if (phase === 'vocabulary') {
@@ -483,6 +483,8 @@ export default function LessonSession() {
       completedItems = lesson.vocabulary.length + currentIndex;
     } else if (phase === 'read_aloud') {
       completedItems = lesson.vocabulary.length + lesson.sentences.length;
+    } else if (phase === 'mini_game') {
+      completedItems = lesson.vocabulary.length + lesson.sentences.length + 1;
     } else if (phase === 'complete') {
       completedItems = totalItems;
     }
