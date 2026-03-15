@@ -371,6 +371,9 @@ export default function LessonSession() {
       if (skipped) {
         setScores(prev => ({ ...prev, readAloud: prev.readAloud ?? 0 }));
       }
+      // Go to mini-game before completing
+      setPhase('mini_game');
+    } else if (phase === 'mini_game') {
       completeLesson();
     }
   };
