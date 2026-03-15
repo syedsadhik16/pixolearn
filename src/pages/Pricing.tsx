@@ -329,6 +329,7 @@ export default function Pricing() {
                 </Button>
               </div>
             )}
+          </div>
         </section>
 
         {/* Level Selection Guidance */}
