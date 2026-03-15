@@ -396,11 +396,13 @@ export default function Pricing() {
                     variant={plan.highlighted ? 'gradient' : 'outline'}
                     className="w-full"
                     size="lg"
-                    disabled={loadingPlan === plan.id}
+                    disabled={loadingPlan === plan.id || isPremium}
                     onClick={() => handleSelectPlan(plan)}
                   >
                     {loadingPlan === plan.id ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : isPremium ? (
+                      'You already have an active premium subscription'
                     ) : (
                       <>
                         {plan.cta}
