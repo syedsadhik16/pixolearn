@@ -195,6 +195,7 @@ export default function ParentDashboard() {
       case 'practice-plan': return <SmartPracticePlan child={selectedChild} />;
       case 'benchmark': return <ParentBenchmark child={selectedChild} />;
       case 'engagement': return <ParentEngagementScore userId={user!.id} />;
+      case 'phonics': return <PhonicsProgressDiagnostics child={selectedChild} />;
       default: return <ParentOverview children={children} selectedChild={selectedChild} onRefresh={fetchChildren} userId={user!.id} />;
     }
   };
