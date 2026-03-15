@@ -243,6 +243,8 @@ export default function Journey() {
                           )}>
                             {node.completed ? (
                               <CheckCircle2 className="h-5 w-5" />
+                            ) : node.premiumLocked ? (
+                              <Crown className="h-4 w-4 text-pixo-orange" />
                             ) : node.isCurrent ? (
                               <Play className="h-4 w-4" />
                             ) : !node.accessible ? (
