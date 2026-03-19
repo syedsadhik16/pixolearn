@@ -159,7 +159,7 @@ export default function LessonSession() {
       }
     }, 500);
     return () => clearTimeout(delay);
-  }, [phase, currentIndex, lesson]);
+  }, [phase, currentIndex, lesson, speak]);
 
   const fetchLesson = async () => {
     try {
