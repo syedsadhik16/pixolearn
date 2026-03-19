@@ -70,6 +70,9 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { useCompanion } from '@/hooks/useCompanion';
+import { useSpeechSettings } from '@/hooks/useSpeechSettings';
+import { SpeechControls } from '@/components/shared/SpeechControls';
+import { BackButton } from '@/components/shared/BackButton';
 
 interface Lesson {
   id: string;
