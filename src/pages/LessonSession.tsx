@@ -653,7 +653,7 @@ export default function LessonSession() {
                 <Button
                   variant="outline"
                   size="lg"
-                  onClick={() => speak(lesson.vocabulary[currentIndex].word)}
+                  onClick={() => speakLesson(lesson.vocabulary[currentIndex].word)}
                   disabled={isSpeaking}
                 >
                   <Volume2 className={`h-5 w-5 mr-2 ${isSpeaking ? 'animate-pulse' : ''}`} />
