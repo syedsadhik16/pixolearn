@@ -104,6 +104,7 @@ export default function LessonSession() {
   const { user, profile } = useAuth();
   const { toast } = useToast();
   const companion = useCompanion();
+  const { settings: speechSettings, setRate, setVoiceURI, speak } = useSpeechSettings();
 
   const [lesson, setLesson] = useState<Lesson | null>(null);
   const [phase, setPhase] = useState<SessionPhase>('intro');
