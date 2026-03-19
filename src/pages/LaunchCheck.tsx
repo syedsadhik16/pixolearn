@@ -306,6 +306,17 @@ export default function LaunchCheck() {
                 Start Assessment
                 <ArrowRight className="h-5 w-5 ml-2" />
               </Button>
+              <Button
+                variant="ghost"
+                className="w-full text-white/60 hover:text-white hover:bg-white/10 text-sm"
+                onClick={() => {
+                  if (window.confirm('Are you sure you want to skip? Your assessment will be marked as incomplete and the next level will not be unlocked.')) {
+                    navigate('/student');
+                  }
+                }}
+              >
+                Skip Assessment
+              </Button>
             </div>
           </div>
         </div>

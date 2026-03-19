@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { SoundMatchingGame } from './SoundMatchingGame';
 import { BalloonPoppingGame } from './BalloonPoppingGame';
 import { PictureMatchingGame } from './PictureMatchingGame';
+import { MemoryFlipGame } from './MemoryFlipGame';
+import { ShadowMatchGame } from './ShadowMatchGame';
 import { Button } from '@/components/ui/button';
 import { Gamepad2, ArrowRight } from 'lucide-react';
 
@@ -11,19 +13,26 @@ interface MiniGameSelectorProps {
   onSkip: () => void;
 }
 
-type GameType = 'sound' | 'balloon' | 'picture';
+type GameType = 'sound' | 'balloon' | 'picture' | 'memory' | 'shadow';
 
-const GAME_META: Record<GameType, { name: string; emoji: string; desc: string }> = {
-  sound: { name: 'Sound Matching', emoji: '🎵', desc: 'Match words with their sounds' },
-  balloon: { name: 'Balloon Pop', emoji: '🎈', desc: 'Pop the right balloon!' },
-  picture: { name: 'Picture Match', emoji: '🖼️', desc: 'Match words to pictures' },
-};
+const ALL_GAMES: { type: GameType; name: string; emoji: string; desc: string }[] = [
+  { type: 'sound', name: 'Sound Matching', emoji: '🎵', desc: 'Match words with their sounds' },
+  { type: 'balloon', name: 'Balloon Pop', emoji: '🎈', desc: 'Pop the right balloon!' },
+  { type: 'picture', name: 'Picture Match', emoji: '🖼️', desc: 'Match words to pictures' },
+  { type: 'memory', name: 'Memory Flip', emoji: '🧠', desc: 'Flip & match word pairs' },
+  { type: 'shadow', name: 'Shadow Match', emoji: '🌗', desc: 'Connect words to meanings' },
+];
+
+function pickGames(count: number): typeof ALL_GAMES {
+  const shuffled = [...ALL_GAMES].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, count);
+}
 
 export function MiniGameSelector({ words, onComplete, onSkip }: MiniGameSelectorProps) {
+  const [availableGames] = useState(() => pickGames(3));
   const [selectedGame, setSelectedGame] = useState<GameType | null>(null);
   const [gameStarted, setGameStarted] = useState(false);
 
-  // Auto-select a random game if there are fewer than 4 words
   useEffect(() => {
     if (words.length < 4) {
       setSelectedGame('picture');
@@ -38,6 +47,10 @@ export function MiniGameSelector({ words, onComplete, onSkip }: MiniGameSelector
         return <BalloonPoppingGame words={words} onComplete={onComplete} />;
       case 'picture':
         return <PictureMatchingGame words={words} onComplete={onComplete} />;
+      case 'memory':
+        return <MemoryFlipGame words={words} onComplete={onComplete} />;
+      case 'shadow':
+        return <ShadowMatchGame words={words} onComplete={onComplete} />;
     }
   }
 
@@ -48,24 +61,21 @@ export function MiniGameSelector({ words, onComplete, onSkip }: MiniGameSelector
       <p className="text-sm text-muted-foreground mb-6">Choose a game to play with today's words</p>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-lg mb-6">
-        {(Object.keys(GAME_META) as GameType[]).map((type) => {
-          const meta = GAME_META[type];
-          return (
-            <button
-              key={type}
-              onClick={() => setSelectedGame(type)}
-              className={`p-4 rounded-2xl border-2 text-center transition-all ${
-                selectedGame === type
-                  ? 'border-primary bg-primary/10 scale-105 shadow-md'
-                  : 'border-border bg-card hover:border-primary/40 hover:shadow-sm'
-              }`}
-            >
-              <span className="text-3xl block mb-2">{meta.emoji}</span>
-              <p className="font-bold text-sm">{meta.name}</p>
-              <p className="text-[11px] text-muted-foreground mt-1">{meta.desc}</p>
-            </button>
-          );
-        })}
+        {availableGames.map((meta) => (
+          <button
+            key={meta.type}
+            onClick={() => setSelectedGame(meta.type)}
+            className={`p-4 rounded-2xl border-2 text-center transition-all ${
+              selectedGame === meta.type
+                ? 'border-primary bg-primary/10 scale-105 shadow-md'
+                : 'border-border bg-card hover:border-primary/40 hover:shadow-sm'
+            }`}
+          >
+            <span className="text-3xl block mb-2">{meta.emoji}</span>
+            <p className="font-bold text-sm">{meta.name}</p>
+            <p className="text-[11px] text-muted-foreground mt-1">{meta.desc}</p>
+          </button>
+        ))}
       </div>
 
       <div className="flex gap-3">

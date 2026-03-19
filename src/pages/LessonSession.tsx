@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 
 // Web Speech API types
 interface SpeechRecognitionEvent extends Event {
@@ -70,6 +70,9 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { useCompanion } from '@/hooks/useCompanion';
+import { useSpeechSettings } from '@/hooks/useSpeechSettings';
+import { SpeechControls } from '@/components/shared/SpeechControls';
+import { BackButton } from '@/components/shared/BackButton';
 
 interface Lesson {
   id: string;
@@ -101,6 +104,7 @@ export default function LessonSession() {
   const { user, profile } = useAuth();
   const { toast } = useToast();
   const companion = useCompanion();
+  const { settings: speechSettings, setRate, setVoiceURI, speak } = useSpeechSettings();
 
   const [lesson, setLesson] = useState<Lesson | null>(null);
   const [phase, setPhase] = useState<SessionPhase>('intro');
@@ -156,7 +160,7 @@ export default function LessonSession() {
       }
     }, 500);
     return () => clearTimeout(delay);
-  }, [phase, currentIndex, lesson]);
+  }, [phase, currentIndex, lesson, speak]);
 
   const fetchLesson = async () => {
     try {
@@ -193,17 +197,19 @@ export default function LessonSession() {
     }
   };
 
-  const speak = (text: string) => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 0.9;
-      utterance.pitch = 1;
-      utterance.onstart = () => setIsSpeaking(true);
-      utterance.onend = () => setIsSpeaking(false);
-      window.speechSynthesis.speak(utterance);
-    }
-  };
+  const speakLesson = useCallback((text: string) => {
+    speak(text, () => setIsSpeaking(true), () => setIsSpeaking(false));
+  }, [speak]);
+
+  // Voice feedback after speech evaluation
+  const giveSpeechFeedback = useCallback((score: number, attemptCount: number) => {
+    let msg = '';
+    if (score >= 80) msg = 'Great pronunciation! You said it perfectly!';
+    else if (score >= 60) msg = 'Good effort! Try saying it a little slower next time.';
+    else if (attemptCount >= 2) msg = 'Nice try! Keep practicing, you are getting better!';
+    else msg = 'Good start! Let\'s try again!';
+    setTimeout(() => speak(msg), 500);
+  }, [speak]);
 
   const startRecording = async () => {
     try {
@@ -338,6 +344,7 @@ export default function LessonSession() {
         title: avgScore >= 80 ? 'Excellent! 🌟' : avgScore >= 60 ? 'Good job! 👍' : 'Keep practicing! 💪',
         description: `Your score: ${avgScore}%`,
       });
+      giveSpeechFeedback(avgScore, scores.vocabulary.length + scores.sentences.length);
     } catch (error) {
       console.error('Error evaluating speech:', error);
       // Fallback to simulated score
@@ -544,15 +551,17 @@ export default function LessonSession() {
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <Button variant="ghost" onClick={() => navigate('/student')}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
-          </Button>
+          <BackButton fallback="/student" label="Back" />
           <div className="text-center">
             <p className="text-sm text-muted-foreground">Day {lesson.day_number}</p>
             <h1 className="font-display font-bold">{lesson.title}</h1>
           </div>
-          <div className="w-24" />
+          <SpeechControls
+            rate={speechSettings.rate}
+            voiceURI={speechSettings.voiceURI}
+            onRateChange={setRate}
+            onVoiceChange={setVoiceURI}
+          />
         </div>
 
         {/* Progress Bar */}
@@ -645,7 +654,7 @@ export default function LessonSession() {
                 <Button
                   variant="outline"
                   size="lg"
-                  onClick={() => speak(lesson.vocabulary[currentIndex].word)}
+                  onClick={() => speakLesson(lesson.vocabulary[currentIndex].word)}
                   disabled={isSpeaking}
                 >
                   <Volume2 className={`h-5 w-5 mr-2 ${isSpeaking ? 'animate-pulse' : ''}`} />
@@ -745,7 +754,7 @@ export default function LessonSession() {
                 <Button
                   variant="outline"
                   size="lg"
-                  onClick={() => speak(lesson.sentences[currentIndex].text)}
+                  onClick={() => speakLesson(lesson.sentences[currentIndex].text)}
                   disabled={isSpeaking}
                 >
                   <Volume2 className={`h-5 w-5 mr-2 ${isSpeaking ? 'animate-pulse' : ''}`} />
@@ -842,7 +851,7 @@ export default function LessonSession() {
                 <Button
                   variant="outline"
                   size="lg"
-                  onClick={() => speak(lesson.read_aloud_text || '')}
+                  onClick={() => speakLesson(lesson.read_aloud_text || '')}
                   disabled={isSpeaking}
                 >
                   <Volume2 className={`h-5 w-5 mr-2 ${isSpeaking ? 'animate-pulse' : ''}`} />

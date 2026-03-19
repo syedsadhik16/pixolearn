@@ -3,6 +3,7 @@ import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import pixoLogo from '@/assets/pixo-logo.png';
+import { UpcomingPrograms } from '@/components/home/UpcomingPrograms';
 import {
   Mic,
   BookOpen,
@@ -342,6 +343,9 @@ export default function Index() {
           </div>
         </div>
       </section>
+
+      {/* Upcoming Programs */}
+      <UpcomingPrograms />
 
       {/* CTA Section */}
       <section className="py-20">
