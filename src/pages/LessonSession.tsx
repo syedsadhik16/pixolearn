@@ -343,6 +343,7 @@ export default function LessonSession() {
         title: avgScore >= 80 ? 'Excellent! 🌟' : avgScore >= 60 ? 'Good job! 👍' : 'Keep practicing! 💪',
         description: `Your score: ${avgScore}%`,
       });
+      giveSpeechFeedback(avgScore, scores.vocabulary.length + scores.sentences.length);
     } catch (error) {
       console.error('Error evaluating speech:', error);
       // Fallback to simulated score
