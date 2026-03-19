@@ -550,15 +550,17 @@ export default function LessonSession() {
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <Button variant="ghost" onClick={() => navigate('/student')}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
-          </Button>
+          <BackButton fallback="/student" label="Back" />
           <div className="text-center">
             <p className="text-sm text-muted-foreground">Day {lesson.day_number}</p>
             <h1 className="font-display font-bold">{lesson.title}</h1>
           </div>
-          <div className="w-24" />
+          <SpeechControls
+            rate={speechSettings.rate}
+            voiceURI={speechSettings.voiceURI}
+            onRateChange={setRate}
+            onVoiceChange={setVoiceURI}
+          />
         </div>
 
         {/* Progress Bar */}
