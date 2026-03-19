@@ -196,17 +196,19 @@ export default function LessonSession() {
     }
   };
 
-  const speak = (text: string) => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 0.9;
-      utterance.pitch = 1;
-      utterance.onstart = () => setIsSpeaking(true);
-      utterance.onend = () => setIsSpeaking(false);
-      window.speechSynthesis.speak(utterance);
-    }
-  };
+  const speakLesson = useCallback((text: string) => {
+    speak(text, () => setIsSpeaking(true), () => setIsSpeaking(false));
+  }, [speak]);
+
+  // Voice feedback after speech evaluation
+  const giveSpeechFeedback = useCallback((score: number, attemptCount: number) => {
+    let msg = '';
+    if (score >= 80) msg = 'Great pronunciation! You said it perfectly!';
+    else if (score >= 60) msg = 'Good effort! Try saying it a little slower next time.';
+    else if (attemptCount >= 2) msg = 'Nice try! Keep practicing, you are getting better!';
+    else msg = 'Good start! Let\'s try again!';
+    setTimeout(() => speak(msg), 500);
+  }, [speak]);
 
   const startRecording = async () => {
     try {
