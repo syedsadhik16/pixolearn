@@ -73,6 +73,7 @@ import { useCompanion } from '@/hooks/useCompanion';
 import { useSpeechSettings } from '@/hooks/useSpeechSettings';
 import { SpeechControls } from '@/components/shared/SpeechControls';
 import { BackButton } from '@/components/shared/BackButton';
+import { useLessonResume } from '@/hooks/useLessonResume';
 
 interface Lesson {
   id: string;
