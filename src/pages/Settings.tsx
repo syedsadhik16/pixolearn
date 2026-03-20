@@ -13,8 +13,10 @@ import { cn } from '@/lib/utils';
 import {
   Moon, Sun, Bell, BellOff, ChevronRight, Shield, Info,
   ArrowLeft, User, Palette, Eye, Lock, Users, Settings2, Loader2, Save,
-  CreditCard, Receipt, Crown
+  CreditCard, Receipt, Crown, Volume2, Globe
 } from 'lucide-react';
+import { useSpeechSettings, getNamedVoices } from '@/hooks/useSpeechSettings';
+import { SUPPORTED_LANGUAGES, getSelectedLanguage, setSelectedLanguage } from '@/components/shared/LanguageSelector';
 
 interface PaymentRecord {
   id: string;
@@ -118,10 +120,23 @@ export default function Settings() {
     }
   };
 
+  const speechHook = useSpeechSettings();
+  const [voices, setVoices] = useState<{ name: string; emoji: string; voiceURI: string | null }[]>([]);
+  const [appLang, setAppLang] = useState(getSelectedLanguage());
+
+  useEffect(() => {
+    const loadVoices = () => setVoices(getNamedVoices());
+    loadVoices();
+    window.speechSynthesis?.addEventListener('voiceschanged', loadVoices);
+    return () => window.speechSynthesis?.removeEventListener('voiceschanged', loadVoices);
+  }, []);
+
   const sections = [
     { id: 'identity', label: 'Identity', icon: User },
     { id: 'subscription', label: 'Subscription', icon: Crown },
     { id: 'appearance', label: 'Visual Comfort', icon: Eye },
+    { id: 'voice', label: 'Voice & Audio', icon: Volume2 },
+    { id: 'language', label: 'Language', icon: Globe },
     ...(profile?.role === 'parent' ? [{ id: 'notifications', label: 'Notifications', icon: Bell }] : []),
     { id: 'security', label: 'Security', icon: Lock },
     ...(profile?.role === 'parent' ? [{ id: 'parent_mode', label: 'Parent Mode', icon: Users }] : []),
@@ -307,7 +322,93 @@ export default function Settings() {
               </div>
             )}
 
-            {/* Notifications */}
+            {/* Voice & Audio */}
+            {activeSection === 'voice' && (
+              <div className="pixo-card space-y-5 animate-fade-in">
+                <h3 className="font-display font-bold text-lg flex items-center gap-2">
+                  <Volume2 className="h-5 w-5 text-primary" /> Voice & Audio
+                </h3>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Speech Rate</label>
+                  <div className="flex gap-2">
+                    {[{ label: '0.75×', value: 0.75 }, { label: '1×', value: 1 }, { label: '1.25×', value: 1.25 }].map(r => (
+                      <button
+                        key={r.value}
+                        onClick={() => speechHook.setRate(r.value)}
+                        className={cn(
+                          "px-4 py-2 rounded-xl text-sm font-semibold transition-colors",
+                          speechHook.settings.rate === r.value
+                            ? "bg-primary/10 text-primary border-2 border-primary"
+                            : "bg-muted text-muted-foreground border-2 border-transparent hover:border-primary/30"
+                        )}
+                      >
+                        {r.label}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-xs text-muted-foreground">Controls how fast PIXO speaks during lessons</p>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Voice Character</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {voices.map(v => (
+                      <button
+                        key={v.name}
+                        onClick={() => speechHook.setVoiceURI(v.voiceURI)}
+                        className={cn(
+                          "flex items-center gap-2 p-3 rounded-xl text-sm font-semibold transition-colors text-left",
+                          speechHook.settings.voiceURI === v.voiceURI
+                            ? "bg-primary/10 text-primary border-2 border-primary"
+                            : "bg-muted text-muted-foreground border-2 border-transparent hover:border-primary/30"
+                        )}
+                      >
+                        <span className="text-lg">{v.emoji}</span>
+                        {v.name}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-xs text-muted-foreground">Choose a narrator for lessons and instructions</p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => speechHook.speak('Hello! I am your PIXO learning companion.')}
+                >
+                  <Volume2 className="h-4 w-4 mr-1" /> Preview Voice
+                </Button>
+              </div>
+            )}
+
+            {/* Language */}
+            {activeSection === 'language' && (
+              <div className="pixo-card space-y-5 animate-fade-in">
+                <h3 className="font-display font-bold text-lg flex items-center gap-2">
+                  <Globe className="h-5 w-5 text-primary" /> App Language
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Change the interface language. Learning content remains in English.
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  {SUPPORTED_LANGUAGES.map(lang => (
+                    <button
+                      key={lang.code}
+                      onClick={() => { setAppLang(lang.code); setSelectedLanguage(lang.code); toast({ title: `Language set to ${lang.label}` }); }}
+                      className={cn(
+                        "flex items-center gap-2 p-3 rounded-xl text-sm font-semibold transition-colors text-left",
+                        appLang === lang.code
+                          ? "bg-primary/10 text-primary border-2 border-primary"
+                          : "bg-muted text-muted-foreground border-2 border-transparent hover:border-primary/30"
+                      )}
+                    >
+                      <span className="text-lg">{lang.flag}</span>
+                      {lang.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+
             {activeSection === 'notifications' && profile?.role === 'parent' && (
               <div className="pixo-card space-y-4 animate-fade-in">
                 <h3 className="font-display font-bold text-lg flex items-center gap-2">

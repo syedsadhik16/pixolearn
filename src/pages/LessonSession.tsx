@@ -73,6 +73,7 @@ import { useCompanion } from '@/hooks/useCompanion';
 import { useSpeechSettings } from '@/hooks/useSpeechSettings';
 import { SpeechControls } from '@/components/shared/SpeechControls';
 import { BackButton } from '@/components/shared/BackButton';
+import { useLessonResume } from '@/hooks/useLessonResume';
 
 interface Lesson {
   id: string;
@@ -105,10 +106,26 @@ export default function LessonSession() {
   const { toast } = useToast();
   const companion = useCompanion();
   const { settings: speechSettings, setRate, setVoiceURI, speak } = useSpeechSettings();
+  const { resumeState, checked: resumeChecked, saveProgress, clearProgress } = useLessonResume(lessonId);
 
   const [lesson, setLesson] = useState<Lesson | null>(null);
   const [phase, setPhase] = useState<SessionPhase>('intro');
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Restore mid-lesson progress silently on mount
+  useEffect(() => {
+    if (resumeChecked && resumeState && lesson) {
+      setPhase(resumeState.phase as SessionPhase);
+      setCurrentIndex(resumeState.currentIndex);
+    }
+  }, [resumeChecked, resumeState, lesson]);
+
+  // Persist progress in background whenever phase/index changes
+  useEffect(() => {
+    if (lesson && phase !== 'intro' && phase !== 'complete') {
+      saveProgress(phase, currentIndex);
+    }
+  }, [phase, currentIndex, lesson, saveProgress]);
   const [isRecording, setIsRecording] = useState(false);
   const [hasRecorded, setHasRecorded] = useState(false);
   const [isEvaluating, setIsEvaluating] = useState(false);
@@ -493,6 +510,7 @@ export default function LessonSession() {
       trackChallengeProgress(user.id, 'lesson');
       checkAndAwardBadges(user.id);
 
+      clearProgress();
       setPhase('complete');
     } catch (error) {
       console.error('Error completing lesson:', error);
