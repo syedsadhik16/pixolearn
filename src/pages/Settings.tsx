@@ -13,8 +13,10 @@ import { cn } from '@/lib/utils';
 import {
   Moon, Sun, Bell, BellOff, ChevronRight, Shield, Info,
   ArrowLeft, User, Palette, Eye, Lock, Users, Settings2, Loader2, Save,
-  CreditCard, Receipt, Crown
+  CreditCard, Receipt, Crown, Volume2, Globe
 } from 'lucide-react';
+import { useSpeechSettings, getNamedVoices } from '@/hooks/useSpeechSettings';
+import { SUPPORTED_LANGUAGES, getSelectedLanguage, setSelectedLanguage } from '@/components/shared/LanguageSelector';
 
 interface PaymentRecord {
   id: string;

@@ -510,6 +510,7 @@ export default function LessonSession() {
       trackChallengeProgress(user.id, 'lesson');
       checkAndAwardBadges(user.id);
 
+      clearProgress();
       setPhase('complete');
     } catch (error) {
       console.error('Error completing lesson:', error);
