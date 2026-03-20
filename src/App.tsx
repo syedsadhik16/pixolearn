@@ -28,6 +28,7 @@ import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import WeeklyReport from "./pages/WeeklyReport";
 import CreativeWriting from "./pages/CreativeWriting";
+import { LanguageOverlay } from "./components/shared/LanguageSelector";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const App = () => (
       <AuthProvider>
         <Toaster />
         <Sonner />
+        <LanguageOverlay />
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
