@@ -120,10 +120,23 @@ export default function Settings() {
     }
   };
 
+  const speechHook = useSpeechSettings();
+  const [voices, setVoices] = useState<{ name: string; emoji: string; voiceURI: string | null }[]>([]);
+  const [appLang, setAppLang] = useState(getSelectedLanguage());
+
+  useEffect(() => {
+    const loadVoices = () => setVoices(getNamedVoices());
+    loadVoices();
+    window.speechSynthesis?.addEventListener('voiceschanged', loadVoices);
+    return () => window.speechSynthesis?.removeEventListener('voiceschanged', loadVoices);
+  }, []);
+
   const sections = [
     { id: 'identity', label: 'Identity', icon: User },
     { id: 'subscription', label: 'Subscription', icon: Crown },
     { id: 'appearance', label: 'Visual Comfort', icon: Eye },
+    { id: 'voice', label: 'Voice & Audio', icon: Volume2 },
+    { id: 'language', label: 'Language', icon: Globe },
     ...(profile?.role === 'parent' ? [{ id: 'notifications', label: 'Notifications', icon: Bell }] : []),
     { id: 'security', label: 'Security', icon: Lock },
     ...(profile?.role === 'parent' ? [{ id: 'parent_mode', label: 'Parent Mode', icon: Users }] : []),
