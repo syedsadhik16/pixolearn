@@ -75,17 +75,23 @@ export function getNamedVoices(): { name: string; emoji: string; voiceURI: strin
     { name: 'Default', emoji: '🔊', voiceURI: null },
   ];
 
-  const linda = findVoice(NAMED_VOICES['Linda']);
-  if (linda) entries.push({ name: 'Linda', emoji: '👩', voiceURI: linda.voiceURI });
+  const zoya = findVoice(NAMED_VOICES['Zoya']);
+  if (zoya) entries.push({ name: 'Zoya', emoji: '👩', voiceURI: zoya.voiceURI });
 
   const shan = findVoice(NAMED_VOICES['Shan']);
   if (shan) entries.push({ name: 'Shan', emoji: '👨', voiceURI: shan.voiceURI });
 
-  const zora = findVoice(NAMED_VOICES['Zora']);
-  if (zora) entries.push({ name: 'Zora', emoji: '👧', voiceURI: zora.voiceURI });
-
   const mac = findVoice(NAMED_VOICES['Mac']);
   if (mac) entries.push({ name: 'Mac', emoji: '👦', voiceURI: mac.voiceURI });
+
+  const lina = findVoice(NAMED_VOICES['Lina']);
+  if (lina) entries.push({ name: 'Lina', emoji: '👩‍🏫', voiceURI: lina.voiceURI });
+
+  const kora = findVoice(NAMED_VOICES['Kora']);
+  if (kora) entries.push({ name: 'Kora', emoji: '👧', voiceURI: kora.voiceURI });
+
+  const meke = findVoice(NAMED_VOICES['Meke']);
+  if (meke) entries.push({ name: 'Meke', emoji: '🤖', voiceURI: meke.voiceURI });
 
   // If no named voices found, add first 3 available
   if (entries.length === 1 && allVoices.length > 0) {
