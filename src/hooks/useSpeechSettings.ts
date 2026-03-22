@@ -8,10 +8,12 @@ export interface SpeechSettings {
 const STORAGE_KEY = 'pixo-speech-settings';
 
 const NAMED_VOICES: Record<string, string[]> = {
-  'Linda': ['linda', 'zira', 'samantha', 'karen', 'female'],
+  'Zoya': ['zira', 'samantha', 'karen', 'female'],
   'Shan': ['david', 'mark', 'daniel', 'james', 'male'],
-  'Zora': ['alice', 'fiona', 'anna', 'girl'],
   'Mac': ['alex', 'tom', 'aaron', 'boy'],
+  'Lina': ['linda', 'susan', 'hazel', 'helena'],
+  'Kora': ['alice', 'fiona', 'anna', 'girl'],
+  'Meke': ['google', 'cortana', 'microsoft'],
 };
 
 export function useSpeechSettings() {
