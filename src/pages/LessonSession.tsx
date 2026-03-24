@@ -686,7 +686,24 @@ export default function LessonSession() {
     );
   }
 
-  if (!lesson) return null;
+  if (!lesson) {
+    return (
+      <Layout>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center pixo-card p-8 max-w-md">
+            <div className="text-4xl mb-3">📚</div>
+            <h2 className="font-display font-bold text-xl mb-2">Lesson Not Found</h2>
+            <p className="text-muted-foreground text-sm mb-4">
+              We couldn't load this lesson. It may not exist yet.
+            </p>
+            <Button variant="gradient" onClick={() => navigate('/student')}>
+              Back to Dashboard
+            </Button>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
