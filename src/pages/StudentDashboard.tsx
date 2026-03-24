@@ -30,31 +30,7 @@ import { DailyLoginReward } from '@/components/shared/DailyLoginReward';
 import { checkAndAwardBadges } from '@/lib/gamification';
 import { useCompanion } from '@/hooks/useCompanion';
 import { TrialCountdown } from '@/components/shared/TrialCountdown';
-
-interface Lesson {
-  id: string;
-  level: string;
-  day_number: number;
-  title: string;
-  description: string | null;
-  vocabulary: unknown;
-  sentences: unknown;
-  read_aloud_text: string | null;
-}
-
-interface StudentProgress {
-  current_level: string;
-  current_day: number;
-}
-
-interface LessonCompletion {
-  lesson_id: string;
-  pronunciation_score: number | null;
-  fluency_score: number | null;
-  clarity_score: number | null;
-  confidence_score: number | null;
-  practice_count: number;
-}
+import { useCurriculumProgress } from '@/hooks/useCurriculumProgress';
 
 export default function StudentDashboard() {
   const { user, profile, loading: authLoading } = useAuth();
@@ -62,11 +38,8 @@ export default function StudentDashboard() {
   const { toast } = useToast();
   const companion = useCompanion();
   
-  const [lessons, setLessons] = useState<Lesson[]>([]);
-  const [progress, setProgress] = useState<StudentProgress | null>(null);
-  const [completions, setCompletions] = useState<LessonCompletion[]>([]);
+  const { progress: currProgress, todaysDay, completedDayIds, days: currDays, loading: currLoading, error: currError } = useCurriculumProgress(user?.id);
   const [streak, setStreak] = useState(0);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -78,54 +51,18 @@ export default function StudentDashboard() {
 
   useEffect(() => {
     if (user && profile?.role === 'student') {
-      fetchData();
+      fetchStreakAndBadges();
     }
   }, [user, profile]);
 
-  const fetchData = async () => {
+  const fetchStreakAndBadges = async () => {
+    if (!user) return;
     try {
-      // Fetch student progress
-      const { data: progressData, error: progressError } = await supabase
-        .from('student_progress')
-        .select('*')
-        .eq('student_id', user!.id)
-        .single();
-
-      if (progressError && progressError.code !== 'PGRST116') {
-        throw progressError;
-      }
-
-      const currentProgress = progressData || { current_level: 'beginner', current_day: 1 };
-      setProgress(currentProgress);
-
-      // Fetch lessons for current level
-      const { data: lessonsData, error: lessonsError } = await supabase
-        .from('lessons')
-        .select('*')
-        .eq('level', currentProgress.current_level)
-        .eq('is_active', true)
-        .order('day_number');
-
-      if (lessonsError) throw lessonsError;
-      setLessons(lessonsData || []);
-
-      // Fetch completions
-      const { data: completionsData, error: completionsError } = await supabase
-        .from('lesson_completions')
-        .select('*')
-        .eq('student_id', user!.id);
-
-      if (completionsError) throw completionsError;
-      setCompletions(completionsData || []);
-
-      // Check and award badges
-      checkAndAwardBadges(user!.id);
-
-      // Calculate streak from attendance
+      checkAndAwardBadges(user.id);
       const { data: attendanceData } = await supabase
         .from('attendance')
         .select('*')
-        .eq('student_id', user!.id)
+        .eq('student_id', user.id)
         .eq('lesson_completed', true)
         .order('date', { ascending: false });
 
@@ -133,14 +70,11 @@ export default function StudentDashboard() {
         let currentStreak = 0;
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-
         for (let i = 0; i < attendanceData.length; i++) {
           const attendanceDate = new Date(attendanceData[i].date);
           attendanceDate.setHours(0, 0, 0, 0);
-          
           const expectedDate = new Date(today);
           expectedDate.setDate(expectedDate.getDate() - i);
-          
           if (attendanceDate.getTime() === expectedDate.getTime()) {
             currentStreak++;
           } else {
@@ -150,63 +84,51 @@ export default function StudentDashboard() {
         setStreak(currentStreak);
       }
     } catch (error) {
-      console.error('Error fetching data:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load your dashboard data',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
+      console.error('Error fetching streak:', error);
     }
   };
 
-  const getTodaysLesson = () => {
-    if (!progress || lessons.length === 0) return null;
-    return lessons.find(l => l.day_number === progress.current_day);
-  };
+  const loading = authLoading || currLoading;
 
-  const isLessonCompleted = (lessonId: string) => {
-    return completions.some(c => c.lesson_id === lessonId);
-  };
-
-  const isLessonAccessible = (dayNumber: number) => {
-    if (!progress) return false;
-    return dayNumber <= progress.current_day;
-  };
-
-  const getAverageScore = () => {
-    if (completions.length === 0) return 0;
-    const scores = completions.flatMap(c => [
-      c.pronunciation_score,
-      c.fluency_score,
-      c.clarity_score,
-      c.confidence_score,
-    ]).filter((s): s is number => s !== null);
-    
-    if (scores.length === 0) return 0;
-    return Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
-  };
-
-  const getTotalPracticeTime = () => {
-    const totalAttempts = completions.reduce((sum, c) => sum + c.practice_count, 0);
-    return totalAttempts * 5; // Estimate 5 minutes per practice
-  };
-
-  const todaysLesson = getTodaysLesson();
-
-  if (authLoading || loading) {
+  if (loading) {
     return (
       <Layout>
         <div className="min-h-screen flex items-center justify-center">
           <div className="animate-pulse text-center">
-            <div className="w-16 h-16 bg-primary/20 rounded-full mx-auto mb-4" />
-            <p className="text-muted-foreground">Loading your dashboard...</p>
+            <div className="text-4xl mb-3">🚀</div>
+            <p className="text-muted-foreground">Loading PIXO Learning Engine...</p>
           </div>
         </div>
       </Layout>
     );
   }
+
+  if (currError || (!currLoading && currDays.length === 0)) {
+    return (
+      <Layout>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center pixo-card p-8 max-w-md">
+            <div className="text-4xl mb-3">📚</div>
+            <h2 className="font-display font-bold text-xl mb-2">No Curriculum Data Found</h2>
+            <p className="text-muted-foreground text-sm mb-4">
+              {currError || "We couldn't load your learning content. Please try again."}
+            </p>
+            <Button variant="gradient" onClick={() => window.location.reload()}>
+              Retry
+            </Button>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  const currentDay = currProgress?.current_day || 1;
+  const completedCount = completedDayIds.size;
+  const totalXp = currProgress?.total_xp || 0;
+  const progressPercent = currProgress?.completion_percent || Math.round((currentDay / 180) * 100);
+
+  // Get nearby days for the lesson list
+  const visibleDays = currDays.slice(0, Math.min(currentDay + 5, currDays.length));
 
   return (
     <Layout>
@@ -235,7 +157,7 @@ export default function StudentDashboard() {
                   Welcome back, <span className="gradient-text">{profile?.full_name?.split(' ')[0] || 'Learner'}</span>! 👋
                 </h1>
                 <p className="text-muted-foreground mt-2">
-                  {companion.name} says: {todaysLesson 
+                  {companion.name} says: {todaysDay 
                     ? "Let's keep learning today!" 
                     : "Great job! You're all caught up!"}
                 </p>
@@ -263,38 +185,38 @@ export default function StudentDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
             <StatCard
-              title="Completed Lessons"
-              value={completions.length}
-              subtitle={`of ${lessons.length} in ${progress?.current_level === 'beginner' ? 'Level 1' : progress?.current_level === 'intermediate' ? 'Level 2' : 'Level 3'}`}
+              title="Completed Days"
+              value={completedCount}
+              subtitle={`of 180 in Level 1`}
               icon={BookOpen}
               colorClass="bg-pixo-orange/10 text-pixo-orange"
             />
           </div>
           <div className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
             <StatCard
-              title="Speaking Score"
-              value={`${getAverageScore()}%`}
-              subtitle="Average performance"
-              icon={Mic}
-              trend={getAverageScore() > 70 ? 'up' : 'neutral'}
+              title="Total XP"
+              value={totalXp}
+              subtitle="Keep earning!"
+              icon={Sparkles}
+              trend={totalXp > 100 ? 'up' : 'neutral'}
               trendValue="Keep practicing!"
               colorClass="bg-pixo-green/10 text-pixo-green"
             />
           </div>
           <div className="animate-slide-up" style={{ animationDelay: '0.3s' }}>
             <StatCard
-              title="Practice Time"
-              value={`${getTotalPracticeTime()}m`}
-              subtitle="Total this month"
+              title="Progress"
+              value={`${progressPercent}%`}
+              subtitle="Level 1 completion"
               icon={Calendar}
               colorClass="bg-pixo-blue/10 text-pixo-blue"
             />
           </div>
           <div className="animate-slide-up" style={{ animationDelay: '0.4s' }}>
             <StatCard
-              title="Current Level"
-              value={progress?.current_level === 'beginner' ? 'Beginner' : progress?.current_level === 'intermediate' ? 'Intermediate' : 'Advanced'}
-              subtitle={`Day ${progress?.current_day || 1}`}
+              title="Current Day"
+              value={`Day ${currentDay}`}
+              subtitle="Phonics Foundation"
               icon={Trophy}
               colorClass="bg-pixo-yellow/10 text-pixo-yellow"
             />
@@ -302,40 +224,40 @@ export default function StudentDashboard() {
         </div>
 
         {/* Today's Lesson Card */}
-        {todaysLesson && (
+        {todaysDay && (
           <div className="mb-8 animate-scale-in" style={{ animationDelay: '0.5s' }}>
             <div className="pixo-card gradient-bg p-8 text-white">
               <div className="flex flex-col lg:flex-row lg:items-center gap-6">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
                     <Sparkles className="h-5 w-5 text-white/80" />
-                    <span className="text-sm font-medium text-white/80">Today's Lesson</span>
+                    <span className="text-sm font-medium text-white/80">Today's Mission</span>
                   </div>
                   <h2 className="text-2xl md:text-3xl font-display font-bold mb-2">
-                    Day {todaysLesson.day_number}: {todaysLesson.title}
+                    Day {todaysDay.day_number}: {todaysDay.title}
                   </h2>
-                  <p className="text-white/90 mb-4">{todaysLesson.description}</p>
+                  <p className="text-white/90 mb-4">{todaysDay.day_objective || todaysDay.theme}</p>
                   <div className="flex flex-wrap gap-4 text-sm">
                     <div className="flex items-center gap-1">
-                      <BookOpen className="h-4 w-4" />
-                      <span>{Array.isArray(todaysLesson.vocabulary) ? todaysLesson.vocabulary.length : 0} vocabulary words</span>
-                    </div>
-                    <div className="flex items-center gap-1">
                       <Target className="h-4 w-4" />
-                      <span>{Array.isArray(todaysLesson.sentences) ? todaysLesson.sentences.length : 0} sentences to practice</span>
+                      <span>{todaysDay.theme}</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Mic className="h-4 w-4" />
-                      <span>Read-aloud exercise</span>
+                      <BookOpen className="h-4 w-4" />
+                      <span>{todaysDay.main_game}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Sparkles className="h-4 w-4" />
+                      <span>{todaysDay.daily_xp} XP</span>
                     </div>
                   </div>
                 </div>
                 <div className="flex flex-col items-center gap-4">
                   <ProgressRing 
-                    progress={isLessonCompleted(todaysLesson.id) ? 100 : 0} 
+                    progress={completedDayIds.has(todaysDay.id) ? 100 : 0} 
                     size={100}
                   >
-                    {isLessonCompleted(todaysLesson.id) ? (
+                    {completedDayIds.has(todaysDay.id) ? (
                       <CheckCircle2 className="h-8 w-8 text-white" />
                     ) : (
                       <Play className="h-8 w-8 text-white" />
@@ -345,9 +267,9 @@ export default function StudentDashboard() {
                     variant="outline"
                     size="lg"
                     className="border-white text-white hover:bg-white hover:text-primary"
-                    onClick={() => navigate(`/lesson/${todaysLesson.id}`)}
+                    onClick={() => navigate(`/lesson/${todaysDay.id}`)}
                   >
-                    {isLessonCompleted(todaysLesson.id) ? 'Practice Again' : 'Start Lesson'}
+                    {completedDayIds.has(todaysDay.id) ? 'Practice Again' : 'Start Lesson'}
                   </Button>
                 </div>
               </div>
@@ -412,26 +334,27 @@ export default function StudentDashboard() {
           </div>
         </div>
 
-        {/* Lesson List */}
+        {/* Lesson List - from curriculum_days */}
         <div className="animate-fade-in" style={{ animationDelay: '0.6s' }}>
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-xl font-display font-bold">Your Lessons</h3>
             <span className="text-sm text-muted-foreground">
-              Level: {progress?.current_level === 'beginner' ? 'Beginner' : progress?.current_level === 'intermediate' ? 'Intermediate' : 'Advanced'}
+              Level 1: Phonics Foundation
             </span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {lessons.map((lesson, index) => {
-              const completed = isLessonCompleted(lesson.id);
-              const accessible = isLessonAccessible(lesson.day_number);
-              const isCurrent = lesson.day_number === progress?.current_day;
+            {visibleDays.map((day, index) => {
+              const completed = completedDayIds.has(day.id);
+              const accessible = day.day_number <= currentDay;
+              const isCurrent = day.day_number === currentDay;
+              const premiumLocked = profile?.subscription_type === 'free' && day.day_number > 2;
 
               return (
                 <div
-                  key={lesson.id}
+                  key={day.id}
                   className={`pixo-card relative overflow-hidden transition-all duration-300 ${
-                    !accessible ? 'opacity-60' : ''
+                    !accessible || premiumLocked ? 'opacity-60' : ''
                   } ${isCurrent ? 'ring-2 ring-primary' : ''}`}
                   style={{ animationDelay: `${0.7 + index * 0.05}s` }}
                 >
@@ -442,34 +365,49 @@ export default function StudentDashboard() {
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-semibold bg-muted px-2 py-1 rounded-full">
-                        Day {lesson.day_number}
+                        Day {day.day_number}
                       </span>
                       {completed && (
                         <CheckCircle2 className="h-5 w-5 text-pixo-green" />
                       )}
                     </div>
-                    {!accessible && <Lock className="h-5 w-5 text-muted-foreground" />}
+                    {premiumLocked ? (
+                      <Crown className="h-5 w-5 text-pixo-orange" />
+                    ) : !accessible ? (
+                      <Lock className="h-5 w-5 text-muted-foreground" />
+                    ) : null}
                   </div>
 
-                  <h4 className="font-semibold mb-2">{lesson.title}</h4>
+                  <h4 className="font-semibold mb-2">{day.title}</h4>
                   <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
-                    {lesson.description}
+                    {day.day_objective || day.theme}
                   </p>
 
                   <div className="flex items-center gap-4 text-xs text-muted-foreground mb-4">
-                    <span>{Array.isArray(lesson.vocabulary) ? lesson.vocabulary.length : 0} words</span>
+                    <span>🎮 {day.main_game}</span>
                     <span>•</span>
-                    <span>{Array.isArray(lesson.sentences) ? lesson.sentences.length : 0} sentences</span>
+                    <span>⭐ {day.daily_xp} XP</span>
                   </div>
 
                   <Button
-                    variant={completed ? 'outline' : accessible ? 'default' : 'ghost'}
+                    variant={completed ? 'outline' : accessible && !premiumLocked ? 'default' : 'ghost'}
                     size="sm"
                     className="w-full"
-                    disabled={!accessible}
-                    onClick={() => navigate(`/lesson/${lesson.id}`)}
+                    disabled={!accessible || premiumLocked}
+                    onClick={() => {
+                      if (premiumLocked) {
+                        navigate('/pricing');
+                        return;
+                      }
+                      navigate(`/lesson/${day.id}`);
+                    }}
                   >
-                    {!accessible ? (
+                    {premiumLocked ? (
+                      <>
+                        <Crown className="h-4 w-4 mr-1" />
+                        Upgrade
+                      </>
+                    ) : !accessible ? (
                       <>
                         <Lock className="h-4 w-4 mr-1" />
                         Locked
@@ -493,7 +431,7 @@ export default function StudentDashboard() {
         </div>
 
         {/* Gamification Panel */}
-        <div className="mb-8 animate-fade-in" style={{ animationDelay: '0.65s' }}>
+        <div className="mb-8 mt-8 animate-fade-in" style={{ animationDelay: '0.65s' }}>
           <h3 className="text-xl font-display font-bold mb-4">🎮 Your Progress & Rewards</h3>
           <GamificationPanel />
         </div>
@@ -508,7 +446,7 @@ export default function StudentDashboard() {
                     Unlock Unlimited Learning 🚀
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    Get access to all lessons, unlimited practice sessions, and advanced progress tracking.
+                    Get access to all 180 days, unlimited practice sessions, and advanced progress tracking.
                   </p>
                 </div>
                 <Button variant="gradient" onClick={() => navigate('/pricing')}>
