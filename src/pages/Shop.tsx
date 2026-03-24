@@ -64,27 +64,19 @@ export default function Shop() {
     if (!user || xp < item.xp_cost) return;
     setBuying(item.id);
     try {
-      // Deduct XP
-      const newXP = xp - item.xp_cost;
-      await supabase.from('student_xp').update({ total_xp: newXP }).eq('student_id', user.id);
-
-      // Record purchase
-      await supabase.from('purchased_items').insert({
-        student_id: user.id,
-        item_id: item.id,
+      const { data, error } = await supabase.rpc('purchase_shop_item', {
+        _student_id: user.id,
+        _item_id: item.id,
       });
-
-      // Log XP spend
-      await supabase.from('xp_history').insert({
-        student_id: user.id,
-        xp_amount: -item.xp_cost,
-        source: 'shop_purchase',
-        source_id: item.id,
-      });
-
-      setXP(newXP);
+      if (error) throw error;
+      const result = data as any;
+      if (!result?.success) {
+        toast({ title: 'Purchase failed', description: result?.error || 'Unknown error', variant: 'destructive' });
+        return;
+      }
+      setXP(result.new_xp);
       setPurchased(prev => [...prev, { item_id: item.id, is_equipped: false }]);
-      toast({ title: `${item.icon} ${item.name} unlocked!`, description: `You spent ${item.xp_cost} XP` });
+      toast({ title: `${result.item_icon} ${result.item_name} unlocked!`, description: `You spent ${result.xp_cost} XP` });
     } catch (e) {
       console.error('Purchase error:', e);
       toast({ title: 'Purchase failed', variant: 'destructive' });

@@ -159,18 +159,13 @@ export async function checkAndAwardBadges(studentId: string) {
       }
     }
 
-    // Award new badges
+    // Award new badges via secure server-side function
     if (newBadges.length > 0) {
-      await supabase.from('student_badges').insert(
-        newBadges.map(badgeId => ({ student_id: studentId, badge_id: badgeId }))
-      );
-
-      // Award XP for badge rewards
       for (const badgeId of newBadges) {
-        const badge = allBadges.find(b => b.id === badgeId);
-        if (badge && badge.xp_reward > 0) {
-          await awardXP(studentId, badge.xp_reward, 'badge_reward', badgeId);
-        }
+        await supabase.rpc('claim_badge', {
+          _student_id: studentId,
+          _badge_id: badgeId,
+        });
       }
     }
 
