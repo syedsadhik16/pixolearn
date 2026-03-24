@@ -500,7 +500,6 @@ export default function LessonSession() {
     if (!lesson || !user) return;
 
     try {
-      // Calculate average scores
       const allVocabScores = scores.vocabulary;
       const allSentenceScores = scores.sentences;
       const readAloudScore = scores.readAloud;
@@ -512,16 +511,65 @@ export default function LessonSession() {
         (allVocabScores.length + allSentenceScores.length + (readAloudScore ? 1 : 0)) || 70
       );
 
-      // Check for existing completion
+      // Try to complete curriculum day attempt
+      const { data: dayAttempt } = await supabase
+        .from('learner_day_attempts')
+        .select('id')
+        .eq('learner_id', user.id)
+        .eq('curriculum_day_id', lesson.id)
+        .eq('completion_status', 'in_progress')
+        .maybeSingle();
+
+      if (dayAttempt) {
+        await supabase
+          .from('learner_day_attempts')
+          .update({
+            completed_at: new Date().toISOString(),
+            completion_status: 'completed',
+            accuracy_score: avgPronunciation,
+            speaking_score: avgPronunciation - 3,
+            confidence_score: avgPronunciation + 2,
+            stars_earned: avgPronunciation >= 80 ? 3 : avgPronunciation >= 60 ? 2 : 1,
+            total_xp_earned: 50,
+            mastery_state: avgPronunciation >= 80 ? 'stable' : 'developing',
+          })
+          .eq('id', dayAttempt.id);
+
+        // Advance curriculum day
+        const { data: currProgress } = await supabase
+          .from('learner_curriculum_progress')
+          .select('*')
+          .eq('learner_id', user.id)
+          .maybeSingle();
+
+        if (currProgress && lesson.day_number === currProgress.current_day) {
+          const nextDay = Math.min(lesson.day_number + 1, 180);
+          const nextWeek = Math.ceil(nextDay / 6);
+          const nextMonth = nextWeek <= 5 ? 1 : nextWeek <= 10 ? 2 : nextWeek <= 15 ? 3 : nextWeek <= 20 ? 4 : nextWeek <= 25 ? 5 : 6;
+          await supabase
+            .from('learner_curriculum_progress')
+            .update({
+              current_day: nextDay,
+              current_week: nextWeek,
+              current_month: nextMonth,
+              total_xp: (currProgress.total_xp || 0) + 50,
+              streak_count: (currProgress.streak_count || 0) + 1,
+              completion_percent: Math.round((nextDay / 180) * 10000) / 100,
+              level_status: nextDay >= 180 ? 'completed' : 'active',
+            })
+            .eq('id', currProgress.id);
+        }
+      }
+
+      // Also handle old lessons system for backwards compatibility
       const { data: existingCompletion } = await supabase
         .from('lesson_completions')
         .select('*')
         .eq('student_id', user.id)
         .eq('lesson_id', lesson.id)
-        .single();
+        .maybeSingle();
 
       if (existingCompletion) {
-        // Update existing completion
         await supabase
           .from('lesson_completions')
           .update({
@@ -534,25 +582,33 @@ export default function LessonSession() {
           })
           .eq('id', existingCompletion.id);
       } else {
-        // Create new completion
-        await supabase.from('lesson_completions').insert({
-          student_id: user.id,
-          lesson_id: lesson.id,
-          pronunciation_score: avgPronunciation,
-          fluency_score: avgPronunciation - 5,
-          clarity_score: avgPronunciation - 3,
-          confidence_score: avgPronunciation + 2,
-          practice_count: 1,
-        });
+        // Only insert if it's from the old lessons table (UUID exists there)
+        const { data: lessonExists } = await supabase
+          .from('lessons')
+          .select('id')
+          .eq('id', lesson.id)
+          .maybeSingle();
 
-        // Update student progress to next day
-        await supabase
-          .from('student_progress')
-          .update({ current_day: lesson.day_number + 1 })
-          .eq('student_id', user.id);
+        if (lessonExists) {
+          await supabase.from('lesson_completions').insert({
+            student_id: user.id,
+            lesson_id: lesson.id,
+            pronunciation_score: avgPronunciation,
+            fluency_score: avgPronunciation - 5,
+            clarity_score: avgPronunciation - 3,
+            confidence_score: avgPronunciation + 2,
+            practice_count: 1,
+          });
+        }
       }
 
-      // Mark attendance - use insert with conflict handling
+      // Update student_progress for old system compat
+      await supabase
+        .from('student_progress')
+        .update({ current_day: lesson.day_number + 1 })
+        .eq('student_id', user.id);
+
+      // Mark attendance
       const today = new Date().toISOString().split('T')[0];
       const { data: existingAttendance } = await supabase
         .from('attendance')
@@ -575,7 +631,6 @@ export default function LessonSession() {
         });
       }
 
-      // Track daily challenge & check badges
       trackChallengeProgress(user.id, 'lesson');
       checkAndAwardBadges(user.id);
 
