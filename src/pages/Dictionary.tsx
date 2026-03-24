@@ -67,6 +67,7 @@ export default function Dictionary() {
     if (!query.trim()) return;
     setSearching(true);
     setResult(null);
+    setAiInsight(null);
     try {
       const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(query.trim())}`);
       if (!res.ok) throw new Error('Word not found');
@@ -74,6 +75,13 @@ export default function Dictionary() {
       setResult(data[0]);
       // Track dictionary challenge
       if (user) trackChallengeProgress(user.id, 'dictionary');
+
+      // Fetch AI insight in background (non-blocking)
+      supabase.functions.invoke('ai-dictionary', {
+        body: { word: query.trim(), action: 'word_info' },
+      }).then(({ data: aiData }) => {
+        if (aiData && !aiData.error) setAiInsight(aiData);
+      }).catch(() => { /* AI insight is optional */ });
     } catch {
       toast({ title: 'Not Found', description: `"${query}" was not found in the dictionary.`, variant: 'destructive' });
     } finally {

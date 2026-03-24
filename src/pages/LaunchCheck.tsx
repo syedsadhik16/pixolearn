@@ -503,6 +503,51 @@ export default function LaunchCheck() {
               </div>
             )}
 
+            {/* AI Intelligence Insights */}
+            {aiEvaluation && (
+              <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-6 border border-white/20 space-y-4">
+                <h3 className="text-lg font-display font-bold text-white flex items-center gap-2">
+                  🧠 AI Learning Insights
+                </h3>
+                <p className="text-sm text-white/80">{aiEvaluation.parentMessage}</p>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  {Object.entries(aiEvaluation.detailedBreakdown).map(([key, value]) => (
+                    <div key={key} className="bg-white/10 rounded-xl p-3 text-center">
+                      <p className="text-xs text-white/60 capitalize">{key}</p>
+                      <p className="text-2xl font-bold text-white">{value}%</p>
+                    </div>
+                  ))}
+                </div>
+
+                {aiEvaluation.strengths.length > 0 && (
+                  <div>
+                    <p className="text-xs text-white/60 mb-1">Strengths</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {aiEvaluation.strengths.map((s, i) => (
+                        <span key={i} className="bg-green-500/20 text-green-200 text-xs px-2 py-1 rounded-full">⭐ {s}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {aiEvaluation.weakAreas.length > 0 && (
+                  <div>
+                    <p className="text-xs text-white/60 mb-1">Focus Areas</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {aiEvaluation.weakAreas.map((w, i) => (
+                        <span key={i} className="bg-yellow-500/20 text-yellow-200 text-xs px-2 py-1 rounded-full">💡 {w}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <p className="text-sm text-white/90 bg-white/5 rounded-xl p-3 italic">
+                  "{aiEvaluation.recommendation}"
+                </p>
+              </div>
+            )}
+
             {/* CTA */}
             <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-6 border border-white/20 text-center space-y-4">
               <img src={companion.image} alt={companion.name} className="w-16 h-16 mx-auto object-contain animate-float" />
