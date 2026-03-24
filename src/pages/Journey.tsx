@@ -4,31 +4,11 @@ import { Layout } from '@/components/layout/Layout';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { HamburgerMenu } from '@/components/layout/HamburgerMenu';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
-import { CheckCircle2, Lock, Star, Trophy, Sparkles, Play, ChevronDown, ChevronUp, Crown } from 'lucide-react';
+import { CheckCircle2, Lock, Sparkles, Play, ChevronDown, ChevronUp, Crown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useCompanion } from '@/hooks/useCompanion';
-
-interface LessonNode {
-  id: string;
-  day_number: number;
-  title: string;
-  description: string | null;
-  completed: boolean;
-  accessible: boolean;
-  isCurrent: boolean;
-  premiumLocked?: boolean;
-}
-
-const phases = [
-  { name: 'Sound Awareness', emoji: '👂', range: [1, 30], color: 'from-pixo-red/20 to-pixo-orange/20 border-pixo-orange/30' },
-  { name: 'Letter-Sound Connection', emoji: '🔤', range: [31, 60], color: 'from-pixo-orange/20 to-pixo-yellow/20 border-pixo-yellow/30' },
-  { name: 'CVC Words & Reading', emoji: '📖', range: [61, 90], color: 'from-pixo-yellow/20 to-pixo-green/20 border-pixo-green/30' },
-  { name: 'Digraphs, Blends & Fluency', emoji: '🚀', range: [91, 120], color: 'from-pixo-green/20 to-pixo-blue/20 border-pixo-blue/30' },
-  { name: 'Vocabulary & Grammar', emoji: '🧠', range: [121, 150], color: 'from-pixo-blue/20 to-pixo-purple/20 border-pixo-purple/30' },
-  { name: 'Story Mastery & Graduation', emoji: '🎓', range: [151, 180], color: 'from-pixo-purple/20 to-pixo-red/20 border-pixo-red/30' },
-];
+import { useCurriculumProgress } from '@/hooks/useCurriculumProgress';
 
 const milestones = [7, 15, 30, 60, 90, 100, 120, 150, 180];
 
@@ -36,80 +16,29 @@ export default function Journey() {
   const { user, profile, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const companion = useCompanion();
-  const [nodes, setNodes] = useState<LessonNode[]>([]);
-  const [currentDay, setCurrentDay] = useState(1);
-  const [loading, setLoading] = useState(true);
-  const [expandedPhase, setExpandedPhase] = useState<number | null>(null);
+  const { progress, days, months, weeks, completedDayIds, loading: currLoading, error: currError } = useCurriculumProgress(user?.id);
+  const [expandedMonth, setExpandedMonth] = useState<number | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) navigate('/auth');
   }, [user, authLoading, navigate]);
 
+  const currentDay = progress?.current_day || 1;
+
+  // Auto-expand the month containing the current day
   useEffect(() => {
-    if (user && profile?.role === 'student') fetchJourneyData();
-  }, [user, profile]);
-
-  // Auto-expand the phase containing the current day
-  useEffect(() => {
-    if (currentDay > 0) {
-      const phaseIndex = phases.findIndex(p => currentDay >= p.range[0] && currentDay <= p.range[1]);
-      setExpandedPhase(phaseIndex >= 0 ? phaseIndex : 0);
+    if (months.length > 0 && days.length > 0) {
+      const monthIndex = months.findIndex((m) => {
+        const monthDays = days.filter(d => d.month_id === m.id);
+        return monthDays.some(d => d.day_number === currentDay);
+      });
+      setExpandedMonth(monthIndex >= 0 ? monthIndex : 0);
     }
-  }, [currentDay]);
+  }, [currentDay, months, days]);
 
-  const fetchJourneyData = async () => {
-    try {
-      const { data: progress } = await supabase
-        .from('student_progress')
-        .select('current_level, current_day')
-        .eq('student_id', user!.id)
-        .single();
+  const loading = authLoading || currLoading;
 
-      const level = progress?.current_level || 'beginner';
-      const day = progress?.current_day || 1;
-      setCurrentDay(day);
-
-      const { data: lessons } = await supabase
-        .from('lessons')
-        .select('id, day_number, title, description')
-        .eq('level', level)
-        .eq('is_active', true)
-        .order('day_number');
-
-      const { data: completions } = await supabase
-        .from('lesson_completions')
-        .select('lesson_id')
-        .eq('student_id', user!.id);
-
-      const completedIds = new Set(completions?.map(c => c.lesson_id) || []);
-
-      const lessonNodes: LessonNode[] = (lessons || []).map(l => ({
-        id: l.id,
-        day_number: l.day_number,
-        title: l.title,
-        description: l.description,
-        completed: completedIds.has(l.id),
-        accessible: l.day_number <= day,
-        isCurrent: l.day_number === day,
-        premiumLocked: profile?.subscription_type === 'free' && l.day_number > 2,
-      }));
-
-      setNodes(lessonNodes);
-    } catch (error) {
-      console.error('Journey fetch error:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getPhaseProgress = (phaseIndex: number) => {
-    const phase = phases[phaseIndex];
-    const phaseNodes = nodes.filter(n => n.day_number >= phase.range[0] && n.day_number <= phase.range[1]);
-    const completed = phaseNodes.filter(n => n.completed).length;
-    return { completed, total: phaseNodes.length || (phase.range[1] - phase.range[0] + 1) };
-  };
-
-  if (authLoading || loading) {
+  if (loading) {
     return (
       <Layout>
         <div className="min-h-screen flex items-center justify-center">
@@ -122,8 +51,38 @@ export default function Journey() {
     );
   }
 
-  const completedCount = nodes.filter(n => n.completed).length;
-  const progressPercent = nodes.length > 0 ? Math.round((completedCount / nodes.length) * 100) : 0;
+  if (currError || days.length === 0) {
+    return (
+      <Layout>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center pixo-card p-8 max-w-md">
+            <div className="text-4xl mb-3">🗺️</div>
+            <h2 className="font-display font-bold text-xl mb-2">No Curriculum Data Found</h2>
+            <p className="text-muted-foreground text-sm mb-4">
+              {currError || "We couldn't load your learning journey. Please try again."}
+            </p>
+            <Button variant="gradient" onClick={() => window.location.reload()}>
+              Retry
+            </Button>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  const completedCount = completedDayIds.size;
+  const progressPercent = Math.round((currentDay / 180) * 100);
+
+  // Map month emojis
+  const monthEmojis = ['👂', '🔤', '📖', '🚀', '🧠', '🎓'];
+  const monthColors = [
+    'from-pixo-red/20 to-pixo-orange/20 border-pixo-orange/30',
+    'from-pixo-orange/20 to-pixo-yellow/20 border-pixo-yellow/30',
+    'from-pixo-yellow/20 to-pixo-green/20 border-pixo-green/30',
+    'from-pixo-green/20 to-pixo-blue/20 border-pixo-blue/30',
+    'from-pixo-blue/20 to-pixo-purple/20 border-pixo-purple/30',
+    'from-pixo-purple/20 to-pixo-red/20 border-pixo-red/30',
+  ];
 
   return (
     <Layout>
@@ -169,34 +128,37 @@ export default function Journey() {
           </div>
         )}
 
-        {/* Phase Accordion */}
+        {/* Month Accordion */}
         <div className="space-y-3">
-          {phases.map((phase, phaseIndex) => {
-            const { completed, total } = getPhaseProgress(phaseIndex);
-            const isExpanded = expandedPhase === phaseIndex;
-            const phaseNodes = nodes.filter(n => n.day_number >= phase.range[0] && n.day_number <= phase.range[1]);
-            const phaseComplete = completed === total && total > 0;
-            const hasCurrentDay = currentDay >= phase.range[0] && currentDay <= phase.range[1];
-            const isLocked = nodes.length > 0 && !nodes.some(n => n.day_number >= phase.range[0] && n.accessible);
+          {months.map((month, monthIndex) => {
+            const isExpanded = expandedMonth === monthIndex;
+            const monthDays = days.filter(d => d.month_id === month.id).sort((a, b) => a.day_number - b.day_number);
+            const monthCompletedCount = monthDays.filter(d => completedDayIds.has(d.id)).length;
+            const monthComplete = monthCompletedCount === monthDays.length && monthDays.length > 0;
+            const hasCurrentDay = monthDays.some(d => d.day_number === currentDay);
+            const isLocked = monthDays.length > 0 && !monthDays.some(d => d.day_number <= currentDay);
+
+            // Group by weeks within this month
+            const monthWeeks = weeks.filter(w => w.month_id === month.id).sort((a, b) => a.sort_order - b.sort_order);
 
             return (
-              <div key={phaseIndex} className={cn("rounded-2xl border overflow-hidden transition-all", isLocked ? "opacity-50" : "")}>
-                {/* Phase Header */}
+              <div key={month.id} className={cn("rounded-2xl border overflow-hidden transition-all", isLocked ? "opacity-50" : "")}>
+                {/* Month Header */}
                 <button
-                  onClick={() => setExpandedPhase(isExpanded ? null : phaseIndex)}
+                  onClick={() => setExpandedMonth(isExpanded ? null : monthIndex)}
                   className={cn(
                     "w-full flex items-center gap-3 p-4 text-left transition-colors bg-gradient-to-r",
-                    phase.color,
+                    monthColors[monthIndex] || monthColors[0],
                     hasCurrentDay && "ring-2 ring-primary/50"
                   )}
                 >
-                  <span className="text-2xl">{phaseComplete ? '✅' : phase.emoji}</span>
+                  <span className="text-2xl">{monthComplete ? '✅' : monthEmojis[monthIndex] || '📚'}</span>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <p className="font-display font-bold text-sm truncate">Phase {phaseIndex + 1}: {phase.name}</p>
+                      <p className="font-display font-bold text-sm truncate">Month {month.month_number}: {month.month_title}</p>
                       {hasCurrentDay && <span className="text-[10px] bg-primary text-primary-foreground px-1.5 py-0.5 rounded-full font-bold">NOW</span>}
                     </div>
-                    <p className="text-xs text-muted-foreground">Days {phase.range[0]}-{phase.range[1]} • {completed}/{total} complete</p>
+                    <p className="text-xs text-muted-foreground">{monthCompletedCount}/{monthDays.length} complete • {month.milestone_badge}</p>
                   </div>
                   {isLocked ? (
                     <Lock className="h-4 w-4 text-muted-foreground shrink-0" />
@@ -207,50 +169,54 @@ export default function Journey() {
                   )}
                 </button>
 
-                {/* Phase Lessons */}
+                {/* Month Lessons */}
                 {isExpanded && !isLocked && (
                   <div className="p-3 space-y-2 bg-card/50">
-                    {phaseNodes.map((node) => {
-                      const isMilestone = milestones.includes(node.day_number);
+                    {monthDays.map((day) => {
+                      const isMilestone = milestones.includes(day.day_number) || day.is_milestone_day;
+                      const completed = completedDayIds.has(day.id);
+                      const accessible = day.day_number <= currentDay;
+                      const isCurrent = day.day_number === currentDay;
+                      const premiumLocked = profile?.subscription_type === 'free' && day.day_number > 2;
 
                       return (
                         <button
-                          key={node.id}
+                          key={day.id}
                           onClick={() => {
-                            if (node.premiumLocked) {
+                            if (premiumLocked) {
                               navigate('/pricing');
                               return;
                             }
-                            if (node.accessible && !node.id.startsWith('placeholder')) navigate(`/lesson/${node.id}`);
+                            if (accessible) navigate(`/lesson/${day.id}`);
                           }}
-                          disabled={!node.accessible || node.id.startsWith('placeholder')}
+                          disabled={!accessible}
                           className={cn(
                             "w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-all",
-                            node.completed && "bg-secondary/10 border-secondary/30",
-                            node.isCurrent && !node.completed && "bg-primary/10 border-primary/40 ring-2 ring-primary/30 animate-pulse-slow",
-                            !node.completed && !node.isCurrent && node.accessible && "bg-card border-border hover:border-primary/40 hover:shadow-pixo-sm",
-                            !node.accessible && "bg-muted/30 border-border/50 opacity-50"
+                            completed && "bg-secondary/10 border-secondary/30",
+                            isCurrent && !completed && "bg-primary/10 border-primary/40 ring-2 ring-primary/30 animate-pulse-slow",
+                            !completed && !isCurrent && accessible && "bg-card border-border hover:border-primary/40 hover:shadow-pixo-sm",
+                            !accessible && "bg-muted/30 border-border/50 opacity-50"
                           )}
                         >
                           {/* Day circle */}
                           <div className={cn(
                             "shrink-0 w-11 h-11 rounded-xl flex items-center justify-center font-bold text-sm",
-                            node.completed && "bg-secondary text-secondary-foreground",
-                            node.isCurrent && !node.completed && "bg-primary text-primary-foreground",
-                            !node.completed && !node.isCurrent && node.accessible && "bg-muted text-muted-foreground",
-                            !node.accessible && "bg-muted/50 text-muted-foreground/50",
-                            isMilestone && node.accessible && "ring-2 ring-accent"
+                            completed && "bg-secondary text-secondary-foreground",
+                            isCurrent && !completed && "bg-primary text-primary-foreground",
+                            !completed && !isCurrent && accessible && "bg-muted text-muted-foreground",
+                            !accessible && "bg-muted/50 text-muted-foreground/50",
+                            isMilestone && accessible && "ring-2 ring-accent"
                           )}>
-                            {node.completed ? (
+                            {completed ? (
                               <CheckCircle2 className="h-5 w-5" />
-                            ) : node.premiumLocked ? (
+                            ) : premiumLocked ? (
                               <Crown className="h-4 w-4 text-pixo-orange" />
-                            ) : node.isCurrent ? (
+                            ) : isCurrent ? (
                               <Play className="h-4 w-4" />
-                            ) : !node.accessible ? (
+                            ) : !accessible ? (
                               <Lock className="h-3.5 w-3.5" />
                             ) : (
-                              <span>{node.day_number}</span>
+                              <span>{day.day_number}</span>
                             )}
                           </div>
 
@@ -259,33 +225,33 @@ export default function Journey() {
                             <div className="flex items-center gap-1.5">
                               <p className={cn(
                                 "text-xs font-bold",
-                                node.isCurrent ? "text-primary" : node.completed ? "text-secondary" : "text-muted-foreground"
+                                isCurrent ? "text-primary" : completed ? "text-secondary" : "text-muted-foreground"
                               )}>
-                                Day {node.day_number}
+                                Day {day.day_number}
                                 {isMilestone && " ⭐"}
                               </p>
                             </div>
                             <p className={cn(
                               "text-sm font-medium truncate",
-                              !node.accessible && "text-muted-foreground/60"
+                              !accessible && "text-muted-foreground/60"
                             )}>
-                              {node.title}
+                              {day.title}
                             </p>
-                            {node.description && node.accessible && (
-                              <p className="text-[11px] text-muted-foreground truncate mt-0.5">{node.description}</p>
+                            {accessible && (
+                              <p className="text-[11px] text-muted-foreground truncate mt-0.5">{day.theme} • {day.main_game}</p>
                             )}
                           </div>
 
                           {/* Action indicator */}
-                          {node.isCurrent && !node.completed && (
+                          {isCurrent && !completed && (
                             <span className="shrink-0 text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded-lg">
                               START
                             </span>
                           )}
-                          {node.completed && (
+                          {completed && (
                             <span className="shrink-0 text-xs text-secondary">✓</span>
                           )}
-                          {isMilestone && node.accessible && !node.completed && !node.isCurrent && (
+                          {isMilestone && accessible && !completed && !isCurrent && (
                             <Sparkles className="h-4 w-4 text-accent shrink-0" />
                           )}
                         </button>
