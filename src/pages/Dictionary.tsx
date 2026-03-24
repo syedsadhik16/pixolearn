@@ -23,6 +23,13 @@ interface WordResult {
   phonetics: { audio?: string }[];
 }
 
+interface AIWordInsight {
+  simpleMeaning?: string;
+  exampleSentence?: string;
+  funFact?: string;
+  relatedWords?: string[];
+}
+
 interface SavedWord {
   id: string;
   word: string;
