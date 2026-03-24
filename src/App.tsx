@@ -70,7 +70,6 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
           <NoupeChatbot />
-          </Routes>
         </BrowserRouter>
       </AuthProvider>
     </TooltipProvider>
