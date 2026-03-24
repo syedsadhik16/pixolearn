@@ -211,6 +211,23 @@ export default function LaunchCheck() {
         current_level: level as 'beginner' | 'intermediate' | 'advanced',
         current_day: 1,
       }).eq('student_id', user.id);
+
+      // Get AI-powered assessment evaluation (non-blocking)
+      try {
+        const { data: aiData } = await supabase.functions.invoke('ai-launch-check', {
+          body: {
+            answers: answerDetails,
+            questions: questions.map(q => ({ question: q.question, difficulty: q.difficulty })),
+            ageGroup,
+            timeTaken: TOTAL_TIME - timeLeft,
+          },
+        });
+        if (aiData && !aiData.error) {
+          setAiEvaluation(aiData);
+        }
+      } catch (aiError) {
+        console.error('AI evaluation error (non-critical):', aiError);
+      }
     } catch (error) {
       console.error('Error saving assessment:', error);
     } finally {
