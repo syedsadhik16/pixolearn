@@ -34,8 +34,9 @@ export function useCurriculumProgress(userId: string | undefined): UseCurriculum
     try {
       // 1. Get level ID
       const lid = await fetchLevelId();
+      console.log('[Curriculum] levelId:', lid, 'userId:', userId);
       if (!lid) {
-        setError('No curriculum level found');
+        setError('No curriculum level found. Please contact support.');
         setLoading(false);
         return;
       }
@@ -54,6 +55,8 @@ export function useCurriculumProgress(userId: string | undefined): UseCurriculum
           .eq('completion_status', 'completed'),
       ]);
 
+      console.log('[Curriculum] days:', allDays.length, 'months:', allMonths.length, 'weeks:', allWeeks.length, 'progress:', prog?.current_day);
+
       setProgress(prog);
       setDays(allDays);
       setMonths(allMonths);
@@ -64,7 +67,7 @@ export function useCurriculumProgress(userId: string | undefined): UseCurriculum
       );
       setCompletedDayIds(completedIds);
     } catch (err) {
-      console.error('Curriculum progress fetch error:', err);
+      console.error('[Curriculum] fetch error:', err);
       setError('Failed to load curriculum data');
     } finally {
       setLoading(false);
