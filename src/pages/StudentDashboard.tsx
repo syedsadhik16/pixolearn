@@ -113,9 +113,14 @@ export default function StudentDashboard() {
             <p className="text-muted-foreground text-sm mb-4">
               {currError || "We couldn't load your learning content. Please try again."}
             </p>
-            <Button variant="gradient" onClick={() => window.location.reload()}>
-              Retry
-            </Button>
+            <div className="flex flex-col gap-2">
+              <Button variant="gradient" onClick={() => window.location.reload()}>
+                Retry
+              </Button>
+              <Button variant="outline" onClick={() => navigate('/launch-check')}>
+                Reassign Level
+              </Button>
+            </div>
           </div>
         </div>
       </Layout>
