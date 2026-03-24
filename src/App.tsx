@@ -30,6 +30,7 @@ import WeeklyReport from "./pages/WeeklyReport";
 import CreativeWriting from "./pages/CreativeWriting";
 import { LanguageOverlay } from "./components/shared/LanguageSelector";
 import { ProtectedRoute } from "./components/shared/ProtectedRoute";
+import { NoupeChatbot } from "./components/shared/NoupeChatbot";
 
 const queryClient = new QueryClient();
 
