@@ -181,6 +181,76 @@ export default function LessonSession() {
 
   const fetchLesson = async () => {
     try {
+      // Try curriculum_days first (new system)
+      const { data: currDay } = await supabase
+        .from('curriculum_days')
+        .select('*')
+        .eq('id', lessonId)
+        .single();
+
+      if (currDay) {
+        // Load curriculum day parts for richer content
+        const { data: parts } = await supabase
+          .from('curriculum_day_parts')
+          .select('*')
+          .eq('curriculum_day_id', currDay.id)
+          .order('sort_order');
+
+        // Build lesson from curriculum data with fallback vocabulary
+        const targetContent = currDay.target_content as Record<string, unknown> || {};
+        const sounds = (targetContent.sounds as string[]) || [];
+        const words = (targetContent.words as string[]) || [];
+
+        const vocabulary = sounds.length > 0 
+          ? sounds.map(s => ({ word: s, phonetic: `/${s}/`, meaning: `The sound "${s}"` }))
+          : words.length > 0
+          ? words.map(w => ({ word: w, phonetic: '', meaning: '' }))
+          : [
+              { word: currDay.theme, phonetic: '', meaning: `Today's theme: ${currDay.theme}` },
+            ];
+
+        const sentences = [
+          { text: `Listen to the sound and repeat.`, tip: 'Speak slowly and clearly' },
+          { text: `Can you say "${vocabulary[0]?.word || currDay.theme}"?`, tip: 'Take your time' },
+        ];
+
+        const parsedLesson: Lesson = {
+          id: currDay.id,
+          level: 'beginner',
+          day_number: currDay.day_number,
+          title: currDay.title,
+          description: currDay.day_objective || currDay.theme,
+          vocabulary,
+          sentences,
+          read_aloud_text: `Great job! Today we learned about ${currDay.theme}. ${vocabulary.map(v => v.word).join(', ')}.`,
+        };
+
+        setLesson(parsedLesson);
+
+        // Start a day attempt for tracking
+        if (user) {
+          const { data: existing } = await supabase
+            .from('learner_day_attempts')
+            .select('id')
+            .eq('learner_id', user.id)
+            .eq('curriculum_day_id', currDay.id)
+            .eq('completion_status', 'in_progress')
+            .maybeSingle();
+
+          if (!existing) {
+            await supabase.from('learner_day_attempts').insert({
+              learner_id: user.id,
+              curriculum_day_id: currDay.id,
+              completion_status: 'in_progress',
+            });
+          }
+        }
+
+        setLoading(false);
+        return;
+      }
+
+      // Fallback: try old lessons table
       const { data, error } = await supabase
         .from('lessons')
         .select('*')
@@ -189,7 +259,6 @@ export default function LessonSession() {
 
       if (error) throw error;
       
-      // Parse JSON fields if they're strings
       const parsedLesson = {
         ...data,
         vocabulary: typeof data.vocabulary === 'string' 
