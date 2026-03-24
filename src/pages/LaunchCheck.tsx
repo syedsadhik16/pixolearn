@@ -105,6 +105,14 @@ export default function LaunchCheck() {
   const [started, setStarted] = useState(false);
   const [showReview, setShowReview] = useState(false);
   const [expandedQ, setExpandedQ] = useState<number | null>(null);
+  const [aiEvaluation, setAiEvaluation] = useState<{
+    confidence: number;
+    strengths: string[];
+    weakAreas: string[];
+    recommendation: string;
+    detailedBreakdown: { phonics: number; vocabulary: number; grammar: number; comprehension: number };
+    parentMessage: string;
+  } | null>(null);
   const fromPricing = new URLSearchParams(window.location.search).get('from') === 'pricing';
   const selectedPlan = (() => {
     try { return JSON.parse(sessionStorage.getItem('selectedPlan') || 'null'); } catch { return null; }
