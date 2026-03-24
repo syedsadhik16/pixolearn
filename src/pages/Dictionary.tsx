@@ -23,6 +23,13 @@ interface WordResult {
   phonetics: { audio?: string }[];
 }
 
+interface AIWordInsight {
+  simpleMeaning?: string;
+  exampleSentence?: string;
+  funFact?: string;
+  relatedWords?: string[];
+}
+
 interface SavedWord {
   id: string;
   word: string;
@@ -34,6 +41,7 @@ export default function Dictionary() {
   const [query, setQuery] = useState('');
   const [result, setResult] = useState<WordResult | null>(null);
   const [searching, setSearching] = useState(false);
+  const [aiInsight, setAiInsight] = useState<AIWordInsight | null>(null);
   const [savedWords, setSavedWords] = useState<SavedWord[]>([]);
   const [savedWordSet, setSavedWordSet] = useState<Set<string>>(new Set());
   const { user, loading: authLoading } = useAuth();
@@ -59,6 +67,7 @@ export default function Dictionary() {
     if (!query.trim()) return;
     setSearching(true);
     setResult(null);
+    setAiInsight(null);
     try {
       const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(query.trim())}`);
       if (!res.ok) throw new Error('Word not found');
@@ -66,6 +75,13 @@ export default function Dictionary() {
       setResult(data[0]);
       // Track dictionary challenge
       if (user) trackChallengeProgress(user.id, 'dictionary');
+
+      // Fetch AI insight in background (non-blocking)
+      supabase.functions.invoke('ai-dictionary', {
+        body: { word: query.trim(), action: 'word_info' },
+      }).then(({ data: aiData }) => {
+        if (aiData && !aiData.error) setAiInsight(aiData);
+      }).catch(() => { /* AI insight is optional */ });
     } catch {
       toast({ title: 'Not Found', description: `"${query}" was not found in the dictionary.`, variant: 'destructive' });
     } finally {
@@ -153,53 +169,84 @@ export default function Dictionary() {
 
             {/* Result */}
             {result && (
-              <Card className="animate-slide-up">
-                <CardContent className="p-5">
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <h2 className="text-2xl font-display font-bold">{result.word}</h2>
-                      {result.phonetic && (
-                        <p className="text-sm text-muted-foreground">{result.phonetic}</p>
-                      )}
+              <>
+                <Card className="animate-slide-up">
+                  <CardContent className="p-5">
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <h2 className="text-2xl font-display font-bold">{result.word}</h2>
+                        {result.phonetic && (
+                          <p className="text-sm text-muted-foreground">{result.phonetic}</p>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="icon" onClick={() => {
+                          const audioUrl = result.phonetics?.find(p => p.audio)?.audio;
+                          if (audioUrl) playAudio(audioUrl);
+                          else speak(result.word);
+                        }}>
+                          <Volume2 className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant={isWordSaved ? 'secondary' : 'outline'}
+                          size="icon"
+                          onClick={saveWord}
+                          disabled={isWordSaved}
+                        >
+                          {isWordSaved ? <BookmarkCheck className="h-4 w-4" /> : <Bookmark className="h-4 w-4" />}
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="icon" onClick={() => {
-                        const audioUrl = result.phonetics?.find(p => p.audio)?.audio;
-                        if (audioUrl) playAudio(audioUrl);
-                        else speak(result.word);
-                      }}>
-                        <Volume2 className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant={isWordSaved ? 'secondary' : 'outline'}
-                        size="icon"
-                        onClick={saveWord}
-                        disabled={isWordSaved}
-                      >
-                        {isWordSaved ? <BookmarkCheck className="h-4 w-4" /> : <Bookmark className="h-4 w-4" />}
-                      </Button>
-                    </div>
-                  </div>
 
-                  {result.meanings.map((meaning, i) => (
-                    <div key={i} className="mb-4">
-                      <Badge variant="outline" className="mb-2">{meaning.partOfSpeech}</Badge>
-                      <ol className="list-decimal list-inside space-y-2">
-                        {meaning.definitions.slice(0, 3).map((def, j) => (
-                          <li key={j} className="text-sm">
-                            {def.definition}
-                            {def.example && (
-                              <p className="text-xs text-muted-foreground ml-5 mt-1 italic">
-                                "{def.example}"
-                              </p>
-                            )}
-                          </li>
-                        ))}
-                      </ol>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
+                    {result.meanings.map((meaning, i) => (
+                      <div key={i} className="mb-4">
+                        <Badge variant="outline" className="mb-2">{meaning.partOfSpeech}</Badge>
+                        <ol className="list-decimal list-inside space-y-2">
+                          {meaning.definitions.slice(0, 3).map((def, j) => (
+                            <li key={j} className="text-sm">
+                              {def.definition}
+                              {def.example && (
+                                <p className="text-xs text-muted-foreground ml-5 mt-1 italic">
+                                  "{def.example}"
+                                </p>
+                              )}
+                            </li>
+                          ))}
+                        </ol>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                {/* AI-powered word insight */}
+                {aiInsight && (
+                  <Card className="bg-primary/5 border-primary/20 animate-slide-up">
+                    <CardContent className="p-4 space-y-2">
+                      <p className="text-xs font-semibold text-primary flex items-center gap-1">
+                        <Star className="h-3 w-3" /> PIXO AI Insight
+                      </p>
+                      {aiInsight.simpleMeaning && (
+                        <p className="text-sm">🧒 <strong>Simple meaning:</strong> {aiInsight.simpleMeaning}</p>
+                      )}
+                      {aiInsight.exampleSentence && (
+                        <p className="text-sm italic text-muted-foreground">📝 &quot;{aiInsight.exampleSentence}&quot;</p>
+                      )}
+                      {aiInsight.funFact && (
+                        <p className="text-sm">🎉 <strong>Fun fact:</strong> {aiInsight.funFact}</p>
+                      )}
+                      {aiInsight.relatedWords && aiInsight.relatedWords.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 pt-1">
+                          {aiInsight.relatedWords.map((w, i) => (
+                            <Badge key={i} variant="secondary" className="text-xs cursor-pointer" onClick={() => { setQuery(w); }}>
+                              {w}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
+              </>
             )}
           </TabsContent>
 

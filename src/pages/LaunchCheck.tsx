@@ -105,6 +105,14 @@ export default function LaunchCheck() {
   const [started, setStarted] = useState(false);
   const [showReview, setShowReview] = useState(false);
   const [expandedQ, setExpandedQ] = useState<number | null>(null);
+  const [aiEvaluation, setAiEvaluation] = useState<{
+    confidence: number;
+    strengths: string[];
+    weakAreas: string[];
+    recommendation: string;
+    detailedBreakdown: { phonics: number; vocabulary: number; grammar: number; comprehension: number };
+    parentMessage: string;
+  } | null>(null);
   const fromPricing = new URLSearchParams(window.location.search).get('from') === 'pricing';
   const selectedPlan = (() => {
     try { return JSON.parse(sessionStorage.getItem('selectedPlan') || 'null'); } catch { return null; }
@@ -203,6 +211,23 @@ export default function LaunchCheck() {
         current_level: level as 'beginner' | 'intermediate' | 'advanced',
         current_day: 1,
       }).eq('student_id', user.id);
+
+      // Get AI-powered assessment evaluation (non-blocking)
+      try {
+        const { data: aiData } = await supabase.functions.invoke('ai-launch-check', {
+          body: {
+            answers: answerDetails,
+            questions: questions.map(q => ({ question: q.question, difficulty: q.difficulty })),
+            ageGroup,
+            timeTaken: TOTAL_TIME - timeLeft,
+          },
+        });
+        if (aiData && !aiData.error) {
+          setAiEvaluation(aiData);
+        }
+      } catch (aiError) {
+        console.error('AI evaluation error (non-critical):', aiError);
+      }
     } catch (error) {
       console.error('Error saving assessment:', error);
     } finally {
@@ -475,6 +500,51 @@ export default function LaunchCheck() {
                     </div>
                   );
                 })}
+              </div>
+            )}
+
+            {/* AI Intelligence Insights */}
+            {aiEvaluation && (
+              <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-6 border border-white/20 space-y-4">
+                <h3 className="text-lg font-display font-bold text-white flex items-center gap-2">
+                  🧠 AI Learning Insights
+                </h3>
+                <p className="text-sm text-white/80">{aiEvaluation.parentMessage}</p>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  {Object.entries(aiEvaluation.detailedBreakdown).map(([key, value]) => (
+                    <div key={key} className="bg-white/10 rounded-xl p-3 text-center">
+                      <p className="text-xs text-white/60 capitalize">{key}</p>
+                      <p className="text-2xl font-bold text-white">{value}%</p>
+                    </div>
+                  ))}
+                </div>
+
+                {aiEvaluation.strengths.length > 0 && (
+                  <div>
+                    <p className="text-xs text-white/60 mb-1">Strengths</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {aiEvaluation.strengths.map((s, i) => (
+                        <span key={i} className="bg-green-500/20 text-green-200 text-xs px-2 py-1 rounded-full">⭐ {s}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {aiEvaluation.weakAreas.length > 0 && (
+                  <div>
+                    <p className="text-xs text-white/60 mb-1">Focus Areas</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {aiEvaluation.weakAreas.map((w, i) => (
+                        <span key={i} className="bg-yellow-500/20 text-yellow-200 text-xs px-2 py-1 rounded-full">💡 {w}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <p className="text-sm text-white/90 bg-white/5 rounded-xl p-3 italic">
+                  "{aiEvaluation.recommendation}"
+                </p>
               </div>
             )}
 

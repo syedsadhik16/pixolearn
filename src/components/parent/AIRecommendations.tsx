@@ -69,33 +69,42 @@ export function AIRecommendations({ child }: Props) {
   const generateAIInsight = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('ai-practice', {
+      const recent = child.completions.slice(0, 10);
+      const totalMinutes = Math.round(
+        child.learningSessions.reduce((sum, s) => sum + (s.duration_seconds || 0), 0) / 60
+      );
+
+      const { data, error } = await supabase.functions.invoke('ai-insights', {
         body: {
-          type: 'parent_insight',
-          childName: child.profile.full_name || child.profile.email,
-          completionsCount: child.completions.length,
-          streak: child.streak,
-          avgScores: {
-            pronunciation: getAvg(child.completions.slice(0, 10).map(c => c.pronunciation_score)),
-            fluency: getAvg(child.completions.slice(0, 10).map(c => c.fluency_score)),
-            clarity: getAvg(child.completions.slice(0, 10).map(c => c.clarity_score)),
-            confidence: getAvg(child.completions.slice(0, 10).map(c => c.confidence_score)),
+          childData: {
+            currentLevel: child.progress?.current_level || 'beginner',
+            currentDay: child.progress?.current_day || 1,
+            totalXp: child.xp?.total_xp || 0,
+            streak: child.streak,
+            lessonsCompleted: child.completions.length,
+            avgPronunciation: getAvg(recent.map(c => c.pronunciation_score)),
+            avgFluency: getAvg(recent.map(c => c.fluency_score)),
+            avgClarity: getAvg(recent.map(c => c.clarity_score)),
+            totalMinutes,
+            writingCount: child.writingSubmissions.length,
+            assessmentLevel: child.assessmentResult?.assigned_level || 'not taken',
           },
-          currentLevel: child.progress?.current_level || 'beginner',
-          currentDay: child.progress?.current_day || 1,
-          writingsCount: child.writingSubmissions.length,
         },
       });
 
       if (error) throw error;
-      if (data?.insight) {
-        setInsight(data.insight);
+      if (data && !data.error) {
+        setInsight({
+          weakAreas: data.areasToWatch || [],
+          strengths: data.strengths || [],
+          practiceGoals: [data.weeklyTip, data.recommendedFocus].filter(Boolean),
+          focusAreas: [data.phonicsInsight].filter(Boolean),
+          summary: data.summary || data.encouragement || '',
+        });
       } else {
-        // Fallback to local
         setInsight(generateLocalInsight());
       }
     } catch {
-      // Fallback to local insight
       setInsight(generateLocalInsight());
     } finally {
       setLoading(false);
