@@ -216,6 +216,35 @@ export default function Dictionary() {
                   ))}
                 </CardContent>
               </Card>
+
+              {/* AI-powered word insight */}
+              {aiInsight && (
+                <Card className="bg-primary/5 border-primary/20 animate-slide-up">
+                  <CardContent className="p-4 space-y-2">
+                    <p className="text-xs font-semibold text-primary flex items-center gap-1">
+                      <Star className="h-3 w-3" /> PIXO AI Insight
+                    </p>
+                    {aiInsight.simpleMeaning && (
+                      <p className="text-sm">🧒 <strong>Simple meaning:</strong> {aiInsight.simpleMeaning}</p>
+                    )}
+                    {aiInsight.exampleSentence && (
+                      <p className="text-sm italic text-muted-foreground">📝 "{aiInsight.exampleSentence}"</p>
+                    )}
+                    {aiInsight.funFact && (
+                      <p className="text-sm">🎉 <strong>Fun fact:</strong> {aiInsight.funFact}</p>
+                    )}
+                    {aiInsight.relatedWords && aiInsight.relatedWords.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 pt-1">
+                        {aiInsight.relatedWords.map((w, i) => (
+                          <Badge key={i} variant="secondary" className="text-xs cursor-pointer" onClick={() => { setQuery(w); }}>
+                            {w}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
             )}
           </TabsContent>
 
