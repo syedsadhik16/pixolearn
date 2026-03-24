@@ -123,6 +123,305 @@ export type Database = {
         }
         Relationships: []
       }
+      curriculum_day_parts: {
+        Row: {
+          celebration_logic: Json | null
+          curriculum_day_id: string
+          duration_minutes: number
+          id: string
+          interaction_type: string
+          part_name: string
+          part_number: number
+          prompt_logic: Json | null
+          sort_order: number
+          support_logic: Json | null
+          xp_value: number
+        }
+        Insert: {
+          celebration_logic?: Json | null
+          curriculum_day_id: string
+          duration_minutes?: number
+          id?: string
+          interaction_type?: string
+          part_name: string
+          part_number: number
+          prompt_logic?: Json | null
+          sort_order: number
+          support_logic?: Json | null
+          xp_value: number
+        }
+        Update: {
+          celebration_logic?: Json | null
+          curriculum_day_id?: string
+          duration_minutes?: number
+          id?: string
+          interaction_type?: string
+          part_name?: string
+          part_number?: number
+          prompt_logic?: Json | null
+          sort_order?: number
+          support_logic?: Json | null
+          xp_value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "curriculum_day_parts_curriculum_day_id_fkey"
+            columns: ["curriculum_day_id"]
+            isOneToOne: false
+            referencedRelation: "curriculum_days"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      curriculum_days: {
+        Row: {
+          adaptive_logic: Json | null
+          created_at: string
+          daily_xp: number
+          day_number: number
+          day_objective: string | null
+          end_of_day_outcome: Json | null
+          hidden_mastery_tags: Json | null
+          id: string
+          is_gate_day: boolean
+          is_milestone_day: boolean
+          level_id: string
+          main_game: string
+          month_id: string
+          parent_confidence_note: string | null
+          parent_home_practice: string | null
+          parent_praise_line: string | null
+          parent_todays_target: string | null
+          parent_words_learned: string | null
+          reward_badge: string
+          status: string
+          success_criteria: Json | null
+          target_content: Json | null
+          target_skills: Json | null
+          theme: string
+          title: string
+          unlock_type: string
+          week_id: string
+          weekly_reward_path: string | null
+        }
+        Insert: {
+          adaptive_logic?: Json | null
+          created_at?: string
+          daily_xp?: number
+          day_number: number
+          day_objective?: string | null
+          end_of_day_outcome?: Json | null
+          hidden_mastery_tags?: Json | null
+          id?: string
+          is_gate_day?: boolean
+          is_milestone_day?: boolean
+          level_id: string
+          main_game: string
+          month_id: string
+          parent_confidence_note?: string | null
+          parent_home_practice?: string | null
+          parent_praise_line?: string | null
+          parent_todays_target?: string | null
+          parent_words_learned?: string | null
+          reward_badge: string
+          status?: string
+          success_criteria?: Json | null
+          target_content?: Json | null
+          target_skills?: Json | null
+          theme: string
+          title: string
+          unlock_type?: string
+          week_id: string
+          weekly_reward_path?: string | null
+        }
+        Update: {
+          adaptive_logic?: Json | null
+          created_at?: string
+          daily_xp?: number
+          day_number?: number
+          day_objective?: string | null
+          end_of_day_outcome?: Json | null
+          hidden_mastery_tags?: Json | null
+          id?: string
+          is_gate_day?: boolean
+          is_milestone_day?: boolean
+          level_id?: string
+          main_game?: string
+          month_id?: string
+          parent_confidence_note?: string | null
+          parent_home_practice?: string | null
+          parent_praise_line?: string | null
+          parent_todays_target?: string | null
+          parent_words_learned?: string | null
+          reward_badge?: string
+          status?: string
+          success_criteria?: Json | null
+          target_content?: Json | null
+          target_skills?: Json | null
+          theme?: string
+          title?: string
+          unlock_type?: string
+          week_id?: string
+          weekly_reward_path?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "curriculum_days_level_id_fkey"
+            columns: ["level_id"]
+            isOneToOne: false
+            referencedRelation: "curriculum_levels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "curriculum_days_month_id_fkey"
+            columns: ["month_id"]
+            isOneToOne: false
+            referencedRelation: "curriculum_months"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "curriculum_days_week_id_fkey"
+            columns: ["week_id"]
+            isOneToOne: false
+            referencedRelation: "curriculum_weeks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      curriculum_levels: {
+        Row: {
+          age_group: string
+          created_at: string
+          duration_days: number
+          duration_months: number
+          final_badge: string
+          hidden_mastery_rule: string
+          id: string
+          level_code: string
+          level_name: string
+          pedagogy_model: string
+          status: string
+        }
+        Insert: {
+          age_group?: string
+          created_at?: string
+          duration_days?: number
+          duration_months?: number
+          final_badge?: string
+          hidden_mastery_rule?: string
+          id?: string
+          level_code: string
+          level_name: string
+          pedagogy_model?: string
+          status?: string
+        }
+        Update: {
+          age_group?: string
+          created_at?: string
+          duration_days?: number
+          duration_months?: number
+          final_badge?: string
+          hidden_mastery_rule?: string
+          id?: string
+          level_code?: string
+          level_name?: string
+          pedagogy_model?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      curriculum_months: {
+        Row: {
+          id: string
+          level_id: string
+          milestone_badge: string
+          month_goal: string | null
+          month_number: number
+          month_title: string
+          pedagogical_emphasis: string | null
+          sort_order: number
+        }
+        Insert: {
+          id?: string
+          level_id: string
+          milestone_badge: string
+          month_goal?: string | null
+          month_number: number
+          month_title: string
+          pedagogical_emphasis?: string | null
+          sort_order: number
+        }
+        Update: {
+          id?: string
+          level_id?: string
+          milestone_badge?: string
+          month_goal?: string | null
+          month_number?: number
+          month_title?: string
+          pedagogical_emphasis?: string | null
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "curriculum_months_level_id_fkey"
+            columns: ["level_id"]
+            isOneToOne: false
+            referencedRelation: "curriculum_levels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      curriculum_weeks: {
+        Row: {
+          id: string
+          level_id: string
+          month_id: string
+          sort_order: number
+          week_number: number
+          week_title: string
+          weekly_focus: string
+          weekly_logic: string | null
+          weekly_reward_label: string
+        }
+        Insert: {
+          id?: string
+          level_id: string
+          month_id: string
+          sort_order: number
+          week_number: number
+          week_title: string
+          weekly_focus: string
+          weekly_logic?: string | null
+          weekly_reward_label: string
+        }
+        Update: {
+          id?: string
+          level_id?: string
+          month_id?: string
+          sort_order?: number
+          week_number?: number
+          week_title?: string
+          weekly_focus?: string
+          weekly_logic?: string | null
+          weekly_reward_label?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "curriculum_weeks_level_id_fkey"
+            columns: ["level_id"]
+            isOneToOne: false
+            referencedRelation: "curriculum_levels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "curriculum_weeks_month_id_fkey"
+            columns: ["month_id"]
+            isOneToOne: false
+            referencedRelation: "curriculum_months"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       daily_challenges: {
         Row: {
           challenge_type: string
@@ -185,6 +484,316 @@ export type Database = {
           {
             foreignKeyName: "daily_login_rewards_student_id_fkey"
             columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      learner_curriculum_progress: {
+        Row: {
+          completion_percent: number
+          created_at: string
+          current_day: number
+          current_month: number
+          current_part: number
+          current_week: number
+          id: string
+          learner_id: string
+          level_id: string
+          level_status: string
+          level_unlocked_next: boolean
+          monthly_badges: Json | null
+          streak_count: number
+          total_xp: number
+          treasure_progress: number
+          updated_at: string
+          weekly_badges: Json | null
+        }
+        Insert: {
+          completion_percent?: number
+          created_at?: string
+          current_day?: number
+          current_month?: number
+          current_part?: number
+          current_week?: number
+          id?: string
+          learner_id: string
+          level_id: string
+          level_status?: string
+          level_unlocked_next?: boolean
+          monthly_badges?: Json | null
+          streak_count?: number
+          total_xp?: number
+          treasure_progress?: number
+          updated_at?: string
+          weekly_badges?: Json | null
+        }
+        Update: {
+          completion_percent?: number
+          created_at?: string
+          current_day?: number
+          current_month?: number
+          current_part?: number
+          current_week?: number
+          id?: string
+          learner_id?: string
+          level_id?: string
+          level_status?: string
+          level_unlocked_next?: boolean
+          monthly_badges?: Json | null
+          streak_count?: number
+          total_xp?: number
+          treasure_progress?: number
+          updated_at?: string
+          weekly_badges?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learner_curriculum_progress_learner_id_fkey"
+            columns: ["learner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learner_curriculum_progress_level_id_fkey"
+            columns: ["level_id"]
+            isOneToOne: false
+            referencedRelation: "curriculum_levels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      learner_day_attempts: {
+        Row: {
+          accuracy_score: number | null
+          completed_at: string | null
+          completion_status: string
+          confidence_score: number | null
+          created_at: string
+          curriculum_day_id: string
+          hesitation_time: number | null
+          id: string
+          learner_id: string
+          mastery_state: string
+          parent_sync_status: string
+          part_progress: Json | null
+          speaking_score: number | null
+          stars_earned: number
+          started_at: string
+          support_needed: boolean
+          total_xp_earned: number
+        }
+        Insert: {
+          accuracy_score?: number | null
+          completed_at?: string | null
+          completion_status?: string
+          confidence_score?: number | null
+          created_at?: string
+          curriculum_day_id: string
+          hesitation_time?: number | null
+          id?: string
+          learner_id: string
+          mastery_state?: string
+          parent_sync_status?: string
+          part_progress?: Json | null
+          speaking_score?: number | null
+          stars_earned?: number
+          started_at?: string
+          support_needed?: boolean
+          total_xp_earned?: number
+        }
+        Update: {
+          accuracy_score?: number | null
+          completed_at?: string | null
+          completion_status?: string
+          confidence_score?: number | null
+          created_at?: string
+          curriculum_day_id?: string
+          hesitation_time?: number | null
+          id?: string
+          learner_id?: string
+          mastery_state?: string
+          parent_sync_status?: string
+          part_progress?: Json | null
+          speaking_score?: number | null
+          stars_earned?: number
+          started_at?: string
+          support_needed?: boolean
+          total_xp_earned?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learner_day_attempts_curriculum_day_id_fkey"
+            columns: ["curriculum_day_id"]
+            isOneToOne: false
+            referencedRelation: "curriculum_days"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learner_day_attempts_learner_id_fkey"
+            columns: ["learner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      learner_hidden_mastery: {
+        Row: {
+          concept_key: string
+          concept_type: string
+          confidence_score: number
+          confusion_pairs: Json | null
+          created_at: string
+          id: string
+          last_seen_day: number
+          learner_id: string
+          mastery_score: number
+          recommended_review_day: number | null
+          strength_state: string
+          support_flag: boolean
+          updated_at: string
+        }
+        Insert: {
+          concept_key: string
+          concept_type: string
+          confidence_score?: number
+          confusion_pairs?: Json | null
+          created_at?: string
+          id?: string
+          last_seen_day?: number
+          learner_id: string
+          mastery_score?: number
+          recommended_review_day?: number | null
+          strength_state?: string
+          support_flag?: boolean
+          updated_at?: string
+        }
+        Update: {
+          concept_key?: string
+          concept_type?: string
+          confidence_score?: number
+          confusion_pairs?: Json | null
+          created_at?: string
+          id?: string
+          last_seen_day?: number
+          learner_id?: string
+          mastery_score?: number
+          recommended_review_day?: number | null
+          strength_state?: string
+          support_flag?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learner_hidden_mastery_learner_id_fkey"
+            columns: ["learner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      learner_level_transitions: {
+        Row: {
+          bridge_word_list: Json | null
+          family_support_plan: string | null
+          from_level: string
+          generated_at: string
+          id: string
+          learner_id: string
+          readiness_summary: string | null
+          strengths: Json | null
+          support_needs: Json | null
+          to_level: string
+          transition_status: string
+        }
+        Insert: {
+          bridge_word_list?: Json | null
+          family_support_plan?: string | null
+          from_level: string
+          generated_at?: string
+          id?: string
+          learner_id: string
+          readiness_summary?: string | null
+          strengths?: Json | null
+          support_needs?: Json | null
+          to_level: string
+          transition_status?: string
+        }
+        Update: {
+          bridge_word_list?: Json | null
+          family_support_plan?: string | null
+          from_level?: string
+          generated_at?: string
+          id?: string
+          learner_id?: string
+          readiness_summary?: string | null
+          strengths?: Json | null
+          support_needs?: Json | null
+          to_level?: string
+          transition_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learner_level_transitions_learner_id_fkey"
+            columns: ["learner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      learner_parent_outputs: {
+        Row: {
+          confidence_note: string
+          curriculum_day_id: string
+          generated_at: string
+          home_practice: string
+          id: string
+          learner_id: string
+          opened_at: string | null
+          praise_line: string
+          todays_target: string
+          words_or_sounds_learned: string
+        }
+        Insert: {
+          confidence_note: string
+          curriculum_day_id: string
+          generated_at?: string
+          home_practice: string
+          id?: string
+          learner_id: string
+          opened_at?: string | null
+          praise_line: string
+          todays_target: string
+          words_or_sounds_learned: string
+        }
+        Update: {
+          confidence_note?: string
+          curriculum_day_id?: string
+          generated_at?: string
+          home_practice?: string
+          id?: string
+          learner_id?: string
+          opened_at?: string | null
+          praise_line?: string
+          todays_target?: string
+          words_or_sounds_learned?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learner_parent_outputs_curriculum_day_id_fkey"
+            columns: ["curriculum_day_id"]
+            isOneToOne: false
+            referencedRelation: "curriculum_days"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learner_parent_outputs_learner_id_fkey"
+            columns: ["learner_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
