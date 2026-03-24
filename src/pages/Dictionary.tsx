@@ -41,6 +41,7 @@ export default function Dictionary() {
   const [query, setQuery] = useState('');
   const [result, setResult] = useState<WordResult | null>(null);
   const [searching, setSearching] = useState(false);
+  const [aiInsight, setAiInsight] = useState<AIWordInsight | null>(null);
   const [savedWords, setSavedWords] = useState<SavedWord[]>([]);
   const [savedWordSet, setSavedWordSet] = useState<Set<string>>(new Set());
   const { user, loading: authLoading } = useAuth();
