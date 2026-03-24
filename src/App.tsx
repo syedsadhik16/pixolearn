@@ -29,6 +29,7 @@ import Settings from "./pages/Settings";
 import WeeklyReport from "./pages/WeeklyReport";
 import CreativeWriting from "./pages/CreativeWriting";
 import { LanguageOverlay } from "./components/shared/LanguageSelector";
+import { ProtectedRoute } from "./components/shared/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -62,8 +63,8 @@ const App = () => (
             <Route path="/settings" element={<Settings />} />
             <Route path="/weekly-report" element={<WeeklyReport />} />
             <Route path="/creative-writing" element={<CreativeWriting />} />
-            <Route path="/parent" element={<ParentDashboard />} />
-            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/parent" element={<ProtectedRoute allowedRoles={['parent', 'admin']}><ParentDashboard /></ProtectedRoute>} />
+            <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
