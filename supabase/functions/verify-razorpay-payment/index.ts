@@ -15,17 +15,43 @@ serve(async (req) => {
     const RAZORPAY_KEY_SECRET = Deno.env.get('RAZORPAY_KEY_SECRET');
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY');
 
     if (!RAZORPAY_KEY_SECRET) {
       throw new Error('RAZORPAY_KEY_SECRET not configured');
     }
-    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY || !SUPABASE_ANON_KEY) {
       throw new Error('Supabase configuration missing');
     }
 
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, user_id, plan_id } = await req.json();
+    // Authenticate the request
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({ success: false, error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
-    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !user_id || !plan_id) {
+    const userClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: claimsData, error: claimsError } = await userClient.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims?.sub) {
+      return new Response(JSON.stringify({ success: false, error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Use verified user ID from JWT, NOT from request body
+    const user_id = claimsData.claims.sub;
+
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, plan_id } = await req.json();
+
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !plan_id) {
       throw new Error('Missing required payment verification fields');
     }
 
@@ -58,7 +84,7 @@ serve(async (req) => {
       razorpay_order_id,
       razorpay_payment_id,
       plan_id,
-      amount: 0, // Will be fetched from order
+      amount: 0,
       currency: 'INR',
       status: 'success',
     });
@@ -66,9 +92,9 @@ serve(async (req) => {
     // Fetch order to get actual amount
     const RAZORPAY_KEY_ID = Deno.env.get('RAZORPAY_KEY_ID');
     if (RAZORPAY_KEY_ID) {
-      const authHeader = btoa(`${RAZORPAY_KEY_ID}:${RAZORPAY_KEY_SECRET}`);
+      const razorpayAuth = btoa(`${RAZORPAY_KEY_ID}:${RAZORPAY_KEY_SECRET}`);
       const orderRes = await fetch(`https://api.razorpay.com/v1/orders/${razorpay_order_id}`, {
-        headers: { 'Authorization': `Basic ${authHeader}` },
+        headers: { 'Authorization': `Basic ${razorpayAuth}` },
       });
       if (orderRes.ok) {
         const order = await orderRes.json();
@@ -97,8 +123,7 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error('Payment verification error:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    return new Response(JSON.stringify({ success: false, error: errorMessage }), {
+    return new Response(JSON.stringify({ success: false, error: 'Payment verification failed' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
