@@ -1648,9 +1648,17 @@ export type Database = {
         }
         Returns: number
       }
+      claim_badge: {
+        Args: { _badge_id: string; _student_id: string }
+        Returns: boolean
+      }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["user_role"]
+      }
+      purchase_shop_item: {
+        Args: { _item_id: string; _student_id: string }
+        Returns: Json
       }
     }
     Enums: {
