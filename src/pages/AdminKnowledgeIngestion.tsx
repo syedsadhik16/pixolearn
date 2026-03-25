@@ -285,7 +285,7 @@ export default function AdminKnowledgeIngestion() {
                   onClick={handleIngest}
                   disabled={isIngesting || !validationResult?.valid}
                   size="sm"
-                  className="bg-green-600 hover:bg-green-700 text-white"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground"
                 >
                   {isIngesting ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Upload className="w-4 h-4 mr-1" />}
                   Ingest & Embed
