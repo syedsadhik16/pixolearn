@@ -477,7 +477,7 @@ serve(async (req) => {
         for (let i = 0; i < chunks.length; i++) {
           await serviceClient
             .from("knowledge_chunks")
-            .update({ embedding: JSON.stringify(embeddings[i]), updated_at: new Date().toISOString() })
+            .update({ embedding: `[${embeddings[i].join(",")}]`, updated_at: new Date().toISOString() })
             .eq("id", chunks[i].id);
         }
 
