@@ -135,14 +135,14 @@ export function ParentAIInsightsCard({
             {/* Areas to Watch */}
             {insight.weak_areas.length > 0 && (
               <div>
-                <h4 className="text-xs font-semibold text-amber-600 flex items-center gap-1.5 mb-2">
+                <h4 className="text-xs font-semibold text-destructive/80 flex items-center gap-1.5 mb-2">
                   <AlertTriangle className="h-3.5 w-3.5" />
                   Areas to Watch
                 </h4>
                 <ul className="space-y-1">
                   {insight.weak_areas.map((w, i) => (
                     <li key={i} className="text-sm text-foreground flex items-start gap-2">
-                      <span className="text-amber-500 mt-0.5">•</span>
+                      <span className="text-destructive/60 mt-0.5">•</span>
                       {w}
                     </li>
                   ))}
