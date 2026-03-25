@@ -29,6 +29,7 @@ import Settings from "./pages/Settings";
 import WeeklyReport from "./pages/WeeklyReport";
 import CreativeWriting from "./pages/CreativeWriting";
 import PIXOChat from "./pages/PIXOChat";
+import AdminKnowledgeIngestion from "./pages/AdminKnowledgeIngestion";
 import { LanguageOverlay } from "./components/shared/LanguageSelector";
 import { ProtectedRoute } from "./components/shared/ProtectedRoute";
 import { NoupeChatbot } from "./components/shared/NoupeChatbot";
@@ -69,6 +70,7 @@ const App = () => (
             <Route path="/pixo-chat" element={<PIXOChat />} />
             <Route path="/parent" element={<ProtectedRoute allowedRoles={['parent', 'admin']}><ParentDashboard /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
+            <Route path="/admin/knowledge" element={<ProtectedRoute allowedRoles={['admin']}><AdminKnowledgeIngestion /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
