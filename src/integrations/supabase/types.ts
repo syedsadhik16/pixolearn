@@ -1975,31 +1975,63 @@ export type Database = {
         Args: { _item_id: string; _student_id: string }
         Returns: Json
       }
-      search_knowledge_chunks: {
-        Args: {
-          filter_audience?: string
-          filter_day?: number
-          filter_level?: number
-          filter_week?: number
-          match_count?: number
-          query_embedding: string
-        }
-        Returns: {
-          chunk_index: number
-          chunk_type: string
-          content: string
-          day_no: number
-          document_id: string
-          id: string
-          lesson_part: number
-          level_no: number
-          metadata: Json
-          similarity: number
-          skill_code: string
-          tags: string[]
-          week_no: number
-        }[]
-      }
+      search_knowledge_chunks:
+        | {
+            Args: {
+              filter_audience?: string
+              filter_day?: number
+              filter_level?: number
+              filter_week?: number
+              match_count?: number
+              query_embedding: string
+            }
+            Returns: {
+              chunk_index: number
+              chunk_type: string
+              content: string
+              day_no: number
+              document_id: string
+              id: string
+              lesson_part: number
+              level_no: number
+              metadata: Json
+              similarity: number
+              skill_code: string
+              tags: string[]
+              week_no: number
+            }[]
+          }
+        | {
+            Args: {
+              filter_audience?: string
+              filter_day?: number
+              filter_lesson_part?: number
+              filter_level?: number
+              filter_skill_code?: string
+              filter_source_type?: string
+              filter_week?: number
+              match_count?: number
+              query_embedding: string
+            }
+            Returns: {
+              audience: string
+              chunk_index: number
+              chunk_type: string
+              content: string
+              day_no: number
+              document_id: string
+              document_title: string
+              id: string
+              lesson_part: number
+              level_no: number
+              metadata: Json
+              similarity: number
+              skill_code: string
+              source_type: string
+              tags: string[]
+              week_no: number
+            }[]
+          }
     }
     Enums: {
       lesson_level: "beginner" | "intermediate" | "advanced"
