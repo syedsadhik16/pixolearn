@@ -28,9 +28,11 @@ import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import WeeklyReport from "./pages/WeeklyReport";
 import CreativeWriting from "./pages/CreativeWriting";
+import PIXOChat from "./pages/PIXOChat";
 import { LanguageOverlay } from "./components/shared/LanguageSelector";
 import { ProtectedRoute } from "./components/shared/ProtectedRoute";
 import { NoupeChatbot } from "./components/shared/NoupeChatbot";
+import { PIXOChatBubble } from "./components/ai/PIXOChatPanel";
 
 const queryClient = new QueryClient();
 
