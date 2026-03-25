@@ -14,6 +14,62 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_interactions: {
+        Row: {
+          created_at: string
+          id: string
+          interaction_type: string
+          mcp_tools_used: Json
+          parent_id: string | null
+          query: string
+          response_json: Json
+          response_text: string | null
+          retrieved_chunks: Json
+          role_context: string
+          status: string
+          student_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          interaction_type: string
+          mcp_tools_used?: Json
+          parent_id?: string | null
+          query: string
+          response_json?: Json
+          response_text?: string | null
+          retrieved_chunks?: Json
+          role_context: string
+          status?: string
+          student_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          interaction_type?: string
+          mcp_tools_used?: Json
+          parent_id?: string | null
+          query?: string
+          response_json?: Json
+          response_text?: string | null
+          retrieved_chunks?: Json
+          role_context?: string
+          status?: string
+          student_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_interactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assessment_results: {
         Row: {
           answers: Json | null
@@ -489,6 +545,170 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      hidden_mastery_events: {
+        Row: {
+          confidence: number | null
+          created_at: string
+          curriculum_day_id: string | null
+          id: string
+          lesson_part: number | null
+          metadata: Json
+          score: number | null
+          skill_code: string
+          source: string
+          student_id: string
+        }
+        Insert: {
+          confidence?: number | null
+          created_at?: string
+          curriculum_day_id?: string | null
+          id?: string
+          lesson_part?: number | null
+          metadata?: Json
+          score?: number | null
+          skill_code: string
+          source?: string
+          student_id: string
+        }
+        Update: {
+          confidence?: number | null
+          created_at?: string
+          curriculum_day_id?: string | null
+          id?: string
+          lesson_part?: number | null
+          metadata?: Json
+          score?: number | null
+          skill_code?: string
+          source?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hidden_mastery_events_curriculum_day_id_fkey"
+            columns: ["curriculum_day_id"]
+            isOneToOne: false
+            referencedRelation: "curriculum_days"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hidden_mastery_events_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      knowledge_chunks: {
+        Row: {
+          chunk_index: number
+          chunk_type: string | null
+          content: string
+          created_at: string
+          day_no: number | null
+          document_id: string
+          embedding: string | null
+          id: string
+          lesson_part: number | null
+          level_no: number | null
+          metadata: Json
+          skill_code: string | null
+          tags: string[]
+          updated_at: string
+          visibility: string
+          week_no: number | null
+        }
+        Insert: {
+          chunk_index: number
+          chunk_type?: string | null
+          content: string
+          created_at?: string
+          day_no?: number | null
+          document_id: string
+          embedding?: string | null
+          id?: string
+          lesson_part?: number | null
+          level_no?: number | null
+          metadata?: Json
+          skill_code?: string | null
+          tags?: string[]
+          updated_at?: string
+          visibility?: string
+          week_no?: number | null
+        }
+        Update: {
+          chunk_index?: number
+          chunk_type?: string | null
+          content?: string
+          created_at?: string
+          day_no?: number | null
+          document_id?: string
+          embedding?: string | null
+          id?: string
+          lesson_part?: number | null
+          level_no?: number | null
+          metadata?: Json
+          skill_code?: string | null
+          tags?: string[]
+          updated_at?: string
+          visibility?: string
+          week_no?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_chunks_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      knowledge_documents: {
+        Row: {
+          audience: string
+          created_at: string
+          day_no: number | null
+          id: string
+          level_no: number | null
+          metadata: Json
+          source_type: string
+          status: string
+          title: string
+          topic: string | null
+          updated_at: string
+          week_no: number | null
+        }
+        Insert: {
+          audience?: string
+          created_at?: string
+          day_no?: number | null
+          id?: string
+          level_no?: number | null
+          metadata?: Json
+          source_type: string
+          status?: string
+          title: string
+          topic?: string | null
+          updated_at?: string
+          week_no?: number | null
+        }
+        Update: {
+          audience?: string
+          created_at?: string
+          day_no?: number | null
+          id?: string
+          level_no?: number | null
+          metadata?: Json
+          source_type?: string
+          status?: string
+          title?: string
+          topic?: string | null
+          updated_at?: string
+          week_no?: number | null
+        }
+        Relationships: []
       }
       learner_curriculum_progress: {
         Row: {
@@ -1064,6 +1284,60 @@ export type Database = {
           },
         ]
       }
+      parent_ai_outputs: {
+        Row: {
+          created_at: string
+          generated_from: Json
+          home_support_steps: Json
+          id: string
+          parent_id: string
+          strengths: Json
+          student_id: string
+          summary: string | null
+          title: string | null
+          weak_areas: Json
+        }
+        Insert: {
+          created_at?: string
+          generated_from?: Json
+          home_support_steps?: Json
+          id?: string
+          parent_id: string
+          strengths?: Json
+          student_id: string
+          summary?: string | null
+          title?: string | null
+          weak_areas?: Json
+        }
+        Update: {
+          created_at?: string
+          generated_from?: Json
+          home_support_steps?: Json
+          id?: string
+          parent_id?: string
+          strengths?: Json
+          student_id?: string
+          summary?: string | null
+          title?: string | null
+          weak_areas?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "parent_ai_outputs_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "parent_ai_outputs_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       parent_children: {
         Row: {
           child_id: string
@@ -1317,6 +1591,47 @@ export type Database = {
             columns: ["student_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rag_index_jobs: {
+        Row: {
+          created_at: string
+          document_id: string | null
+          error_message: string | null
+          id: string
+          job_type: string
+          payload: Json
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          document_id?: string | null
+          error_message?: string | null
+          id?: string
+          job_type: string
+          payload?: Json
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          document_id?: string | null
+          error_message?: string | null
+          id?: string
+          job_type?: string
+          payload?: Json
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rag_index_jobs_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_documents"
             referencedColumns: ["id"]
           },
         ]
@@ -1659,6 +1974,31 @@ export type Database = {
       purchase_shop_item: {
         Args: { _item_id: string; _student_id: string }
         Returns: Json
+      }
+      search_knowledge_chunks: {
+        Args: {
+          filter_audience?: string
+          filter_day?: number
+          filter_level?: number
+          filter_week?: number
+          match_count?: number
+          query_embedding: string
+        }
+        Returns: {
+          chunk_index: number
+          chunk_type: string
+          content: string
+          day_no: number
+          document_id: string
+          id: string
+          lesson_part: number
+          level_no: number
+          metadata: Json
+          similarity: number
+          skill_code: string
+          tags: string[]
+          week_no: number
+        }[]
       }
     }
     Enums: {

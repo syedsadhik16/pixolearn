@@ -28,9 +28,11 @@ import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import WeeklyReport from "./pages/WeeklyReport";
 import CreativeWriting from "./pages/CreativeWriting";
+import PIXOChat from "./pages/PIXOChat";
 import { LanguageOverlay } from "./components/shared/LanguageSelector";
 import { ProtectedRoute } from "./components/shared/ProtectedRoute";
 import { NoupeChatbot } from "./components/shared/NoupeChatbot";
+import { PIXOChatBubble } from "./components/ai/PIXOChatPanel";
 
 const queryClient = new QueryClient();
 
@@ -64,11 +66,13 @@ const App = () => (
             <Route path="/settings" element={<Settings />} />
             <Route path="/weekly-report" element={<WeeklyReport />} />
             <Route path="/creative-writing" element={<CreativeWriting />} />
+            <Route path="/pixo-chat" element={<PIXOChat />} />
             <Route path="/parent" element={<ProtectedRoute allowedRoles={['parent', 'admin']}><ParentDashboard /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <PIXOChatBubble />
           <NoupeChatbot />
         </BrowserRouter>
       </AuthProvider>
