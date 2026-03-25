@@ -1,9 +1,10 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
 serve(async (req) => {
@@ -12,6 +13,16 @@ serve(async (req) => {
   }
 
   try {
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+    const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_ANON_KEY')!, { global: { headers: { Authorization: authHeader } } });
+    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(authHeader.replace('Bearer ', ''));
+    if (claimsError || !claimsData?.claims?.sub) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
     const { targetText, attemptedText, phase } = await req.json();
 
     if (!targetText || !attemptedText) {
@@ -50,25 +61,8 @@ Respond in JSON format:
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { 
-            role: 'user', 
-            content: `Target text: "${targetText}"
-Student's attempt: "${attemptedText}"
-Practice type: ${phase}
-
-Please evaluate this speaking attempt.` 
-          }
-        ],
-        temperature: 0.3,
-      }),
+      headers: { 'Authorization': `Bearer ${LOVABLE_API_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'google/gemini-2.5-flash', messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: `Target text: "${targetText}"\nStudent's attempt: "${attemptedText}"\nPractice type: ${phase}\n\nPlease evaluate this speaking attempt.` }], temperature: 0.3 }),
     });
 
     if (!response.ok) {
@@ -80,43 +74,20 @@ Please evaluate this speaking attempt.`
     const data = await response.json();
     const content = data.choices[0]?.message?.content;
 
-    // Parse the JSON from the response
     let evaluation;
     try {
-      // Extract JSON from potential markdown code blocks
       const jsonMatch = content.match(/```json\n?([\s\S]*?)\n?```/) || content.match(/\{[\s\S]*\}/);
       const jsonStr = jsonMatch ? (jsonMatch[1] || jsonMatch[0]) : content;
       evaluation = JSON.parse(jsonStr);
     } catch (parseError) {
       console.error('Failed to parse AI response:', content);
-      // Fallback evaluation
-      evaluation = {
-        pronunciationScore: 75,
-        fluencyScore: 70,
-        clarityScore: 72,
-        feedback: "Good effort! Keep practicing to improve your pronunciation.",
-        tips: ["Try speaking more slowly", "Listen to the example again"]
-      };
+      evaluation = { pronunciationScore: 75, fluencyScore: 70, clarityScore: 72, feedback: "Good effort! Keep practicing to improve your pronunciation.", tips: ["Try speaking more slowly", "Listen to the example again"] };
     }
 
-    return new Response(JSON.stringify(evaluation), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
-
+    return new Response(JSON.stringify(evaluation), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.error('Error in evaluate-speech:', errorMessage);
-    return new Response(JSON.stringify({ 
-      error: errorMessage,
-      // Fallback scores so the app doesn't break
-      pronunciationScore: 70,
-      fluencyScore: 65,
-      clarityScore: 68,
-      feedback: "Great effort! Keep practicing.",
-      tips: ["Practice makes perfect!"]
-    }), {
-      status: 200, // Return 200 with fallback data
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return new Response(JSON.stringify({ error: errorMessage, pronunciationScore: 70, fluencyScore: 65, clarityScore: 68, feedback: "Great effort! Keep practicing.", tips: ["Practice makes perfect!"] }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 });

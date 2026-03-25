@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,6 +12,16 @@ serve(async (req) => {
   }
 
   try {
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_ANON_KEY')!, { global: { headers: { Authorization: authHeader } } });
+    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(authHeader.replace('Bearer ', ''));
+    if (claimsError || !claimsData?.claims?.sub) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     const { childData, parentQuestion } = await req.json();
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
@@ -53,31 +64,13 @@ ${parentQuestion ? `Parent asks: "${parentQuestion}"` : 'Generate a general prog
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        temperature: 0.4,
-      }),
+      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ model: "google/gemini-2.5-flash", messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userPrompt }], temperature: 0.4 }),
     });
 
     if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limits exceeded." }), {
-          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "AI service unavailable." }), {
-          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
+      if (response.status === 429) return new Response(JSON.stringify({ error: "Rate limits exceeded." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      if (response.status === 402) return new Response(JSON.stringify({ error: "AI service unavailable." }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       throw new Error(`AI gateway error: ${response.status}`);
     }
 
@@ -90,25 +83,12 @@ ${parentQuestion ? `Parent asks: "${parentQuestion}"` : 'Generate a general prog
       const jsonStr = jsonMatch ? (jsonMatch[1] || jsonMatch[0]) : content;
       insights = JSON.parse(jsonStr);
     } catch {
-      insights = {
-        summary: "Your child is making progress on their learning journey.",
-        strengths: ["Consistent practice"],
-        areasToWatch: ["Continue daily practice"],
-        weeklyTip: "Encourage 15 minutes of daily practice.",
-        progressTrend: "steady",
-        encouragement: "Every step forward counts!",
-        phonicsInsight: "Building foundational sound awareness.",
-        recommendedFocus: "Continue with current lessons.",
-      };
+      insights = { summary: "Your child is making progress on their learning journey.", strengths: ["Consistent practice"], areasToWatch: ["Continue daily practice"], weeklyTip: "Encourage 15 minutes of daily practice.", progressTrend: "steady", encouragement: "Every step forward counts!", phonicsInsight: "Building foundational sound awareness.", recommendedFocus: "Continue with current lessons." };
     }
 
-    return new Response(JSON.stringify(insights), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(JSON.stringify(insights), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (error) {
     console.error("Insights error:", error);
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 });
