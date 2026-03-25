@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import type { ChatMessage, AIMode, AICard } from '@/lib/pixo-ai-types';
 
 const QUICK_ACTIONS_STUDENT = [
@@ -28,7 +29,7 @@ interface PIXOChatPanelProps {
 }
 
 export function PIXOChatPanel({ mode: propMode, isFullPage = false, studentId, currentDay, currentLevel }: PIXOChatPanelProps) {
-  const { profile } = useAuth();
+  const { user, profile } = useAuth();
   const mode: AIMode = propMode || (profile?.role === 'parent' ? 'parent' : 'student');
   const quickActions = mode === 'parent' ? QUICK_ACTIONS_PARENT : QUICK_ACTIONS_STUDENT;
 
@@ -58,22 +59,44 @@ export function PIXOChatPanel({ mode: propMode, isFullPage = false, studentId, c
     setIsLoading(true);
     setError(null);
 
-    // Phase 3 will wire this to /api/pixo-ai/chat
-    // For now, show a placeholder that the AI backend is not yet connected
-    setTimeout(() => {
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke('pixo-ai-chat', {
+        body: {
+          message: text.trim(),
+          role_context: mode,
+          student_id: studentId || user?.id,
+          parent_id: mode === 'parent' ? user?.id : undefined,
+          current_level: currentLevel,
+          current_day: currentDay,
+        },
+      });
+
+      if (fnError) throw fnError;
+
       const assistantMsg: ChatMessage = {
         id: crypto.randomUUID(),
         role: 'assistant',
-        content: mode === 'student'
-          ? "Hi there! 🌟 I'm PIXO, your learning buddy! The AI chat will be fully connected soon. Keep practising!"
-          : "Hello! 📊 PIXO AI insights will be connected in the next update. Your child's progress data will power personalised recommendations here.",
+        content: data?.answer || "I'm here to help! Could you try asking again?",
+        cards: data?.cards,
+        quick_actions: data?.quick_actions,
         timestamp: new Date(),
-        quick_actions: quickActions.map(a => a.label),
       };
       setMessages(prev => [...prev, assistantMsg]);
+    } catch (err) {
+      console.error('PIXO chat error:', err);
+      setError('Something went wrong. Tap retry.');
+      const fallbackMsg: ChatMessage = {
+        id: crypto.randomUUID(),
+        role: 'assistant',
+        content: "Oops! I had a little hiccup. Can you try again? 😊",
+        quick_actions: ["Try again"],
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, fallbackMsg]);
+    } finally {
       setIsLoading(false);
-    }, 800);
-  }, [isLoading, mode, quickActions]);
+    }
+  }, [isLoading, mode, studentId, user?.id, currentLevel, currentDay]);
 
   const handleQuickAction = (actionKey: string) => {
     const action = quickActions.find(a => a.key === actionKey);
@@ -93,7 +116,6 @@ export function PIXOChatPanel({ mode: propMode, isFullPage = false, studentId, c
       'flex flex-col border-border bg-card',
       isFullPage ? 'h-full rounded-none border-0' : 'h-[500px] w-[380px] shadow-lg'
     )}>
-      {/* Header */}
       <CardHeader className="py-3 px-4 border-b border-border bg-gradient-to-r from-primary/10 to-secondary/10">
         <CardTitle className="text-base flex items-center gap-2">
           <Sparkles className="h-5 w-5 text-primary" />
@@ -103,7 +125,6 @@ export function PIXOChatPanel({ mode: propMode, isFullPage = false, studentId, c
         </CardTitle>
       </CardHeader>
 
-      {/* Messages */}
       <CardContent className="flex-1 overflow-y-auto p-3 space-y-3">
         {messages.length === 0 && (
           <div className="text-center py-8 space-y-3">
@@ -146,6 +167,19 @@ export function PIXOChatPanel({ mode: propMode, isFullPage = false, studentId, c
                   ))}
                 </div>
               )}
+              {msg.quick_actions && msg.quick_actions.length > 0 && msg.role === 'assistant' && (
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {msg.quick_actions.map((qa, i) => (
+                    <button
+                      key={i}
+                      className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs hover:bg-primary/20 transition-colors"
+                      onClick={() => sendMessage(qa)}
+                    >
+                      {qa}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         ))}
@@ -169,7 +203,6 @@ export function PIXOChatPanel({ mode: propMode, isFullPage = false, studentId, c
         <div ref={messagesEndRef} />
       </CardContent>
 
-      {/* Input */}
       <div className="p-3 border-t border-border">
         <form
           onSubmit={e => { e.preventDefault(); sendMessage(input); }}

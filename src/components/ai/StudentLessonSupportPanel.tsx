@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Sparkles, BookOpen, Lightbulb, RotateCcw, ChevronRight, Loader2 } from 'lucide-react';
+import { Sparkles, Lightbulb, RotateCcw, ChevronRight, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
 import type { LessonSupportResponse, MiniPractice } from '@/lib/pixo-ai-types';
 
 interface StudentLessonSupportPanelProps {
@@ -28,25 +29,42 @@ export function StudentLessonSupportPanel({
     setIsLoading(true);
     setError(null);
 
-    // Phase 3 will connect to /api/pixo-ai/lesson-support
-    setTimeout(() => {
-      setSupport({
-        success: true,
-        title: "Today's Help 🌟",
-        explanation: "This lesson is all about the sound 'sh'. When you see the letters S and H together, they make a special sound — like in 'ship', 'shoe', and 'shell'. Try saying 'shhhh' like you're telling someone to be quiet!",
-        examples: ["🚢 ship", "👟 shoe", "🐚 shell", "🐑 sheep"],
-        mini_practice: [
-          { type: 'say_it', prompt: "Can you say 'shell' three times?", answer: 'shell' },
-          { type: 'pick_one', prompt: "Which word starts with 'sh'?", options: ['cat', 'ship', 'dog'], answer: 'ship' },
-        ],
-        encouragement: "You're doing amazing! Every new sound you learn makes you a stronger reader! 🌟",
-        next_step: "Try the Main Game to practise 'sh' words!",
-        sources: [],
-        metadata: {},
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke('pixo-ai-lesson-support', {
+        body: {
+          student_id: studentId,
+          current_level: currentLevel,
+          current_day: currentDay,
+          lesson_part: lessonPart,
+          question: question || undefined,
+        },
       });
-      setIsLoading(false);
+
+      if (fnError) throw fnError;
+
+      setSupport({
+        success: data?.success ?? true,
+        title: data?.title || "Today's Help 🌟",
+        explanation: data?.explanation || "Let's keep learning!",
+        examples: data?.examples || [],
+        mini_practice: (data?.mini_practice || []).map((mp: Record<string, unknown>) => ({
+          type: mp.type === 'choose' ? 'pick_one' : mp.type === 'repeat' ? 'say_it' : (mp.type as string) || 'say_it',
+          prompt: (mp.prompt as string) || '',
+          answer: mp.answer as string | undefined,
+          options: mp.options as string[] | undefined,
+        })),
+        encouragement: data?.encouragement || "You're doing great! 🌟",
+        next_step: data?.next_step || "Keep practising!",
+        sources: data?.sources || [],
+        metadata: data?.metadata || {},
+      });
       setIsExpanded(true);
-    }, 600);
+    } catch (err) {
+      console.error('Lesson support error:', err);
+      setError('Could not load help. Try again!');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (!isExpanded) {
@@ -88,7 +106,6 @@ export function StudentLessonSupportPanel({
           </div>
         ) : support ? (
           <>
-            {/* Explanation */}
             <div className="bg-card rounded-lg p-3 border border-border">
               <div className="flex items-start gap-2">
                 <Lightbulb className="h-4 w-4 text-accent mt-0.5 flex-shrink-0" />
@@ -96,7 +113,6 @@ export function StudentLessonSupportPanel({
               </div>
             </div>
 
-            {/* Examples */}
             {support.examples.length > 0 && (
               <div>
                 <p className="text-xs font-semibold text-muted-foreground mb-1.5">Examples:</p>
@@ -110,7 +126,6 @@ export function StudentLessonSupportPanel({
               </div>
             )}
 
-            {/* Mini Practice */}
             {support.mini_practice.length > 0 && (
               <div className="space-y-2">
                 <p className="text-xs font-semibold text-muted-foreground">Quick Practice:</p>
@@ -120,12 +135,10 @@ export function StudentLessonSupportPanel({
               </div>
             )}
 
-            {/* Encouragement */}
             <div className="bg-accent/10 rounded-lg p-3 text-center">
               <p className="text-foreground font-medium">{support.encouragement}</p>
             </div>
 
-            {/* Next Step */}
             <Button
               size="sm"
               className="w-full rounded-full"
@@ -135,7 +148,6 @@ export function StudentLessonSupportPanel({
               <ChevronRight className="h-4 w-4 ml-1" />
             </Button>
 
-            {/* Ask more */}
             <Button
               size="sm"
               variant="ghost"

@@ -378,7 +378,7 @@ serve(async (req) => {
           chunk_index: c.chunk_index,
           chunk_type: c.chunk_type,
           content: c.content,
-          embedding: JSON.stringify(embeddings[i]),
+          embedding: `[${embeddings[i].join(",")}]`,
           level_no: c.level_no,
           week_no: c.week_no,
           day_no: c.day_no,
@@ -477,7 +477,7 @@ serve(async (req) => {
         for (let i = 0; i < chunks.length; i++) {
           await serviceClient
             .from("knowledge_chunks")
-            .update({ embedding: JSON.stringify(embeddings[i]), updated_at: new Date().toISOString() })
+            .update({ embedding: `[${embeddings[i].join(",")}]`, updated_at: new Date().toISOString() })
             .eq("id", chunks[i].id);
         }
 
