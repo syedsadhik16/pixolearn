@@ -294,20 +294,20 @@ export default function AdminKnowledgeIngestion() {
 
               {/* Validation result */}
               {validationResult && (
-                <div className={`p-3 rounded-lg border ${validationResult.valid ? "bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800" : "bg-red-50 border-red-200 dark:bg-red-950/20 dark:border-red-800"}`}>
+                <div className={`p-3 rounded-lg border ${validationResult.valid ? "bg-primary/5 border-primary/20" : "bg-destructive/5 border-destructive/20"}`}>
                   {validationResult.valid ? (
-                    <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
+                    <div className="flex items-center gap-2 text-primary">
                       <CheckCircle2 className="w-4 h-4" />
                       <span className="text-sm font-medium">Valid — {validationResult.dayCount} day(s) found</span>
                     </div>
                   ) : (
                     <div className="space-y-1">
-                      <div className="flex items-center gap-2 text-red-700 dark:text-red-400">
+                      <div className="flex items-center gap-2 text-destructive">
                         <AlertTriangle className="w-4 h-4" />
                         <span className="text-sm font-medium">Validation errors:</span>
                       </div>
                       {validationResult.errors?.map((err, i) => (
-                        <p key={i} className="text-xs text-red-600 dark:text-red-400 ml-6">• {err}</p>
+                        <p key={i} className="text-xs text-destructive ml-6">• {err}</p>
                       ))}
                     </div>
                   )}
