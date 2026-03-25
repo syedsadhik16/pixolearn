@@ -70,6 +70,7 @@ const App = () => (
             <Route path="/pixo-chat" element={<PIXOChat />} />
             <Route path="/parent" element={<ProtectedRoute allowedRoles={['parent', 'admin']}><ParentDashboard /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
+            <Route path="/admin/knowledge" element={<ProtectedRoute allowedRoles={['admin']}><AdminKnowledgeIngestion /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
