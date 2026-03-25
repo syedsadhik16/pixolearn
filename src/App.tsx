@@ -66,11 +66,13 @@ const App = () => (
             <Route path="/settings" element={<Settings />} />
             <Route path="/weekly-report" element={<WeeklyReport />} />
             <Route path="/creative-writing" element={<CreativeWriting />} />
+            <Route path="/pixo-chat" element={<PIXOChat />} />
             <Route path="/parent" element={<ProtectedRoute allowedRoles={['parent', 'admin']}><ParentDashboard /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <PIXOChatBubble />
           <NoupeChatbot />
         </BrowserRouter>
       </AuthProvider>
