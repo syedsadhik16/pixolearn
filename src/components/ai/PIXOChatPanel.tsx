@@ -100,21 +100,30 @@ export function PIXOChatPanel({ mode: propMode, isFullPage = false, studentId, c
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, assistantMsg]);
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('PIXO chat error:', err);
-      setError('Something went wrong. Tap retry.');
+      const isUnauthorized =
+        typeof err === 'object' &&
+        err !== null &&
+        'message' in err &&
+        typeof (err as { message?: string }).message === 'string' &&
+        (err as { message: string }).message.includes('401');
+
+      setError(isUnauthorized ? 'Please sign in to chat with PIXO.' : 'Something went wrong. Tap retry.');
       const fallbackMsg: ChatMessage = {
         id: crypto.randomUUID(),
         role: 'assistant',
-        content: "Oops! I had a little hiccup. Can you try again? 😊",
-        quick_actions: ["Try again"],
+        content: isUnauthorized
+          ? "Please sign in again to continue chatting with PIXO. 😊"
+          : "Oops! I had a little hiccup. Can you try again? 😊",
+        quick_actions: isUnauthorized ? ["Sign in"] : ["Try again"],
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, fallbackMsg]);
     } finally {
       setIsLoading(false);
     }
-  }, [isLoading, mode, studentId, user?.id, currentLevel, currentDay]);
+  }, [isLoading, mode, studentId, user, session?.access_token, currentLevel, currentDay]);
 
   const handleQuickAction = (actionKey: string) => {
     const action = quickActions.find(a => a.key === actionKey);
