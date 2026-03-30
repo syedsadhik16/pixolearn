@@ -309,9 +309,9 @@ export default function StudentDashboard() {
               <div className="absolute inset-0 bg-background/60 backdrop-blur-[2px] z-10 flex items-center justify-center">
                 <div className="text-center">
                   <Lock className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                  <p className="text-sm font-semibold text-muted-foreground mb-2">Premium Feature</p>
+                  <p className="text-sm font-semibold text-muted-foreground mb-2">{t('premiumFeature')}</p>
                   <Button variant="gradient" size="sm" onClick={() => navigate('/pricing')}>
-                    <Crown className="h-4 w-4 mr-1" /> Upgrade to Unlock
+                    <Crown className="h-4 w-4 mr-1" /> {t('upgradeToUnlock')}
                   </Button>
                 </div>
               </div>
