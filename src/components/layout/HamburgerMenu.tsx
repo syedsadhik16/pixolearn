@@ -16,17 +16,19 @@ import {
   X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/hooks/useTranslation';
+import type { TranslationKey } from '@/lib/translations';
 
-const menuItems = [
-  { path: '/chat', label: 'Chat', icon: MessageCircle },
-  { path: '/live', label: 'Live Classes', icon: Radio },
-  { path: '/roleplay', label: 'Roleplay Practice', icon: Theater },
-  { path: '/dictionary', label: 'Dictionary', icon: BookOpenText },
-  { path: '/studio', label: 'Studio', icon: Mic2 },
-  { path: '/creative-writing', label: 'Writing', icon: PenLine },
-  { path: '/leaderboard', label: 'Rankings', icon: Trophy },
-  { path: '/shop', label: 'Shop', icon: ShoppingBag },
-  { path: '/settings', label: 'Settings', icon: Settings },
+const menuItemDefs: { path: string; labelKey: TranslationKey; icon: typeof MessageCircle }[] = [
+  { path: '/chat', labelKey: 'chat', icon: MessageCircle },
+  { path: '/live', labelKey: 'liveClasses', icon: Radio },
+  { path: '/roleplay', labelKey: 'roleplayPractice', icon: Theater },
+  { path: '/dictionary', labelKey: 'dictionary', icon: BookOpenText },
+  { path: '/studio', labelKey: 'studio', icon: Mic2 },
+  { path: '/creative-writing', labelKey: 'writing', icon: PenLine },
+  { path: '/leaderboard', labelKey: 'rankings', icon: Trophy },
+  { path: '/shop', labelKey: 'shop', icon: ShoppingBag },
+  { path: '/settings', labelKey: 'settings', icon: Settings },
 ];
 
 export function HamburgerMenu() {
@@ -34,6 +36,7 @@ export function HamburgerMenu() {
   const navigate = useNavigate();
   const location = useLocation();
   const { profile, signOut } = useAuth();
+  const { t } = useTranslation();
 
   const handleNav = (path: string) => {
     navigate(path);
@@ -48,7 +51,7 @@ export function HamburgerMenu() {
 
   return (
     <>
-      {/* Trigger button — positioned in top-right */}
+      {/* Trigger button */}
       <button
         onClick={() => setOpen(true)}
         className="fixed top-[1.125rem] right-4 z-[60] p-2 rounded-xl bg-card/90 backdrop-blur-md border border-border shadow-sm hover:shadow-md transition-shadow"
@@ -76,7 +79,7 @@ export function HamburgerMenu() {
         <div className="flex items-center justify-between p-5 border-b border-border">
           <div>
             <p className="font-display font-bold text-base text-foreground">
-              {profile?.full_name || 'Learner'}
+              {profile?.full_name || t('learner')}
             </p>
             <p className="text-xs text-muted-foreground mt-0.5">
               {profile?.email || ''}
@@ -93,7 +96,7 @@ export function HamburgerMenu() {
 
         {/* Menu items */}
         <div className="flex-1 overflow-y-auto py-3 px-3">
-          {menuItems.map((item) => {
+          {menuItemDefs.map((item) => {
             const isActive = location.pathname === item.path;
             return (
               <button
@@ -107,7 +110,7 @@ export function HamburgerMenu() {
                 )}
               >
                 <item.icon className="h-5 w-5 shrink-0" />
-                <span>{item.label}</span>
+                <span>{t(item.labelKey)}</span>
               </button>
             );
           })}
@@ -120,7 +123,7 @@ export function HamburgerMenu() {
             className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm text-destructive hover:bg-destructive/10 transition-colors"
           >
             <LogOut className="h-5 w-5 shrink-0" />
-            <span>Sign Out</span>
+            <span>{t('signOut')}</span>
           </button>
         </div>
       </div>

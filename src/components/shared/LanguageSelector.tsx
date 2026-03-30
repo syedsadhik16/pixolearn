@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Globe } from 'lucide-react';
-
-const LANGUAGE_KEY = 'pixo-app-language';
-const FIRST_LAUNCH_KEY = 'pixo-language-selected';
+import { useLanguage, type LangCode } from '@/contexts/LanguageContext';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export interface AppLanguage {
-  code: string;
+  code: LangCode;
   label: string;
   flag: string;
 }
@@ -20,17 +19,18 @@ export const SUPPORTED_LANGUAGES: AppLanguage[] = [
   { code: 'ml', label: 'മലയാളം', flag: '🇮🇳' },
 ];
 
+// Legacy compat exports — redirect to context
 export function getSelectedLanguage(): string {
-  return localStorage.getItem(LANGUAGE_KEY) || 'en';
+  return localStorage.getItem('selectedLanguage') || 'en';
 }
 
 export function setSelectedLanguage(code: string) {
-  localStorage.setItem(LANGUAGE_KEY, code);
-  localStorage.setItem(FIRST_LAUNCH_KEY, 'true');
+  localStorage.setItem('selectedLanguage', code);
+  localStorage.setItem('pixo-language-selected', 'true');
 }
 
 export function hasSelectedLanguage(): boolean {
-  return localStorage.getItem(FIRST_LAUNCH_KEY) === 'true';
+  return localStorage.getItem('pixo-language-selected') === 'true';
 }
 
 /**
@@ -39,17 +39,19 @@ export function hasSelectedLanguage(): boolean {
  * Language can be changed only inside Settings.
  */
 export function LanguageOverlay() {
+  const { hasSelectedLanguage: hasSelected, setLanguage } = useLanguage();
+  const { t } = useTranslation();
   const [show, setShow] = useState(false);
-  const [selected, setSelected] = useState('en');
+  const [selected, setSelected] = useState<LangCode>('en');
 
   useEffect(() => {
-    if (!hasSelectedLanguage()) {
+    if (!hasSelected) {
       setShow(true);
     }
-  }, []);
+  }, [hasSelected]);
 
   const handleConfirm = () => {
-    setSelectedLanguage(selected);
+    setLanguage(selected);
     setShow(false);
   };
 
@@ -62,9 +64,9 @@ export function LanguageOverlay() {
           <Globe className="h-8 w-8 text-primary" />
         </div>
         <div>
-          <h2 className="text-2xl font-display font-bold">Choose Your Language</h2>
+          <h2 className="text-2xl font-display font-bold">{t('chooseLanguage')}</h2>
           <p className="text-sm text-muted-foreground mt-1">
-            You can change this anytime in Settings
+            {t('changeAnytimeInSettings')}
           </p>
         </div>
 
@@ -86,7 +88,7 @@ export function LanguageOverlay() {
         </div>
 
         <Button variant="gradient" size="lg" className="w-full" onClick={handleConfirm}>
-          Continue
+          {t('continue')}
         </Button>
       </div>
     </div>

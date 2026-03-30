@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Layout } from '@/components/layout/Layout';
 import pixoLogo from '@/assets/pixo-logo.png';
 import { Check, Loader2, ArrowRight, ArrowLeft, Sparkles } from 'lucide-react';
+import { useTranslation } from '@/hooks/useTranslation';
 import pixelChar from '@/assets/characters/pixel.png';
 import zestChar from '@/assets/characters/zest.png';
 import bloomChar from '@/assets/characters/bloom.png';
@@ -57,6 +58,7 @@ export default function Onboarding() {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const [step, setStep] = useState(1);
   const [selectedAvatar, setSelectedAvatar] = useState('pixel');
@@ -101,7 +103,7 @@ export default function Onboarding() {
 
       if (error) throw error;
 
-      toast({ title: 'Profile created! 🎉', description: "Now let's check your English level." });
+      toast({ title: t('profileCreated'), description: t('letsCheckLevel') });
       navigate('/launch-check');
     } catch (error) {
       console.error('Onboarding error:', error);
@@ -119,9 +121,9 @@ export default function Onboarding() {
           <div className="text-center space-y-3">
             <img src={pixoLogo} alt="PIXO" className="h-14 mx-auto animate-float" />
             <h1 className="text-3xl md:text-4xl font-display font-bold text-white">
-              Welcome Home{profile?.full_name ? `, ${profile.full_name.split(' ')[0]}` : ''}! 🏠
+              {t('welcomeHome')}{profile?.full_name ? `, ${profile.full_name.split(' ')[0]}` : ''}! 🏠
             </h1>
-            <p className="text-white/80 text-lg">Let's set up your learning world</p>
+            <p className="text-white/80 text-lg">{t('setupLearningWorld')}</p>
           </div>
 
           {/* Progress bar */}
@@ -143,9 +145,9 @@ export default function Onboarding() {
               <div className="space-y-6 animate-fade-in">
                 <div className="text-center">
                   <h2 className="text-2xl font-display font-bold text-white mb-2">
-                    Choose Your Learning Buddy! 🐾
+                    {t('chooseLearningBuddy')}
                   </h2>
-                  <p className="text-white/70">Pick a companion who'll guide you through every lesson</p>
+                  <p className="text-white/70">{t('pickCompanion')}</p>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {avatars.map(avatar => (
@@ -183,13 +185,13 @@ export default function Onboarding() {
               <div className="space-y-6 animate-fade-in">
                 <div className="text-center">
                   <h2 className="text-2xl font-display font-bold text-white mb-2">
-                    Learning Launch Check 🚀
+                    {t('learningLaunchCheck')}
                   </h2>
-                  <p className="text-white/70">Let's personalize your child's English learning journey in under 60 seconds</p>
+                  <p className="text-white/70">{t('personalizeJourney')}</p>
                 </div>
 
                 <div className="space-y-3">
-                  <label className="text-sm font-semibold text-white/90">Child Age Group</label>
+                  <label className="text-sm font-semibold text-white/90">{t('childAgeGroup')}</label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {ageGroups.map(ag => (
                       <button
@@ -212,7 +214,7 @@ export default function Onboarding() {
                 </div>
 
                 <div className="space-y-3">
-                  <label className="text-sm font-semibold text-white/90">Current Learning Stage</label>
+                  <label className="text-sm font-semibold text-white/90">{t('currentLearningStage')}</label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {learningStages.map(st => (
                       <button
@@ -241,9 +243,9 @@ export default function Onboarding() {
               <div className="space-y-6 animate-fade-in">
                 <div className="text-center">
                   <h2 className="text-2xl font-display font-bold text-white mb-2">
-                    What Should We Improve Most? 🎯
+                    {t('whatShouldWeImprove')}
                   </h2>
-                  <p className="text-white/70">Select up to 3 goals for your child</p>
+                  <p className="text-white/70">{t('selectUpTo3')}</p>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {goals.map(goal => (
@@ -279,9 +281,9 @@ export default function Onboarding() {
               <div className="space-y-6 animate-fade-in">
                 <div className="text-center">
                   <h2 className="text-2xl font-display font-bold text-white mb-2">
-                    School Board (Optional) 🏫
+                    {t('schoolBoardOptional')}
                   </h2>
-                  <p className="text-white/70">This helps us align lessons with your curriculum</p>
+                  <p className="text-white/70">{t('alignCurriculum')}</p>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   {schoolBoards.map(board => (
@@ -299,7 +301,7 @@ export default function Onboarding() {
                   ))}
                 </div>
                 <p className="text-center text-xs text-white/50">
-                  You can skip this step — it's completely optional
+                  {t('skipOptional')}
                 </p>
               </div>
             )}
@@ -313,7 +315,7 @@ export default function Onboarding() {
               onClick={() => step > 1 ? setStep(step - 1) : navigate('/auth')}
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
+              {t('back')}
             </Button>
 
             {step < totalSteps ? (
@@ -322,7 +324,7 @@ export default function Onboarding() {
                 disabled={!canProceed()}
                 onClick={() => setStep(step + 1)}
               >
-                Next
+                {t('next')}
                 <ArrowRight className="h-5 w-5 ml-2" />
               </Button>
             ) : (
@@ -336,7 +338,7 @@ export default function Onboarding() {
                 ) : (
                   <>
                     <Sparkles className="h-5 w-5 mr-2" />
-                    Build My Child's Learning Path
+                    {t('buildLearningPath')}
                   </>
                 )}
               </Button>

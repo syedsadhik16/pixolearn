@@ -16,7 +16,9 @@ import {
   CreditCard, Receipt, Crown, Volume2, Globe
 } from 'lucide-react';
 import { useSpeechSettings, getNamedVoices } from '@/hooks/useSpeechSettings';
-import { SUPPORTED_LANGUAGES, getSelectedLanguage, setSelectedLanguage } from '@/components/shared/LanguageSelector';
+import { SUPPORTED_LANGUAGES } from '@/components/shared/LanguageSelector';
+import { useTranslation } from '@/hooks/useTranslation';
+import type { LangCode } from '@/contexts/LanguageContext';
 
 interface PaymentRecord {
   id: string;
@@ -122,7 +124,7 @@ export default function Settings() {
 
   const speechHook = useSpeechSettings();
   const [voices, setVoices] = useState<{ name: string; emoji: string; voiceURI: string | null }[]>([]);
-  const [appLang, setAppLang] = useState(getSelectedLanguage());
+  const { t, language: appLang, setLanguage: setAppLang } = useTranslation();
 
   useEffect(() => {
     const loadVoices = () => setVoices(getNamedVoices());
@@ -132,15 +134,15 @@ export default function Settings() {
   }, []);
 
   const sections = [
-    { id: 'identity', label: 'Identity', icon: User },
-    { id: 'subscription', label: 'Subscription', icon: Crown },
-    { id: 'appearance', label: 'Visual Comfort', icon: Eye },
-    { id: 'voice', label: 'Voice & Audio', icon: Volume2 },
-    { id: 'language', label: 'Language', icon: Globe },
-    ...(profile?.role === 'parent' ? [{ id: 'notifications', label: 'Notifications', icon: Bell }] : []),
-    { id: 'security', label: 'Security', icon: Lock },
-    ...(profile?.role === 'parent' ? [{ id: 'parent_mode', label: 'Parent Mode', icon: Users }] : []),
-    { id: 'about', label: 'About', icon: Info },
+    { id: 'identity', label: t('identity'), icon: User },
+    { id: 'subscription', label: t('subscription'), icon: Crown },
+    { id: 'appearance', label: t('visualComfort'), icon: Eye },
+    { id: 'voice', label: t('voiceAudio'), icon: Volume2 },
+    { id: 'language', label: t('language'), icon: Globe },
+    ...(profile?.role === 'parent' ? [{ id: 'notifications', label: t('notifications'), icon: Bell }] : []),
+    { id: 'security', label: t('security'), icon: Lock },
+    ...(profile?.role === 'parent' ? [{ id: 'parent_mode', label: t('parentMode'), icon: Users }] : []),
+    { id: 'about', label: t('about'), icon: Info },
   ];
 
   if (authLoading) {
@@ -162,8 +164,8 @@ export default function Settings() {
             <ArrowLeft className="h-5 w-5" />
           </button>
           <div>
-            <h1 className="text-2xl font-display font-bold">Settings</h1>
-            <p className="text-sm text-muted-foreground">Customize your PIXO experience</p>
+            <h1 className="text-2xl font-display font-bold">{t('settings')}</h1>
+            <p className="text-sm text-muted-foreground">{t('customizeExperience')}</p>
           </div>
         </div>
 
@@ -383,16 +385,16 @@ export default function Settings() {
             {activeSection === 'language' && (
               <div className="pixo-card space-y-5 animate-fade-in">
                 <h3 className="font-display font-bold text-lg flex items-center gap-2">
-                  <Globe className="h-5 w-5 text-primary" /> App Language
+                  <Globe className="h-5 w-5 text-primary" /> {t('appLanguage')}
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  Change the interface language. Learning content remains in English.
+                  {t('languageInterfaceNote')}
                 </p>
                 <div className="grid grid-cols-2 gap-2">
                   {SUPPORTED_LANGUAGES.map(lang => (
                     <button
                       key={lang.code}
-                      onClick={() => { setAppLang(lang.code); setSelectedLanguage(lang.code); toast({ title: `Language set to ${lang.label}` }); }}
+                      onClick={() => { setAppLang(lang.code as LangCode); toast({ title: `Language set to ${lang.label}` }); }}
                       className={cn(
                         "flex items-center gap-2 p-3 rounded-xl text-sm font-semibold transition-colors text-left",
                         appLang === lang.code
@@ -405,6 +407,9 @@ export default function Settings() {
                     </button>
                   ))}
                 </div>
+                <p className="text-xs text-muted-foreground flex items-center gap-1">
+                  🌐 {t('changesApplyInstantly')}
+                </p>
               </div>
             )}
 

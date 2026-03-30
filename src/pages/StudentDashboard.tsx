@@ -31,12 +31,14 @@ import { checkAndAwardBadges } from '@/lib/gamification';
 import { useCompanion } from '@/hooks/useCompanion';
 import { TrialCountdown } from '@/components/shared/TrialCountdown';
 import { useCurriculumProgress } from '@/hooks/useCurriculumProgress';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function StudentDashboard() {
   const { user, profile, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const companion = useCompanion();
+  const { t } = useTranslation();
   
   const { progress: currProgress, todaysDay, completedDayIds, days: currDays, loading: currLoading, error: currError } = useCurriculumProgress(user?.id);
   const [streak, setStreak] = useState(0);
@@ -96,7 +98,7 @@ export default function StudentDashboard() {
         <div className="min-h-screen flex items-center justify-center">
           <div className="animate-pulse text-center">
             <div className="text-4xl mb-3">🚀</div>
-            <p className="text-muted-foreground">Loading PIXO Learning Engine...</p>
+            <p className="text-muted-foreground">{t('loadingPIXO')}</p>
           </div>
         </div>
       </Layout>
@@ -109,16 +111,16 @@ export default function StudentDashboard() {
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center pixo-card p-8 max-w-md">
             <div className="text-4xl mb-3">📚</div>
-            <h2 className="font-display font-bold text-xl mb-2">No Curriculum Data Found</h2>
+            <h2 className="font-display font-bold text-xl mb-2">{t('noCurriculumData')}</h2>
             <p className="text-muted-foreground text-sm mb-4">
-              {currError || "We couldn't load your learning content. Please try again."}
+              {currError || t('noCurriculumDesc')}
             </p>
             <div className="flex flex-col gap-2">
               <Button variant="gradient" onClick={() => window.location.reload()}>
-                Retry
+                {t('retry')}
               </Button>
               <Button variant="outline" onClick={() => navigate('/launch-check')}>
-                Reassign Level
+                {t('reassignLevel')}
               </Button>
             </div>
           </div>
@@ -159,26 +161,26 @@ export default function StudentDashboard() {
               />
               <div>
                 <h1 className="text-3xl md:text-4xl font-display font-bold">
-                  Welcome back, <span className="gradient-text">{profile?.full_name?.split(' ')[0] || 'Learner'}</span>! 👋
+                  {t('welcomeBackName')} <span className="gradient-text">{profile?.full_name?.split(' ')[0] || t('learner')}</span>! 👋
                 </h1>
                 <p className="text-muted-foreground mt-2">
                   {companion.name} says: {todaysDay 
-                    ? "Let's keep learning today!" 
-                    : "Great job! You're all caught up!"}
+                    ? t('letsKeepLearning') 
+                    : t('allCaughtUp')}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               {profile?.subscription_type === 'premium' ? (
                 <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full gradient-bg text-white text-xs font-bold">
-                  <Crown className="h-3.5 w-3.5" /> Premium
+                  <Crown className="h-3.5 w-3.5" /> {t('premium')}
                 </span>
               ) : (
                 <button
                   onClick={() => navigate('/pricing')}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted text-muted-foreground text-xs font-semibold hover:bg-primary/10 hover:text-primary transition-colors"
                 >
-                  <Crown className="h-3.5 w-3.5" /> Free Plan
+                  <Crown className="h-3.5 w-3.5" /> {t('freePlan')}
                 </button>
               )}
               <StreakDisplay streak={streak} />
@@ -190,38 +192,38 @@ export default function StudentDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
             <StatCard
-              title="Completed Days"
+              title={t('completedDays')}
               value={completedCount}
-              subtitle={`of 180 in Level 1`}
+              subtitle={`${t('of')} 180 in Level 1`}
               icon={BookOpen}
               colorClass="bg-pixo-orange/10 text-pixo-orange"
             />
           </div>
           <div className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
             <StatCard
-              title="Total XP"
+              title={t('totalXP')}
               value={totalXp}
-              subtitle="Keep earning!"
+              subtitle={t('keepEarning')}
               icon={Sparkles}
               trend={totalXp > 100 ? 'up' : 'neutral'}
-              trendValue="Keep practicing!"
+              trendValue={t('keepPracticing')}
               colorClass="bg-pixo-green/10 text-pixo-green"
             />
           </div>
           <div className="animate-slide-up" style={{ animationDelay: '0.3s' }}>
             <StatCard
-              title="Progress"
+              title={t('progress')}
               value={`${progressPercent}%`}
-              subtitle="Level 1 completion"
+              subtitle={t('levelCompletion')}
               icon={Calendar}
               colorClass="bg-pixo-blue/10 text-pixo-blue"
             />
           </div>
           <div className="animate-slide-up" style={{ animationDelay: '0.4s' }}>
             <StatCard
-              title="Current Day"
-              value={`Day ${currentDay}`}
-              subtitle="Phonics Foundation"
+              title={t('currentDay')}
+              value={`${t('day')} ${currentDay}`}
+              subtitle={t('phonicsFoundation')}
               icon={Trophy}
               colorClass="bg-pixo-yellow/10 text-pixo-yellow"
             />
@@ -236,10 +238,10 @@ export default function StudentDashboard() {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
                     <Sparkles className="h-5 w-5 text-white/80" />
-                    <span className="text-sm font-medium text-white/80">Today's Mission</span>
+                    <span className="text-sm font-medium text-white/80">{t('todaysMission')}</span>
                   </div>
                   <h2 className="text-2xl md:text-3xl font-display font-bold mb-2">
-                    Day {todaysDay.day_number}: {todaysDay.title}
+                    {t('day')} {todaysDay.day_number}: {todaysDay.title}
                   </h2>
                   <p className="text-white/90 mb-4">{todaysDay.day_objective || todaysDay.theme}</p>
                   <div className="flex flex-wrap gap-4 text-sm">
@@ -274,7 +276,7 @@ export default function StudentDashboard() {
                     className="border-white text-white hover:bg-white hover:text-primary"
                     onClick={() => navigate(`/lesson/${todaysDay.id}`)}
                   >
-                    {completedDayIds.has(todaysDay.id) ? 'Practice Again' : 'Start Lesson'}
+                    {completedDayIds.has(todaysDay.id) ? t('practiceAgain') : t('startLesson')}
                   </Button>
                 </div>
               </div>
@@ -290,11 +292,11 @@ export default function StudentDashboard() {
                 <BarChart3 className="h-6 w-6 text-pixo-blue" />
               </div>
               <div className="flex-1">
-                <h3 className="font-display font-bold">Weekly Progress Report</h3>
-                <p className="text-sm text-muted-foreground">View your lessons, XP, and streak charts</p>
+                <h3 className="font-display font-bold">{t('weeklyProgressReport')}</h3>
+                <p className="text-sm text-muted-foreground">{t('viewLessonsXP')}</p>
               </div>
               <Button variant="outline" size="sm" onClick={() => navigate('/weekly-report')}>
-                View
+                {t('view')}
               </Button>
             </div>
           </div>
@@ -307,9 +309,9 @@ export default function StudentDashboard() {
               <div className="absolute inset-0 bg-background/60 backdrop-blur-[2px] z-10 flex items-center justify-center">
                 <div className="text-center">
                   <Lock className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                  <p className="text-sm font-semibold text-muted-foreground mb-2">Premium Feature</p>
+                  <p className="text-sm font-semibold text-muted-foreground mb-2">{t('premiumFeature')}</p>
                   <Button variant="gradient" size="sm" onClick={() => navigate('/pricing')}>
-                    <Crown className="h-4 w-4 mr-1" /> Upgrade to Unlock
+                    <Crown className="h-4 w-4 mr-1" /> {t('upgradeToUnlock')}
                   </Button>
                 </div>
               </div>
@@ -320,9 +322,9 @@ export default function StudentDashboard() {
                   <MessageCircle className="h-7 w-7 text-accent" />
                 </div>
                 <div>
-                  <h3 className="font-display font-bold text-lg">AI Practice Simulations</h3>
+                  <h3 className="font-display font-bold text-lg">{t('aiPracticeSimulations')}</h3>
                   <p className="text-sm text-muted-foreground">
-                    Practice real conversations with AI in restaurants, shops, interviews & more
+                    {t('aiPracticeDesc')}
                   </p>
                 </div>
               </div>
@@ -333,7 +335,7 @@ export default function StudentDashboard() {
                 disabled={profile?.subscription_type === 'free'}
               >
                 <MessageCircle className="h-5 w-5 mr-2" />
-                Start Practicing
+                {t('startPracticing')}
               </Button>
             </div>
           </div>
@@ -342,9 +344,9 @@ export default function StudentDashboard() {
         {/* Lesson List - from curriculum_days */}
         <div className="animate-fade-in" style={{ animationDelay: '0.6s' }}>
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-display font-bold">Your Lessons</h3>
+            <h3 className="text-xl font-display font-bold">{t('yourLessons')}</h3>
             <span className="text-sm text-muted-foreground">
-              Level 1: Phonics Foundation
+              {t('levelPhonics')}
             </span>
           </div>
 
@@ -370,7 +372,7 @@ export default function StudentDashboard() {
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-semibold bg-muted px-2 py-1 rounded-full">
-                        Day {day.day_number}
+                        {t('day')} {day.day_number}
                       </span>
                       {completed && (
                         <CheckCircle2 className="h-5 w-5 text-pixo-green" />
@@ -410,22 +412,22 @@ export default function StudentDashboard() {
                     {premiumLocked ? (
                       <>
                         <Crown className="h-4 w-4 mr-1" />
-                        Upgrade
+                        {t('upgrade')}
                       </>
                     ) : !accessible ? (
                       <>
                         <Lock className="h-4 w-4 mr-1" />
-                        Locked
+                        {t('locked')}
                       </>
                     ) : completed ? (
                       <>
                         <TrendingUp className="h-4 w-4 mr-1" />
-                        Practice Again
+                        {t('practiceAgain')}
                       </>
                     ) : (
                       <>
                         <Play className="h-4 w-4 mr-1" />
-                        Start
+                        {t('startLesson')}
                       </>
                     )}
                   </Button>

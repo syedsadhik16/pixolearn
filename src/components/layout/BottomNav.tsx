@@ -1,16 +1,18 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Home, Map, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-const navItems = [
-  { path: '/student', label: 'Home', icon: Home },
-  { path: '/journey', label: 'Journey', icon: Map },
-  { path: '/profile', label: 'Profile', icon: User },
-];
+import { useTranslation } from '@/hooks/useTranslation';
 
 export function BottomNav() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { t } = useTranslation();
+
+  const navItems = [
+    { path: '/student', label: t('home'), icon: Home },
+    { path: '/journey', label: t('journey'), icon: Map },
+    { path: '/profile', label: t('profile'), icon: User },
+  ];
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-lg border-t border-border safe-area-bottom">

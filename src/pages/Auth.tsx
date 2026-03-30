@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import pixoLogo from '@/assets/pixo-logo.png';
 import { Eye, EyeOff, GraduationCap, Users, Loader2 } from 'lucide-react';
 import { z } from 'zod';
+import { useTranslation } from '@/hooks/useTranslation';
 
 const authSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -34,13 +35,11 @@ export default function Auth() {
   const { signIn, signUp, resetPassword, user, profile } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (user && profile) {
-      // For new students, redirect to level selection
-      // For returning users, go to their dashboard
       if (profile.role === 'student') {
-        // Check if they've selected a level by looking at their progress
         checkStudentProgress();
       } else {
         const redirectPath = profile.role === 'admin' ? '/admin' : '/parent';
@@ -51,8 +50,6 @@ export default function Auth() {
 
   const checkStudentProgress = async () => {
     if (!user) return;
-    
-    // Check if onboarding is completed
     const { data: learnerProfile } = await supabase
       .from('learner_profiles')
       .select('onboarding_completed')
@@ -60,7 +57,6 @@ export default function Auth() {
       .maybeSingle();
 
     if (!learnerProfile || !learnerProfile.onboarding_completed) {
-      // New student or onboarding not completed → go to onboarding
       navigate('/onboarding');
     } else {
       navigate('/student');
@@ -103,39 +99,39 @@ export default function Auth() {
         const { error } = await resetPassword(email);
         if (error) throw error;
         toast({
-          title: 'Check your email',
-          description: 'We sent you a password reset link.',
+          title: t('checkEmail'),
+          description: t('resetLinkSent'),
         });
         setIsResetPassword(false);
       } else if (isSignUp) {
         const { error } = await signUp(email, password, fullName, selectedRole);
         if (error) {
           if (error.message.includes('already registered')) {
-            throw new Error('This email is already registered. Please sign in instead.');
+            throw new Error(t('emailAlreadyRegistered'));
           }
           throw error;
         }
         toast({
-          title: 'Welcome to PIXO! 🎉',
-          description: 'Your account has been created successfully.',
+          title: t('welcomeToPIXO'),
+          description: t('accountCreated'),
         });
       } else {
         const { error } = await signIn(email, password);
         if (error) {
           if (error.message.includes('Invalid login')) {
-            throw new Error('Invalid email or password. Please try again.');
+            throw new Error(t('invalidCredentials'));
           }
           throw error;
         }
         toast({
-          title: 'Welcome back! 👋',
-          description: 'You have signed in successfully.',
+          title: t('welcomeBackGreeting'),
+          description: t('signedInSuccess'),
         });
       }
     } catch (error) {
       toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Something went wrong',
+        title: t('error'),
+        description: error instanceof Error ? error.message : t('somethingWrong'),
         variant: 'destructive',
       });
     } finally {
@@ -146,14 +142,14 @@ export default function Auth() {
   const roles = [
     {
       id: 'student' as UserRole,
-      title: 'Student',
-      description: 'I want to learn English',
+      title: t('student'),
+      description: t('iWantToLearn'),
       icon: GraduationCap,
     },
     {
       id: 'parent' as UserRole,
-      title: 'Parent',
-      description: 'I want to monitor my child',
+      title: t('parent'),
+      description: t('iWantToMonitor'),
       icon: Users,
     },
   ];
@@ -167,10 +163,10 @@ export default function Auth() {
             <img src={pixoLogo} alt="PIXO" className="h-32 mx-auto animate-float" />
             <div className="space-y-4">
               <h1 className="text-4xl font-display font-bold text-white">
-                Energy. Learn. Grow.
+                {t('energyLearnGrow')}
               </h1>
               <p className="text-xl text-white/90 max-w-md">
-                Master spoken English with AI-powered lessons designed to build your confidence.
+                {t('heroDescription')}
               </p>
             </div>
             <div className="flex justify-center gap-6 text-white/80">
@@ -180,7 +176,7 @@ export default function Auth() {
               </div>
               <div className="text-center">
                 <p className="text-3xl font-bold">500+</p>
-                <p className="text-sm">Lessons</p>
+                <p className="text-sm">{t('lessons')}</p>
               </div>
               <div className="text-center">
                 <p className="text-3xl font-bold">95%</p>
@@ -200,17 +196,17 @@ export default function Auth() {
             <div className="text-center space-y-2">
               <h2 className="text-3xl font-display font-bold">
                 {isResetPassword
-                  ? 'Reset Password'
+                  ? t('resetPassword')
                   : isSignUp
-                  ? 'Create Account'
-                  : 'Welcome Back'}
+                  ? t('createAccount')
+                  : t('welcomeBack')}
               </h2>
               <p className="text-muted-foreground">
                 {isResetPassword
-                  ? 'Enter your email to receive a reset link'
+                  ? t('enterResetEmail')
                   : isSignUp
-                  ? 'Start your English learning journey today'
-                  : 'Continue your learning journey'}
+                  ? t('startJourneyToday')
+                  : t('continueJourney')}
               </p>
             </div>
 
@@ -219,7 +215,7 @@ export default function Auth() {
                 <>
                   {/* Role Selection */}
                   <div className="space-y-3">
-                    <Label>I am a...</Label>
+                    <Label>{t('iAmA')}</Label>
                     <div className="grid grid-cols-2 gap-4">
                       {roles.map((role) => (
                         <button
@@ -250,12 +246,12 @@ export default function Auth() {
 
                   {/* Full Name */}
                   <div className="space-y-2">
-                    <Label htmlFor="fullName">Full Name</Label>
+                    <Label htmlFor="fullName">{t('fullName')}</Label>
                     <Input
                       id="fullName"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
-                      placeholder="Enter your full name"
+                      placeholder={t('enterFullName')}
                       className={errors.fullName ? 'border-destructive' : ''}
                     />
                     {errors.fullName && (
@@ -267,7 +263,7 @@ export default function Auth() {
 
               {/* Email */}
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t('email')}</Label>
                 <Input
                   id="email"
                   type="email"
@@ -284,14 +280,14 @@ export default function Auth() {
               {/* Password */}
               {!isResetPassword && (
                 <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">{t('password')}</Label>
                   <div className="relative">
                     <Input
                       id="password"
                       type={showPassword ? 'text' : 'password'}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Enter your password"
+                      placeholder={t('enterPassword')}
                       className={errors.password ? 'border-destructive pr-10' : 'pr-10'}
                     />
                     <button
@@ -319,7 +315,7 @@ export default function Auth() {
                   onClick={() => setIsResetPassword(true)}
                   className="text-sm text-primary hover:underline"
                 >
-                  Forgot your password?
+                  {t('forgotPassword')}
                 </button>
               )}
 
@@ -334,11 +330,11 @@ export default function Auth() {
                 {loading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : isResetPassword ? (
-                  'Send Reset Link'
+                  t('sendResetLink')
                 ) : isSignUp ? (
-                  'Create Account'
+                  t('createAccount')
                 ) : (
-                  'Sign In'
+                  t('signIn')
                 )}
               </Button>
             </form>
@@ -350,16 +346,16 @@ export default function Auth() {
                   onClick={() => setIsResetPassword(false)}
                   className="text-sm text-muted-foreground hover:text-foreground"
                 >
-                  Back to sign in
+                  {t('backToSignIn')}
                 </button>
               ) : (
                 <p className="text-sm text-muted-foreground">
-                  {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
+                  {isSignUp ? t('alreadyHaveAccount') : t('dontHaveAccount')}{' '}
                   <button
                     onClick={() => setIsSignUp(!isSignUp)}
                     className="text-primary font-semibold hover:underline"
                   >
-                    {isSignUp ? 'Sign In' : 'Sign Up'}
+                    {isSignUp ? t('signIn') : t('signUp')}
                   </button>
                 </p>
               )}
@@ -370,4 +366,3 @@ export default function Auth() {
     </Layout>
   );
 }
-
