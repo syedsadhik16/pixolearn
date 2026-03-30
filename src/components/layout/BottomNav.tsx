@@ -11,6 +11,7 @@ export function BottomNav() {
   const navItems = [
     { path: '/student', label: t('home'), icon: Home },
     { path: '/journey', label: t('journey'), icon: Map },
+    { path: '/trophy-room', label: t('trophies'), icon: Trophy },
     { path: '/profile', label: t('profile'), icon: User },
   ];
 

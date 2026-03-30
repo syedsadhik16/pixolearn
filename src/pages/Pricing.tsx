@@ -197,7 +197,7 @@ export default function Pricing() {
           } catch (err: any) {
             console.error('Verification error:', err);
             toast({ title: 'Verification Issue', description: 'Payment received but verification pending. Please contact support.', variant: 'destructive' });
-            navigate('/student');
+            navigate('/payment-success');
           }
         },
         prefill: { name: profile?.full_name || '', email: profile?.email || '' },
