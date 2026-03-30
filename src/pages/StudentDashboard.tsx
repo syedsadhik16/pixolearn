@@ -180,7 +180,7 @@ export default function StudentDashboard() {
                   onClick={() => navigate('/pricing')}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted text-muted-foreground text-xs font-semibold hover:bg-primary/10 hover:text-primary transition-colors"
                 >
-                  <Crown className="h-3.5 w-3.5" /> Free Plan
+                  <Crown className="h-3.5 w-3.5" /> {t('freePlan')}
                 </button>
               )}
               <StreakDisplay streak={streak} />
