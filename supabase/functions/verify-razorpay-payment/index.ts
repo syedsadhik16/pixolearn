@@ -114,6 +114,32 @@ serve(async (req) => {
       throw new Error('Failed to update subscription');
     }
 
+    // Write entitlement record server-side
+    const planDurationMap: Record<string, number> = {
+      '6-months': 6,
+      '12-months': 12,
+      '18-months': 18,
+    };
+    const durationMonths = planDurationMap[plan_id] || 6;
+    const now = new Date();
+    const expiryDate = new Date(now);
+    expiryDate.setMonth(expiryDate.getMonth() + durationMonths);
+
+    await supabase.from('user_entitlements').upsert({
+      user_id,
+      payment_status: 'success',
+      payment_id: razorpay_payment_id,
+      order_id: razorpay_order_id,
+      selected_plan: plan_id,
+      plan_duration_months: durationMonths,
+      is_paid: true,
+      entitlement_status: 'active',
+      entitlement_start_date: now.toISOString(),
+      entitlement_expiry_date: expiryDate.toISOString(),
+      paid_at: now.toISOString(),
+      updated_at: now.toISOString(),
+    }, { onConflict: 'user_id' });
+
     return new Response(JSON.stringify({
       success: true,
       message: 'Payment verified and subscription activated',

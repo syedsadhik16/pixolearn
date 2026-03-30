@@ -39,17 +39,20 @@ export default function Auth() {
 
   useEffect(() => {
     if (user && profile) {
-      if (profile.role === 'student') {
-        checkStudentProgress();
-      } else {
+      if (profile.role !== 'student') {
         const redirectPath = profile.role === 'admin' ? '/admin' : '/parent';
         navigate(redirectPath);
+        return;
       }
+      // Student flow: check entitlement state for proper redirect
+      checkStudentFlowState();
     }
   }, [user, profile, navigate]);
 
-  const checkStudentProgress = async () => {
+  const checkStudentFlowState = async () => {
     if (!user) return;
+
+    // Check learner profile onboarding first
     const { data: learnerProfile } = await supabase
       .from('learner_profiles')
       .select('onboarding_completed')
@@ -58,9 +61,40 @@ export default function Auth() {
 
     if (!learnerProfile || !learnerProfile.onboarding_completed) {
       navigate('/onboarding');
-    } else {
-      navigate('/student');
+      return;
     }
+
+    // Check entitlement state
+    const { data: entitlement } = await supabase
+      .from('user_entitlements')
+      .select('launch_check_completed, selected_level, is_paid, entitlement_status, entitlement_expiry_date')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    // Premium via profile (trial or existing subscription)
+    if (profile?.subscription_type === 'premium') {
+      navigate('/student');
+      return;
+    }
+
+    if (!entitlement || !entitlement.launch_check_completed) {
+      navigate('/launch-check');
+      return;
+    }
+    if (!entitlement.selected_level) {
+      navigate('/level-selection');
+      return;
+    }
+    if (!entitlement.is_paid || entitlement.entitlement_status !== 'active') {
+      navigate('/pricing');
+      return;
+    }
+    if (entitlement.entitlement_expiry_date && new Date(entitlement.entitlement_expiry_date) <= new Date()) {
+      navigate('/pricing');
+      return;
+    }
+
+    navigate('/student');
   };
 
   const validateForm = () => {

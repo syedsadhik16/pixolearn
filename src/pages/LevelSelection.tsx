@@ -84,6 +84,13 @@ export default function LevelSelection() {
 
       if (error) throw error;
 
+      // Update entitlement with selected level
+      await supabase.from('user_entitlements').upsert({
+        user_id: user.id,
+        selected_level: selectedLevel,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'user_id' });
+
       const levelNames: Record<string, string> = {
         beginner: 'Level 1: Phonics Foundation',
         intermediate: 'Level 2: English Communication',
@@ -95,7 +102,7 @@ export default function LevelSelection() {
         description: `You're starting ${levelNames[selectedLevel] || selectedLevel}`,
       });
 
-      navigate('/student');
+      navigate('/pricing');
     } catch (error) {
       toast({
         title: 'Error',

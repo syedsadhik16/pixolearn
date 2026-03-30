@@ -4,6 +4,7 @@ import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { handlePaymentSuccess } from '@/lib/entitlement';
 import { useToast } from '@/hooks/use-toast';
 import pixoLogo from '@/assets/pixo-logo.png';
 import { Check, ArrowRight, Star, Sparkles, ArrowLeft, Loader2, Shield } from 'lucide-react';
@@ -169,6 +170,28 @@ export default function Pricing() {
               },
             });
             if (verifyError || !verifyData?.success) throw new Error(verifyData?.error || 'Payment verification failed');
+
+            // Determine plan duration in months
+            const planDurationMap: Record<string, number> = {
+              '6-months': 6,
+              '12-months': 12,
+              '18-months': 18,
+            };
+            const durationMonths = planDurationMap[planId] || 6;
+
+            // Write entitlement to database + sessionStorage
+            await handlePaymentSuccess({
+              userId: user.id,
+              email: profile?.email || user.email || '',
+              selectedPlan: planName,
+              selectedLevel: sessionStorage.getItem('selectedLevel') || 'beginner',
+              planDurationMonths: durationMonths,
+              paymentId: response.razorpay_payment_id,
+              orderId: response.razorpay_order_id,
+              amountPaid: priceAmount,
+              currency: 'INR',
+            });
+
             sessionStorage.removeItem('selectedPlan');
             toast({ title: 'Payment Successful! 🎉', description: `Welcome to PIXO ${planName}! Your premium features are now active.` });
             navigate('/student');

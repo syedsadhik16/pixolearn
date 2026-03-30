@@ -212,6 +212,15 @@ export default function LaunchCheck() {
         current_day: 1,
       }).eq('student_id', user.id);
 
+      // Update entitlement: mark launch check completed + recommended level
+      await supabase.from('user_entitlements').upsert({
+        user_id: user.id,
+        email: user.email || '',
+        launch_check_completed: true,
+        recommended_level: level,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'user_id' });
+
       // Get AI-powered assessment evaluation (non-blocking)
       try {
         const { data: aiData } = await supabase.functions.invoke('ai-launch-check', {
@@ -610,11 +619,11 @@ export default function LaunchCheck() {
                   <Button
                     className="w-full bg-white text-primary hover:bg-white/90 font-bold text-lg py-6 rounded-2xl"
                     disabled={loading}
-                    onClick={() => navigate('/journey')}
+                    onClick={() => navigate('/level-selection')}
                   >
                     {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : (
                       <>
-                        Start Learning Journey
+                        Choose Your Level
                         <ArrowRight className="h-5 w-5 ml-2" />
                       </>
                     )}
