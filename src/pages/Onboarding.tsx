@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Layout } from '@/components/layout/Layout';
 import pixoLogo from '@/assets/pixo-logo.png';
 import { Check, Loader2, ArrowRight, ArrowLeft, Sparkles } from 'lucide-react';
+import { useTranslation } from '@/hooks/useTranslation';
 import pixelChar from '@/assets/characters/pixel.png';
 import zestChar from '@/assets/characters/zest.png';
 import bloomChar from '@/assets/characters/bloom.png';
