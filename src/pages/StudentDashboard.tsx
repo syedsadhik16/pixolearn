@@ -322,9 +322,9 @@ export default function StudentDashboard() {
                   <MessageCircle className="h-7 w-7 text-accent" />
                 </div>
                 <div>
-                  <h3 className="font-display font-bold text-lg">AI Practice Simulations</h3>
+                  <h3 className="font-display font-bold text-lg">{t('aiPracticeSimulations')}</h3>
                   <p className="text-sm text-muted-foreground">
-                    Practice real conversations with AI in restaurants, shops, interviews & more
+                    {t('aiPracticeDesc')}
                   </p>
                 </div>
               </div>
