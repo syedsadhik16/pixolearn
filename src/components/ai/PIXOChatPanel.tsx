@@ -47,6 +47,18 @@ export function PIXOChatPanel({ mode: propMode, isFullPage = false, studentId, c
   const sendMessage = useCallback(async (text: string) => {
     if (!text.trim() || isLoading) return;
 
+    if (!user) {
+      setError('Please sign in to chat with PIXO.');
+      const loginMsg: ChatMessage = {
+        id: crypto.randomUUID(),
+        role: 'assistant',
+        content: "You need to sign in first before we can chat! 😊",
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, loginMsg]);
+      return;
+    }
+
     const userMsg: ChatMessage = {
       id: crypto.randomUUID(),
       role: 'user',
