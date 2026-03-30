@@ -344,9 +344,9 @@ export default function StudentDashboard() {
         {/* Lesson List - from curriculum_days */}
         <div className="animate-fade-in" style={{ animationDelay: '0.6s' }}>
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-display font-bold">Your Lessons</h3>
+            <h3 className="text-xl font-display font-bold">{t('yourLessons')}</h3>
             <span className="text-sm text-muted-foreground">
-              Level 1: Phonics Foundation
+              {t('levelPhonics')}
             </span>
           </div>
 
