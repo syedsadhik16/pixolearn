@@ -282,6 +282,46 @@ export const en = {
   of: "of",
   xp: "XP",
   min: "min",
+
+  // Payment Success
+  paymentSuccessful: "Payment Successful!",
+  welcomeToPIXOExcited: "Welcome to PIXO, we're excited to have you!",
+  level: "Level",
+  validUntil: "Valid Until",
+  startLearning: "Start Learning",
+  autoRedirect: "You'll be redirected to your dashboard in a few seconds...",
+
+  // Billing
+  loadingBilling: "Loading billing...",
+  billingSubscriptions: "Billing & Subscriptions",
+  noPlan: "No Plan",
+  active: "Active",
+  expired: "Expired",
+  startDate: "Start",
+  expiryDate: "Expiry",
+  daysRemaining: "days remaining",
+  renewSubscription: "Renew Subscription",
+  upgradePlan: "Upgrade Plan",
+  subscriptionExpiredMsg: "Your subscription has expired. Renew to continue learning.",
+  choosePlanToStart: "Choose a plan to unlock premium learning content.",
+  renewNow: "Renew Now",
+  viewPlans: "View Plans",
+  availableUpgrades: "Available Upgrades",
+  billingHistory: "Billing History",
+  noPaymentsYet: "No payments recorded yet.",
+  billing: "Billing",
+
+  // Trophy Room
+  loadingTrophies: "Loading trophies...",
+  hallOfFame: "Hall of Fame",
+  hiExplorer: "Hi, {name} Explorer!",
+  dayRoadmap: "180-Day English Roadmap",
+  masteryLevel: "Mastery Level",
+  trophyRoom: "Trophy Room",
+  noBadgesAvailable: "No badges available yet.",
+  earned: "Earned",
+  badges: "Badges",
+  trophies: "Trophies",
 } as const;
 
 export type TranslationKey = keyof typeof en;
