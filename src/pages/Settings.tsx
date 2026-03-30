@@ -16,7 +16,9 @@ import {
   CreditCard, Receipt, Crown, Volume2, Globe
 } from 'lucide-react';
 import { useSpeechSettings, getNamedVoices } from '@/hooks/useSpeechSettings';
-import { SUPPORTED_LANGUAGES, getSelectedLanguage, setSelectedLanguage } from '@/components/shared/LanguageSelector';
+import { SUPPORTED_LANGUAGES } from '@/components/shared/LanguageSelector';
+import { useTranslation } from '@/hooks/useTranslation';
+import type { LangCode } from '@/contexts/LanguageContext';
 
 interface PaymentRecord {
   id: string;
