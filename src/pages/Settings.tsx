@@ -124,7 +124,7 @@ export default function Settings() {
 
   const speechHook = useSpeechSettings();
   const [voices, setVoices] = useState<{ name: string; emoji: string; voiceURI: string | null }[]>([]);
-  const [appLang, setAppLang] = useState(getSelectedLanguage());
+  const { t, language: appLang, setLanguage: setAppLang } = useTranslation();
 
   useEffect(() => {
     const loadVoices = () => setVoices(getNamedVoices());
