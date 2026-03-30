@@ -212,9 +212,9 @@ export default function StudentDashboard() {
           </div>
           <div className="animate-slide-up" style={{ animationDelay: '0.3s' }}>
             <StatCard
-              title="Progress"
+              title={t('progress')}
               value={`${progressPercent}%`}
-              subtitle="Level 1 completion"
+              subtitle={t('levelCompletion')}
               icon={Calendar}
               colorClass="bg-pixo-blue/10 text-pixo-blue"
             />
