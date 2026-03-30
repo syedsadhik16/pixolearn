@@ -320,7 +320,6 @@ export const en = {
   trophyRoom: "Trophy Room",
   noBadgesAvailable: "No badges available yet.",
   earned: "Earned",
-  badges: "Badges",
   trophies: "Trophies",
 } as const;
 
