@@ -221,9 +221,9 @@ export default function StudentDashboard() {
           </div>
           <div className="animate-slide-up" style={{ animationDelay: '0.4s' }}>
             <StatCard
-              title="Current Day"
-              value={`Day ${currentDay}`}
-              subtitle="Phonics Foundation"
+              title={t('currentDay')}
+              value={`${t('day')} ${currentDay}`}
+              subtitle={t('phonicsFoundation')}
               icon={Trophy}
               colorClass="bg-pixo-yellow/10 text-pixo-yellow"
             />
