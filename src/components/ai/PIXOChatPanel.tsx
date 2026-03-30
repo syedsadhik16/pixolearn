@@ -29,7 +29,7 @@ interface PIXOChatPanelProps {
 }
 
 export function PIXOChatPanel({ mode: propMode, isFullPage = false, studentId, currentDay, currentLevel }: PIXOChatPanelProps) {
-  const { user, profile } = useAuth();
+  const { user, session, profile } = useAuth();
   const mode: AIMode = propMode || (profile?.role === 'parent' ? 'parent' : 'student');
   const quickActions = mode === 'parent' ? QUICK_ACTIONS_PARENT : QUICK_ACTIONS_STUDENT;
 
@@ -47,7 +47,10 @@ export function PIXOChatPanel({ mode: propMode, isFullPage = false, studentId, c
   const sendMessage = useCallback(async (text: string) => {
     if (!text.trim() || isLoading) return;
 
-    if (!user) {
+    const { data: { session: activeSession } } = await supabase.auth.getSession();
+    const accessToken = activeSession?.access_token || session?.access_token;
+
+    if (!user || !accessToken) {
       setError('Please sign in to chat with PIXO.');
       const loginMsg: ChatMessage = {
         id: crypto.randomUUID(),
@@ -73,11 +76,14 @@ export function PIXOChatPanel({ mode: propMode, isFullPage = false, studentId, c
 
     try {
       const { data, error: fnError } = await supabase.functions.invoke('pixo-ai-chat', {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
         body: {
           message: text.trim(),
           role_context: mode,
-          student_id: studentId || user?.id,
-          parent_id: mode === 'parent' ? user?.id : undefined,
+          student_id: studentId || user.id,
+          parent_id: mode === 'parent' ? user.id : undefined,
           current_level: currentLevel,
           current_day: currentDay,
         },
