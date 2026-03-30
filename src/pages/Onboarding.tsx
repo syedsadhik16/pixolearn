@@ -58,6 +58,7 @@ export default function Onboarding() {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const [step, setStep] = useState(1);
   const [selectedAvatar, setSelectedAvatar] = useState('pixel');
