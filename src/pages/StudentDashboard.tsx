@@ -98,7 +98,7 @@ export default function StudentDashboard() {
         <div className="min-h-screen flex items-center justify-center">
           <div className="animate-pulse text-center">
             <div className="text-4xl mb-3">🚀</div>
-            <p className="text-muted-foreground">Loading PIXO Learning Engine...</p>
+            <p className="text-muted-foreground">{t('loadingPIXO')}</p>
           </div>
         </div>
       </Layout>
