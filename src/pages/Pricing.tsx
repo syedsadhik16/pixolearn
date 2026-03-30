@@ -236,11 +236,13 @@ export default function Pricing() {
         body: { user_id: user.id },
       });
 
-      // Parse error message from either data or error context
-      const errorMsg = data?.error || (error as any)?.context?.body ? JSON.parse((error as any)?.context?.body || '{}')?.error : error?.message;
-      
       if (error || !data?.success) {
-        const msg = errorMsg || 'Failed to activate trial';
+        // Extract message from various error shapes
+        let msg = data?.error || '';
+        if (!msg && error) {
+          try { msg = JSON.parse((error as any)?.context?.body || '{}')?.error || ''; } catch {}
+          if (!msg) msg = error.message || 'Failed to activate trial';
+        }
         if (msg.toLowerCase().includes('already been used')) {
           toast({ title: 'Trial Already Used', description: 'Your free trial has expired. Choose a plan below to continue learning!' });
           return;
