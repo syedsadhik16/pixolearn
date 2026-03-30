@@ -243,9 +243,9 @@ export default function Onboarding() {
               <div className="space-y-6 animate-fade-in">
                 <div className="text-center">
                   <h2 className="text-2xl font-display font-bold text-white mb-2">
-                    What Should We Improve Most? 🎯
+                    {t('whatShouldWeImprove')}
                   </h2>
-                  <p className="text-white/70">Select up to 3 goals for your child</p>
+                  <p className="text-white/70">{t('selectUpTo3')}</p>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {goals.map(goal => (
