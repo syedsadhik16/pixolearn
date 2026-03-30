@@ -281,9 +281,9 @@ export default function Onboarding() {
               <div className="space-y-6 animate-fade-in">
                 <div className="text-center">
                   <h2 className="text-2xl font-display font-bold text-white mb-2">
-                    School Board (Optional) 🏫
+                    {t('schoolBoardOptional')}
                   </h2>
-                  <p className="text-white/70">This helps us align lessons with your curriculum</p>
+                  <p className="text-white/70">{t('alignCurriculum')}</p>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   {schoolBoards.map(board => (
