@@ -121,9 +121,9 @@ export default function Onboarding() {
           <div className="text-center space-y-3">
             <img src={pixoLogo} alt="PIXO" className="h-14 mx-auto animate-float" />
             <h1 className="text-3xl md:text-4xl font-display font-bold text-white">
-              Welcome Home{profile?.full_name ? `, ${profile.full_name.split(' ')[0]}` : ''}! 🏠
+              {t('welcomeHome')}{profile?.full_name ? `, ${profile.full_name.split(' ')[0]}` : ''}! 🏠
             </h1>
-            <p className="text-white/80 text-lg">Let's set up your learning world</p>
+            <p className="text-white/80 text-lg">{t('setupLearningWorld')}</p>
           </div>
 
           {/* Progress bar */}
