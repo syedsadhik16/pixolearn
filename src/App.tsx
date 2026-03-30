@@ -80,6 +80,7 @@ const App = () => (
           <NoupeChatbot />
         </BrowserRouter>
       </AuthProvider>
+      </LanguageProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
