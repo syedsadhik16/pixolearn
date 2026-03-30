@@ -55,22 +55,22 @@ const App = () => (
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/launch-check" element={<LaunchCheck />} />
             <Route path="/pricing" element={<Pricing />} />
-            <Route path="/student" element={<StudentDashboard />} />
-            <Route path="/lesson/:lessonId" element={<LessonSession />} />
-            <Route path="/practice" element={<AIPractice />} />
-            <Route path="/journey" element={<Journey />} />
-            <Route path="/chat" element={<Chat />} />
-            <Route path="/live" element={<Live />} />
-            <Route path="/roleplay" element={<Roleplay />} />
-            <Route path="/dictionary" element={<Dictionary />} />
-            <Route path="/studio" element={<Studio />} />
-            <Route path="/leaderboard" element={<Leaderboard />} />
-            <Route path="/shop" element={<Shop />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/weekly-report" element={<WeeklyReport />} />
-            <Route path="/creative-writing" element={<CreativeWriting />} />
-            <Route path="/pixo-chat" element={<PIXOChat />} />
+            <Route path="/student" element={<PremiumRoute><StudentDashboard /></PremiumRoute>} />
+            <Route path="/lesson/:lessonId" element={<PremiumRoute><LessonSession /></PremiumRoute>} />
+            <Route path="/practice" element={<PremiumRoute><AIPractice /></PremiumRoute>} />
+            <Route path="/journey" element={<PremiumRoute><Journey /></PremiumRoute>} />
+            <Route path="/chat" element={<PremiumRoute><Chat /></PremiumRoute>} />
+            <Route path="/live" element={<PremiumRoute><Live /></PremiumRoute>} />
+            <Route path="/roleplay" element={<PremiumRoute><Roleplay /></PremiumRoute>} />
+            <Route path="/dictionary" element={<PremiumRoute><Dictionary /></PremiumRoute>} />
+            <Route path="/studio" element={<PremiumRoute><Studio /></PremiumRoute>} />
+            <Route path="/leaderboard" element={<PremiumRoute><Leaderboard /></PremiumRoute>} />
+            <Route path="/shop" element={<PremiumRoute><Shop /></PremiumRoute>} />
+            <Route path="/profile" element={<PremiumRoute><Profile /></PremiumRoute>} />
+            <Route path="/settings" element={<PremiumRoute><Settings /></PremiumRoute>} />
+            <Route path="/weekly-report" element={<PremiumRoute><WeeklyReport /></PremiumRoute>} />
+            <Route path="/creative-writing" element={<PremiumRoute><CreativeWriting /></PremiumRoute>} />
+            <Route path="/pixo-chat" element={<PremiumRoute><PIXOChat /></PremiumRoute>} />
             <Route path="/parent" element={<ProtectedRoute allowedRoles={['parent', 'admin']}><ParentDashboard /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/knowledge" element={<ProtectedRoute allowedRoles={['admin']}><AdminKnowledgeIngestion /></ProtectedRoute>} />
