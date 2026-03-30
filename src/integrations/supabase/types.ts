@@ -1858,6 +1858,75 @@ export type Database = {
           },
         ]
       }
+      user_entitlements: {
+        Row: {
+          amount_paid: number | null
+          created_at: string
+          currency: string | null
+          email: string | null
+          entitlement_expiry_date: string | null
+          entitlement_start_date: string | null
+          entitlement_status: string
+          id: string
+          is_paid: boolean
+          launch_check_completed: boolean
+          order_id: string | null
+          paid_at: string | null
+          payment_id: string | null
+          payment_status: string
+          plan_duration_months: number | null
+          recommended_level: string | null
+          selected_level: string | null
+          selected_plan: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_paid?: number | null
+          created_at?: string
+          currency?: string | null
+          email?: string | null
+          entitlement_expiry_date?: string | null
+          entitlement_start_date?: string | null
+          entitlement_status?: string
+          id?: string
+          is_paid?: boolean
+          launch_check_completed?: boolean
+          order_id?: string | null
+          paid_at?: string | null
+          payment_id?: string | null
+          payment_status?: string
+          plan_duration_months?: number | null
+          recommended_level?: string | null
+          selected_level?: string | null
+          selected_plan?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_paid?: number | null
+          created_at?: string
+          currency?: string | null
+          email?: string | null
+          entitlement_expiry_date?: string | null
+          entitlement_start_date?: string | null
+          entitlement_status?: string
+          id?: string
+          is_paid?: boolean
+          launch_check_completed?: boolean
+          order_id?: string | null
+          paid_at?: string | null
+          payment_id?: string | null
+          payment_status?: string
+          plan_duration_months?: number | null
+          recommended_level?: string | null
+          selected_level?: string | null
+          selected_plan?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       writing_submissions: {
         Row: {
           corrected_text: string | null
