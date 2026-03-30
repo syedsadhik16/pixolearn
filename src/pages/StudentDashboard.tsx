@@ -192,9 +192,9 @@ export default function StudentDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
             <StatCard
-              title="Completed Days"
+              title={t('completedDays')}
               value={completedCount}
-              subtitle={`of 180 in Level 1`}
+              subtitle={`${t('of')} 180 in Level 1`}
               icon={BookOpen}
               colorClass="bg-pixo-orange/10 text-pixo-orange"
             />
