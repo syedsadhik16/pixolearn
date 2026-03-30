@@ -315,7 +315,7 @@ export default function Onboarding() {
               onClick={() => step > 1 ? setStep(step - 1) : navigate('/auth')}
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
+              {t('back')}
             </Button>
 
             {step < totalSteps ? (
