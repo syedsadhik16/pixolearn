@@ -372,7 +372,7 @@ export default function StudentDashboard() {
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-semibold bg-muted px-2 py-1 rounded-full">
-                        Day {day.day_number}
+                        {t('day')} {day.day_number}
                       </span>
                       {completed && (
                         <CheckCircle2 className="h-5 w-5 text-pixo-green" />
