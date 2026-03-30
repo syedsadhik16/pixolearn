@@ -191,7 +191,7 @@ export default function Onboarding() {
                 </div>
 
                 <div className="space-y-3">
-                  <label className="text-sm font-semibold text-white/90">Child Age Group</label>
+                  <label className="text-sm font-semibold text-white/90">{t('childAgeGroup')}</label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {ageGroups.map(ag => (
                       <button
