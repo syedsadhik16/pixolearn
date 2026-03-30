@@ -161,7 +161,7 @@ export default function StudentDashboard() {
               />
               <div>
                 <h1 className="text-3xl md:text-4xl font-display font-bold">
-                  Welcome back, <span className="gradient-text">{profile?.full_name?.split(' ')[0] || 'Learner'}</span>! 👋
+                  {t('welcomeBackName')} <span className="gradient-text">{profile?.full_name?.split(' ')[0] || t('learner')}</span>! 👋
                 </h1>
                 <p className="text-muted-foreground mt-2">
                   {companion.name} says: {todaysDay 
