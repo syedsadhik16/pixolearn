@@ -31,6 +31,7 @@ import CreativeWriting from "./pages/CreativeWriting";
 import PIXOChat from "./pages/PIXOChat";
 import AdminKnowledgeIngestion from "./pages/AdminKnowledgeIngestion";
 import { LanguageOverlay } from "./components/shared/LanguageSelector";
+import { LanguageProvider } from "./contexts/LanguageContext";
 import { ProtectedRoute } from "./components/shared/ProtectedRoute";
 import { NoupeChatbot } from "./components/shared/NoupeChatbot";
 import { PIXOChatBubble } from "./components/ai/PIXOChatPanel";
@@ -40,6 +41,7 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
+      <LanguageProvider>
       <AuthProvider>
         <Toaster />
         <Sonner />
