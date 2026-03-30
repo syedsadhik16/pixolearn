@@ -103,7 +103,7 @@ export default function Onboarding() {
 
       if (error) throw error;
 
-      toast({ title: 'Profile created! 🎉', description: "Now let's check your English level." });
+      toast({ title: t('profileCreated'), description: t('letsCheckLevel') });
       navigate('/launch-check');
     } catch (error) {
       console.error('Onboarding error:', error);
