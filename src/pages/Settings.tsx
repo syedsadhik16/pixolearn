@@ -134,15 +134,15 @@ export default function Settings() {
   }, []);
 
   const sections = [
-    { id: 'identity', label: 'Identity', icon: User },
-    { id: 'subscription', label: 'Subscription', icon: Crown },
-    { id: 'appearance', label: 'Visual Comfort', icon: Eye },
-    { id: 'voice', label: 'Voice & Audio', icon: Volume2 },
-    { id: 'language', label: 'Language', icon: Globe },
-    ...(profile?.role === 'parent' ? [{ id: 'notifications', label: 'Notifications', icon: Bell }] : []),
-    { id: 'security', label: 'Security', icon: Lock },
-    ...(profile?.role === 'parent' ? [{ id: 'parent_mode', label: 'Parent Mode', icon: Users }] : []),
-    { id: 'about', label: 'About', icon: Info },
+    { id: 'identity', label: t('identity'), icon: User },
+    { id: 'subscription', label: t('subscription'), icon: Crown },
+    { id: 'appearance', label: t('visualComfort'), icon: Eye },
+    { id: 'voice', label: t('voiceAudio'), icon: Volume2 },
+    { id: 'language', label: t('language'), icon: Globe },
+    ...(profile?.role === 'parent' ? [{ id: 'notifications', label: t('notifications'), icon: Bell }] : []),
+    { id: 'security', label: t('security'), icon: Lock },
+    ...(profile?.role === 'parent' ? [{ id: 'parent_mode', label: t('parentMode'), icon: Users }] : []),
+    { id: 'about', label: t('about'), icon: Info },
   ];
 
   if (authLoading) {
