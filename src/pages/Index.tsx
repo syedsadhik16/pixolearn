@@ -45,16 +45,23 @@ export default function Index() {
     }
   };
 
-  const handlePrimaryCTA = () => {
+  const handlePrimaryCTA = async () => {
     if (!user) {
       navigate('/auth?signup=true');
       return;
     }
-    if (hasCompletedLaunchCheck) {
-      navigate(getDashboardPath());
-    } else {
-      navigate('/onboarding');
+    if (profile?.role === 'admin') { navigate('/admin'); return; }
+    if (profile?.role === 'parent') { navigate('/parent'); return; }
+
+    // For students: check entitlement state
+    if (profile?.subscription_type === 'premium') {
+      navigate('/student');
+      return;
     }
+
+    const entitlement = await syncEntitlementFromDatabase(user.id);
+    const state = getUserAccessState(true, entitlement, profile?.subscription_type);
+    navigate(getRedirectForState(state));
   };
 
   const features = [
