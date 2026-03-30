@@ -185,9 +185,9 @@ export default function Onboarding() {
               <div className="space-y-6 animate-fade-in">
                 <div className="text-center">
                   <h2 className="text-2xl font-display font-bold text-white mb-2">
-                    Learning Launch Check 🚀
+                    {t('learningLaunchCheck')}
                   </h2>
-                  <p className="text-white/70">Let's personalize your child's English learning journey in under 60 seconds</p>
+                  <p className="text-white/70">{t('personalizeJourney')}</p>
                 </div>
 
                 <div className="space-y-3">
