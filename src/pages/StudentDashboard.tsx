@@ -292,8 +292,8 @@ export default function StudentDashboard() {
                 <BarChart3 className="h-6 w-6 text-pixo-blue" />
               </div>
               <div className="flex-1">
-                <h3 className="font-display font-bold">Weekly Progress Report</h3>
-                <p className="text-sm text-muted-foreground">View your lessons, XP, and streak charts</p>
+                <h3 className="font-display font-bold">{t('weeklyProgressReport')}</h3>
+                <p className="text-sm text-muted-foreground">{t('viewLessonsXP')}</p>
               </div>
               <Button variant="outline" size="sm" onClick={() => navigate('/weekly-report')}>
                 View
