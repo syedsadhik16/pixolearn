@@ -145,9 +145,9 @@ export default function Onboarding() {
               <div className="space-y-6 animate-fade-in">
                 <div className="text-center">
                   <h2 className="text-2xl font-display font-bold text-white mb-2">
-                    Choose Your Learning Buddy! 🐾
+                    {t('chooseLearningBuddy')}
                   </h2>
-                  <p className="text-white/70">Pick a companion who'll guide you through every lesson</p>
+                  <p className="text-white/70">{t('pickCompanion')}</p>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {avatars.map(avatar => (
