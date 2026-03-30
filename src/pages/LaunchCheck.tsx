@@ -212,6 +212,15 @@ export default function LaunchCheck() {
         current_day: 1,
       }).eq('student_id', user.id);
 
+      // Update entitlement: mark launch check completed + recommended level
+      await supabase.from('user_entitlements').upsert({
+        user_id: user.id,
+        email: user.email || '',
+        launch_check_completed: true,
+        recommended_level: level,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'user_id' });
+
       // Get AI-powered assessment evaluation (non-blocking)
       try {
         const { data: aiData } = await supabase.functions.invoke('ai-launch-check', {
