@@ -74,6 +74,9 @@ const App = () => (
             <Route path="/weekly-report" element={<PremiumRoute><WeeklyReport /></PremiumRoute>} />
             <Route path="/creative-writing" element={<PremiumRoute><CreativeWriting /></PremiumRoute>} />
             <Route path="/pixo-chat" element={<PremiumRoute><PIXOChat /></PremiumRoute>} />
+            <Route path="/payment-success" element={<PaymentSuccess />} />
+            <Route path="/billing" element={<PremiumRoute><Billing /></PremiumRoute>} />
+            <Route path="/trophy-room" element={<PremiumRoute><TrophyRoom /></PremiumRoute>} />
             <Route path="/parent" element={<ProtectedRoute allowedRoles={['parent', 'admin']}><ParentDashboard /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/knowledge" element={<ProtectedRoute allowedRoles={['admin']}><AdminKnowledgeIngestion /></ProtectedRoute>} />
