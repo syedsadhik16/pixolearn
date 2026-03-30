@@ -120,7 +120,7 @@ export default function StudentDashboard() {
                 {t('retry')}
               </Button>
               <Button variant="outline" onClick={() => navigate('/launch-check')}>
-                Reassign Level
+                {t('reassignLevel')}
               </Button>
             </div>
           </div>
