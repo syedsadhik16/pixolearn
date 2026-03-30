@@ -165,8 +165,8 @@ export default function StudentDashboard() {
                 </h1>
                 <p className="text-muted-foreground mt-2">
                   {companion.name} says: {todaysDay 
-                    ? "Let's keep learning today!" 
-                    : "Great job! You're all caught up!"}
+                    ? t('letsKeepLearning') 
+                    : t('allCaughtUp')}
                 </p>
               </div>
             </div>
