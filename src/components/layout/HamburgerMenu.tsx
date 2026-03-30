@@ -26,8 +26,10 @@ const menuItemDefs: { path: string; labelKey: TranslationKey; icon: typeof Messa
   { path: '/dictionary', labelKey: 'dictionary', icon: BookOpenText },
   { path: '/studio', labelKey: 'studio', icon: Mic2 },
   { path: '/creative-writing', labelKey: 'writing', icon: PenLine },
+  { path: '/trophy-room', labelKey: 'trophies', icon: Trophy },
   { path: '/leaderboard', labelKey: 'rankings', icon: Trophy },
   { path: '/shop', labelKey: 'shop', icon: ShoppingBag },
+  { path: '/billing', labelKey: 'billing', icon: ShoppingBag },
   { path: '/settings', labelKey: 'settings', icon: Settings },
 ];
 

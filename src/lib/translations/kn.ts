@@ -251,4 +251,5 @@ export const kn: Record<TranslationKey, string> = {
   of: "ರಲ್ಲಿ",
   xp: "XP",
   min: "ನಿಮಿಷ",
+  paymentSuccessful: "Payment Successful!", welcomeToPIXOExcited: "Welcome to PIXO!", level: "Level", validUntil: "Valid Until", startLearning: "Start Learning", autoRedirect: "Redirecting...", loadingBilling: "Loading...", billingSubscriptions: "Billing & Subscriptions", noPlan: "No Plan", active: "Active", expired: "Expired", startDate: "Start", expiryDate: "Expiry", daysRemaining: "days remaining", renewSubscription: "Renew", upgradePlan: "Upgrade", subscriptionExpiredMsg: "Subscription expired.", choosePlanToStart: "Choose a plan.", renewNow: "Renew Now", viewPlans: "View Plans", availableUpgrades: "Upgrades", billingHistory: "Billing History", noPaymentsYet: "No payments yet.", billing: "Billing", loadingTrophies: "Loading...", hallOfFame: "Hall of Fame", hiExplorer: "Hi, {name}!", dayRoadmap: "180-Day Roadmap", masteryLevel: "Mastery", trophyRoom: "Trophy Room", noBadgesAvailable: "No badges yet.", earned: "Earned", trophies: "Trophies",
 };
