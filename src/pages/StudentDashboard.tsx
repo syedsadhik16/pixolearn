@@ -412,22 +412,22 @@ export default function StudentDashboard() {
                     {premiumLocked ? (
                       <>
                         <Crown className="h-4 w-4 mr-1" />
-                        Upgrade
+                        {t('upgrade')}
                       </>
                     ) : !accessible ? (
                       <>
                         <Lock className="h-4 w-4 mr-1" />
-                        Locked
+                        {t('locked')}
                       </>
                     ) : completed ? (
                       <>
                         <TrendingUp className="h-4 w-4 mr-1" />
-                        Practice Again
+                        {t('practiceAgain')}
                       </>
                     ) : (
                       <>
                         <Play className="h-4 w-4 mr-1" />
-                        Start
+                        {t('startLesson')}
                       </>
                     )}
                   </Button>
