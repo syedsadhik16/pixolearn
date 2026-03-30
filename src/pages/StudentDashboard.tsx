@@ -276,7 +276,7 @@ export default function StudentDashboard() {
                     className="border-white text-white hover:bg-white hover:text-primary"
                     onClick={() => navigate(`/lesson/${todaysDay.id}`)}
                   >
-                    {completedDayIds.has(todaysDay.id) ? 'Practice Again' : 'Start Lesson'}
+                    {completedDayIds.has(todaysDay.id) ? t('practiceAgain') : t('startLesson')}
                   </Button>
                 </div>
               </div>
