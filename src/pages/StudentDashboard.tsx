@@ -241,7 +241,7 @@ export default function StudentDashboard() {
                     <span className="text-sm font-medium text-white/80">{t('todaysMission')}</span>
                   </div>
                   <h2 className="text-2xl md:text-3xl font-display font-bold mb-2">
-                    Day {todaysDay.day_number}: {todaysDay.title}
+                    {t('day')} {todaysDay.day_number}: {todaysDay.title}
                   </h2>
                   <p className="text-white/90 mb-4">{todaysDay.day_objective || todaysDay.theme}</p>
                   <div className="flex flex-wrap gap-4 text-sm">
