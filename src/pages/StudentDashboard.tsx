@@ -173,7 +173,7 @@ export default function StudentDashboard() {
             <div className="flex items-center gap-3">
               {profile?.subscription_type === 'premium' ? (
                 <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full gradient-bg text-white text-xs font-bold">
-                  <Crown className="h-3.5 w-3.5" /> Premium
+                  <Crown className="h-3.5 w-3.5" /> {t('premium')}
                 </span>
               ) : (
                 <button
