@@ -236,7 +236,12 @@ export default function Pricing() {
         body: { user_id: user.id },
       });
       if (error || !data?.success) {
-        throw new Error(data?.error || error?.message || 'Failed to activate trial');
+        const msg = data?.error || error?.message || 'Failed to activate trial';
+        if (msg.toLowerCase().includes('already been used')) {
+          toast({ title: 'Trial Already Used', description: 'Your free trial has expired. Choose a plan below to continue learning!' });
+          return;
+        }
+        throw new Error(msg);
       }
       toast({ title: '🎉 Free Trial Activated!', description: 'Enjoy 24 hours of full premium access.' });
       navigate('/student');
