@@ -164,8 +164,8 @@ export default function Settings() {
             <ArrowLeft className="h-5 w-5" />
           </button>
           <div>
-            <h1 className="text-2xl font-display font-bold">Settings</h1>
-            <p className="text-sm text-muted-foreground">Customize your PIXO experience</p>
+            <h1 className="text-2xl font-display font-bold">{t('settings')}</h1>
+            <p className="text-sm text-muted-foreground">{t('customizeExperience')}</p>
           </div>
         </div>
 
