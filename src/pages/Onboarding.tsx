@@ -301,7 +301,7 @@ export default function Onboarding() {
                   ))}
                 </div>
                 <p className="text-center text-xs text-white/50">
-                  You can skip this step — it's completely optional
+                  {t('skipOptional')}
                 </p>
               </div>
             )}
