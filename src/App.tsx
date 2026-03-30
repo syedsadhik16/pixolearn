@@ -33,6 +33,7 @@ import AdminKnowledgeIngestion from "./pages/AdminKnowledgeIngestion";
 import { LanguageOverlay } from "./components/shared/LanguageSelector";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { ProtectedRoute } from "./components/shared/ProtectedRoute";
+import { PremiumRoute } from "./components/shared/PremiumRoute";
 import { NoupeChatbot } from "./components/shared/NoupeChatbot";
 import { PIXOChatBubble } from "./components/ai/PIXOChatPanel";
 
