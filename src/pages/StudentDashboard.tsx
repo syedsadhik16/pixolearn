@@ -111,13 +111,13 @@ export default function StudentDashboard() {
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center pixo-card p-8 max-w-md">
             <div className="text-4xl mb-3">📚</div>
-            <h2 className="font-display font-bold text-xl mb-2">No Curriculum Data Found</h2>
+            <h2 className="font-display font-bold text-xl mb-2">{t('noCurriculumData')}</h2>
             <p className="text-muted-foreground text-sm mb-4">
-              {currError || "We couldn't load your learning content. Please try again."}
+              {currError || t('noCurriculumDesc')}
             </p>
             <div className="flex flex-col gap-2">
               <Button variant="gradient" onClick={() => window.location.reload()}>
-                Retry
+                {t('retry')}
               </Button>
               <Button variant="outline" onClick={() => navigate('/launch-check')}>
                 Reassign Level
