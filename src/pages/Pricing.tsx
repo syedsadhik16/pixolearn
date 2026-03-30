@@ -170,6 +170,28 @@ export default function Pricing() {
               },
             });
             if (verifyError || !verifyData?.success) throw new Error(verifyData?.error || 'Payment verification failed');
+
+            // Determine plan duration in months
+            const planDurationMap: Record<string, number> = {
+              '6-months': 6,
+              '12-months': 12,
+              '18-months': 18,
+            };
+            const durationMonths = planDurationMap[planId] || 6;
+
+            // Write entitlement to database + sessionStorage
+            await handlePaymentSuccess({
+              userId: user.id,
+              email: profile?.email || user.email || '',
+              selectedPlan: planName,
+              selectedLevel: sessionStorage.getItem('selectedLevel') || 'beginner',
+              planDurationMonths: durationMonths,
+              paymentId: response.razorpay_payment_id,
+              orderId: response.razorpay_order_id,
+              amountPaid: priceAmount,
+              currency: 'INR',
+            });
+
             sessionStorage.removeItem('selectedPlan');
             toast({ title: 'Payment Successful! 🎉', description: `Welcome to PIXO ${planName}! Your premium features are now active.` });
             navigate('/student');
