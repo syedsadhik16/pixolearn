@@ -238,7 +238,7 @@ export default function StudentDashboard() {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
                     <Sparkles className="h-5 w-5 text-white/80" />
-                    <span className="text-sm font-medium text-white/80">Today's Mission</span>
+                    <span className="text-sm font-medium text-white/80">{t('todaysMission')}</span>
                   </div>
                   <h2 className="text-2xl md:text-3xl font-display font-bold mb-2">
                     Day {todaysDay.day_number}: {todaysDay.title}
