@@ -619,11 +619,11 @@ export default function LaunchCheck() {
                   <Button
                     className="w-full bg-white text-primary hover:bg-white/90 font-bold text-lg py-6 rounded-2xl"
                     disabled={loading}
-                    onClick={() => navigate('/journey')}
+                    onClick={() => navigate('/level-selection')}
                   >
                     {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : (
                       <>
-                        Start Learning Journey
+                        Choose Your Level
                         <ArrowRight className="h-5 w-5 ml-2" />
                       </>
                     )}
