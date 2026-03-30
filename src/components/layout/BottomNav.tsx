@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Home, Map, User } from 'lucide-react';
+import { Home, Map, Trophy, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/hooks/useTranslation';
 
@@ -11,6 +11,7 @@ export function BottomNav() {
   const navItems = [
     { path: '/student', label: t('home'), icon: Home },
     { path: '/journey', label: t('journey'), icon: Map },
+    { path: '/trophy-room', label: t('trophies'), icon: Trophy },
     { path: '/profile', label: t('profile'), icon: User },
   ];
 

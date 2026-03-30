@@ -193,12 +193,11 @@ export default function Pricing() {
             });
 
             sessionStorage.removeItem('selectedPlan');
-            toast({ title: 'Payment Successful! 🎉', description: `Welcome to PIXO ${planName}! Your premium features are now active.` });
-            navigate('/student');
+            navigate('/payment-success');
           } catch (err: any) {
             console.error('Verification error:', err);
             toast({ title: 'Verification Issue', description: 'Payment received but verification pending. Please contact support.', variant: 'destructive' });
-            navigate('/student');
+            navigate('/payment-success');
           }
         },
         prefill: { name: profile?.full_name || '', email: profile?.email || '' },
