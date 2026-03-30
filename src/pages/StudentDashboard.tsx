@@ -335,7 +335,7 @@ export default function StudentDashboard() {
                 disabled={profile?.subscription_type === 'free'}
               >
                 <MessageCircle className="h-5 w-5 mr-2" />
-                Start Practicing
+                {t('startPracticing')}
               </Button>
             </div>
           </div>
