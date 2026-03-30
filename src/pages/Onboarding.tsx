@@ -214,7 +214,7 @@ export default function Onboarding() {
                 </div>
 
                 <div className="space-y-3">
-                  <label className="text-sm font-semibold text-white/90">Current Learning Stage</label>
+                  <label className="text-sm font-semibold text-white/90">{t('currentLearningStage')}</label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {learningStages.map(st => (
                       <button
