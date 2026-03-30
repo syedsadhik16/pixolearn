@@ -4,11 +4,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import pixoLogo from '@/assets/pixo-logo.png';
 import { LogOut, User, Menu, X } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export function Navbar() {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { t } = useTranslation();
 
   const handleSignOut = async () => {
     await signOut();
@@ -18,12 +20,9 @@ export function Navbar() {
   const getDashboardPath = () => {
     if (!profile) return '/';
     switch (profile.role) {
-      case 'admin':
-        return '/admin';
-      case 'parent':
-        return '/parent';
-      default:
-        return '/student';
+      case 'admin': return '/admin';
+      case 'parent': return '/parent';
+      default: return '/student';
     }
   };
 
@@ -42,21 +41,21 @@ export function Navbar() {
                 <Link to={getDashboardPath()}>
                   <Button variant="ghost" className="gap-2">
                     <User className="h-4 w-4" />
-                    {profile.full_name || 'Dashboard'}
+                    {profile.full_name || t('goToDashboard')}
                   </Button>
                 </Link>
                 <Button variant="outline" onClick={handleSignOut} className="gap-2">
                   <LogOut className="h-4 w-4" />
-                  Sign Out
+                  {t('signOut')}
                 </Button>
               </>
             ) : (
               <>
                 <Link to="/auth">
-                  <Button variant="ghost">Sign In</Button>
+                  <Button variant="ghost">{t('signIn')}</Button>
                 </Link>
                 <Link to="/auth?signup=true">
-                  <Button variant="gradient">Get Started</Button>
+                  <Button variant="gradient">{t('getStarted')}</Button>
                 </Link>
               </>
             )}
@@ -79,7 +78,7 @@ export function Navbar() {
                 <Link to={getDashboardPath()} onClick={() => setMobileMenuOpen(false)}>
                   <Button variant="ghost" className="w-full justify-start gap-2">
                     <User className="h-4 w-4" />
-                    {profile.full_name || 'Dashboard'}
+                    {profile.full_name || t('goToDashboard')}
                   </Button>
                 </Link>
                 <Button
@@ -91,16 +90,16 @@ export function Navbar() {
                   className="w-full justify-start gap-2"
                 >
                   <LogOut className="h-4 w-4" />
-                  Sign Out
+                  {t('signOut')}
                 </Button>
               </>
             ) : (
               <>
                 <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="ghost" className="w-full">Sign In</Button>
+                  <Button variant="ghost" className="w-full">{t('signIn')}</Button>
                 </Link>
                 <Link to="/auth?signup=true" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="gradient" className="w-full">Get Started</Button>
+                  <Button variant="gradient" className="w-full">{t('getStarted')}</Button>
                 </Link>
               </>
             )}
