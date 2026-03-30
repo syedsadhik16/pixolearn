@@ -21,6 +21,7 @@ import {
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useTranslation } from '@/hooks/useTranslation';
+import { syncEntitlementFromDatabase, getUserAccessState, getRedirectForState } from '@/lib/entitlement';
 
 export default function Index() {
   const { user, profile } = useAuth();
