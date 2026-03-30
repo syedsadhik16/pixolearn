@@ -385,16 +385,16 @@ export default function Settings() {
             {activeSection === 'language' && (
               <div className="pixo-card space-y-5 animate-fade-in">
                 <h3 className="font-display font-bold text-lg flex items-center gap-2">
-                  <Globe className="h-5 w-5 text-primary" /> App Language
+                  <Globe className="h-5 w-5 text-primary" /> {t('appLanguage')}
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  Change the interface language. Learning content remains in English.
+                  {t('languageInterfaceNote')}
                 </p>
                 <div className="grid grid-cols-2 gap-2">
                   {SUPPORTED_LANGUAGES.map(lang => (
                     <button
                       key={lang.code}
-                      onClick={() => { setAppLang(lang.code); setSelectedLanguage(lang.code); toast({ title: `Language set to ${lang.label}` }); }}
+                      onClick={() => { setAppLang(lang.code as LangCode); toast({ title: `Language set to ${lang.label}` }); }}
                       className={cn(
                         "flex items-center gap-2 p-3 rounded-xl text-sm font-semibold transition-colors text-left",
                         appLang === lang.code
@@ -407,6 +407,9 @@ export default function Settings() {
                     </button>
                   ))}
                 </div>
+                <p className="text-xs text-muted-foreground flex items-center gap-1">
+                  🌐 {t('changesApplyInstantly')}
+                </p>
               </div>
             )}
 
