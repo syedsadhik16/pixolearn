@@ -324,7 +324,7 @@ export default function Onboarding() {
                 disabled={!canProceed()}
                 onClick={() => setStep(step + 1)}
               >
-                Next
+                {t('next')}
                 <ArrowRight className="h-5 w-5 ml-2" />
               </Button>
             ) : (
