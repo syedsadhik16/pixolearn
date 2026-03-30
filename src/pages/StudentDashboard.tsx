@@ -296,7 +296,7 @@ export default function StudentDashboard() {
                 <p className="text-sm text-muted-foreground">{t('viewLessonsXP')}</p>
               </div>
               <Button variant="outline" size="sm" onClick={() => navigate('/weekly-report')}>
-                View
+                {t('view')}
               </Button>
             </div>
           </div>
