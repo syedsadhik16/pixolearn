@@ -338,7 +338,7 @@ export default function Onboarding() {
                 ) : (
                   <>
                     <Sparkles className="h-5 w-5 mr-2" />
-                    Build My Child's Learning Path
+                    {t('buildLearningPath')}
                   </>
                 )}
               </Button>
