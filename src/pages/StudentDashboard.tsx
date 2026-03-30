@@ -31,6 +31,7 @@ import { checkAndAwardBadges } from '@/lib/gamification';
 import { useCompanion } from '@/hooks/useCompanion';
 import { TrialCountdown } from '@/components/shared/TrialCountdown';
 import { useCurriculumProgress } from '@/hooks/useCurriculumProgress';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function StudentDashboard() {
   const { user, profile, loading: authLoading } = useAuth();
