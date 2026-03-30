@@ -38,6 +38,7 @@ export default function StudentDashboard() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const companion = useCompanion();
+  const { t } = useTranslation();
   
   const { progress: currProgress, todaysDay, completedDayIds, days: currDays, loading: currLoading, error: currError } = useCurriculumProgress(user?.id);
   const [streak, setStreak] = useState(0);
