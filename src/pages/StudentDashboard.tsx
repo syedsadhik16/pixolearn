@@ -201,12 +201,12 @@ export default function StudentDashboard() {
           </div>
           <div className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
             <StatCard
-              title="Total XP"
+              title={t('totalXP')}
               value={totalXp}
-              subtitle="Keep earning!"
+              subtitle={t('keepEarning')}
               icon={Sparkles}
               trend={totalXp > 100 ? 'up' : 'neutral'}
-              trendValue="Keep practicing!"
+              trendValue={t('keepPracticing')}
               colorClass="bg-pixo-green/10 text-pixo-green"
             />
           </div>
