@@ -105,6 +105,8 @@ export default function LaunchCheck() {
   const [started, setStarted] = useState(false);
   const [showReview, setShowReview] = useState(false);
   const [expandedQ, setExpandedQ] = useState<number | null>(null);
+  const [showSkipModal, setShowSkipModal] = useState(false);
+  const [skipLoading, setSkipLoading] = useState(false);
   const [aiEvaluation, setAiEvaluation] = useState<{
     confidence: number;
     strengths: string[];
