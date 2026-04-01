@@ -337,4 +337,7 @@ export const ta: Record<TranslationKey, string> = {
   youAreStarting: "நீங்கள் தொடங்குகிறீர்கள்",
   failedSaveLevel: "நிலை தேர்வை சேமிக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.",
   languageUpdated: "மொழி புதுப்பிக்கப்பட்டது",
+  accountExists: "கணக்கு ஏற்கனவே உள்ளது",
+  accountExistsDesc: "இந்த மின்னஞ்சல் ஏற்கனவே பதிவுசெய்யப்பட்டுள்ளது। உள்நுழைய உங்கள் கடவுச்சொல்லை உள்ளிடவும்.",
+  downloadInvoice: "விலைப்பட்டியல் பதிவிறக்கம்",
 };
