@@ -321,4 +321,7 @@ export const ml: Record<TranslationKey, string> = {
   youAreStarting: "നിങ്ങൾ ആരംഭിക്കുന്നു",
   failedSaveLevel: "ലെവൽ തിരഞ്ഞെടുപ്പ് സേവ് ചെയ്യാൻ കഴിഞ്ഞില്ല. വീണ്ടും ശ്രമിക്കുക.",
   languageUpdated: "ഭാഷ അപ്ഡേറ്റ് ചെയ്തു",
+  accountExists: "അക്കൗണ്ട് നിലവിലുണ്ട്",
+  accountExistsDesc: "ഈ ഇമെയിൽ ഇതിനകം രജിസ്റ്റർ ചെയ്തിട്ടുണ്ട്. സൈൻ ഇൻ ചെയ്യാൻ നിങ്ങളുടെ പാസ്‌വേഡ് നൽകുക.",
+  downloadInvoice: "ഇൻവോയ്സ് ഡൗൺലോഡ്",
 };

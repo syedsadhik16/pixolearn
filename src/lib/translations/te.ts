@@ -321,4 +321,7 @@ export const te: Record<TranslationKey, string> = {
   youAreStarting: "మీరు ప్రారంభిస్తున్నారు",
   failedSaveLevel: "లెవెల్ ఎంపికను సేవ్ చేయడం విఫలమైంది. దయచేసి మళ్ళీ ప్రయత్నించండి.",
   languageUpdated: "భాష నవీకరించబడింది",
+  accountExists: "ఖాతా ఇప్పటికే ఉంది",
+  accountExistsDesc: "ఈ ఇమెయిల్ ఇప్పటికే నమోదు చేయబడింది. దయచేసి సైన్ ఇన్ చేయడానికి మీ పాస్‌వర్డ్ నమోదు చేయండి.",
+  downloadInvoice: "ఇన్వాయిస్ డౌన్‌లోడ్",
 };

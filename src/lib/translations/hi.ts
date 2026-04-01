@@ -369,4 +369,7 @@ export const hi: Record<TranslationKey, string> = {
   youAreStarting: "आप शुरू कर रहे हैं",
   failedSaveLevel: "स्तर चयन सहेजने में विफल। कृपया पुनः प्रयास करें।",
   languageUpdated: "भाषा अपडेट हुई",
+  accountExists: "खाता पहले से मौजूद है",
+  accountExistsDesc: "यह ईमेल पहले से पंजीकृत है। कृपया साइन इन करने के लिए अपना पासवर्ड दर्ज करें।",
+  downloadInvoice: "इनवॉइस डाउनलोड करें",
 };

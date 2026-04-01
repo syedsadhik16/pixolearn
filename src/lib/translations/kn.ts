@@ -321,4 +321,7 @@ export const kn: Record<TranslationKey, string> = {
   youAreStarting: "ನೀವು ಪ್ರಾರಂಭಿಸುತ್ತಿದ್ದೀರಿ",
   failedSaveLevel: "ಮಟ್ಟ ಆಯ್ಕೆಯನ್ನು ಉಳಿಸಲು ವಿಫಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
   languageUpdated: "ಭಾಷೆ ನವೀಕರಿಸಲಾಗಿದೆ",
+  accountExists: "ಖಾತೆ ಈಗಾಗಲೇ ಅಸ್ತಿತ್ವದಲ್ಲಿದೆ",
+  accountExistsDesc: "ಈ ಇಮೇಲ್ ಈಗಾಗಲೇ ನೋಂದಾಯಿಸಲಾಗಿದೆ. ಸೈನ್ ಇನ್ ಮಾಡಲು ನಿಮ್ಮ ಪಾಸ್‌ವರ್ಡ್ ನಮೂದಿಸಿ.",
+  downloadInvoice: "ಇನ್ವಾಯ್ಸ್ ಡೌನ್‌ಲೋಡ್",
 };
