@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCompanion } from '@/hooks/useCompanion';
 import { useTranslation } from '@/hooks/useTranslation';
-import { CheckCircle2, ArrowRight, Sparkles, Crown, Calendar } from 'lucide-react';
+import { CheckCircle2, ArrowRight, Sparkles, Crown, Calendar, Download } from 'lucide-react';
+import { buildInvoiceData, downloadInvoicePDF } from '@/lib/invoice';
 
 export default function PaymentSuccess() {
   const { user, profile } = useAuth();
@@ -19,8 +20,7 @@ export default function PaymentSuccess() {
   const expiryDate = sessionStorage.getItem('expiryDate');
 
   useEffect(() => {
-    // Auto-redirect after 10 seconds
-    const timer = setTimeout(() => navigate('/student'), 10000);
+    const timer = setTimeout(() => navigate('/student'), 15000);
     return () => clearTimeout(timer);
   }, [navigate]);
 
@@ -32,6 +32,35 @@ export default function PaymentSuccess() {
   const formattedExpiry = expiryDate
     ? new Date(expiryDate).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })
     : '';
+
+  const handleDownloadInvoice = () => {
+    const now = new Date().toISOString();
+    const data = buildInvoiceData({
+      parentName: profile?.full_name || 'N/A',
+      learnerName: profile?.full_name || 'N/A',
+      email: profile?.email || user?.email || '',
+      selectedPlan,
+      selectedLevels: selectedLevel,
+      amountPaid: (() => {
+        try {
+          const p = JSON.parse(selectedPlan);
+          return p.priceAmount || 0;
+        } catch {
+          if (selectedPlan.includes('6')) return 5999;
+          if (selectedPlan.includes('12')) return 9999;
+          if (selectedPlan.includes('18')) return 14999;
+          return 0;
+        }
+      })(),
+      currency: 'INR',
+      paymentId: sessionStorage.getItem('paymentId') || 'N/A',
+      orderId: sessionStorage.getItem('orderId') || 'N/A',
+      paidAt: now,
+      startDate: now,
+      expiryDate: expiryDate || now,
+    });
+    downloadInvoicePDF(data);
+  };
 
   return (
     <Layout showNavbar={false}>
@@ -105,6 +134,16 @@ export default function PaymentSuccess() {
                 </div>
               )}
             </div>
+
+            {/* Invoice Download */}
+            <Button
+              variant="ghost"
+              className="w-full text-white/90 hover:text-white hover:bg-white/10 border border-white/20 rounded-2xl py-4"
+              onClick={handleDownloadInvoice}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              {t('downloadInvoice') || 'Download Invoice'}
+            </Button>
 
             <Button
               size="lg"

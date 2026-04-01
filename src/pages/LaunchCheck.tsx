@@ -350,6 +350,65 @@ export default function LaunchCheck() {
                 Skip Assessment
               </Button>
             </div>
+
+            {/* Skip Assessment Modal */}
+            {showSkipModal && (
+              <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+                <div className="bg-white/15 backdrop-blur-md rounded-3xl p-8 border border-white/20 max-w-sm w-full space-y-5 text-center animate-scale-in">
+                  <div className="text-5xl">🤔</div>
+                  <h3 className="text-xl font-display font-bold text-white">Skip the Assessment?</h3>
+                  <p className="text-white/80 text-sm">
+                    No worries! You can choose your level manually. The assessment helps us recommend the best starting point, but you're free to pick any level you like.
+                  </p>
+                  <div className="space-y-3">
+                    <Button
+                      className="w-full bg-white text-primary hover:bg-white/90 font-bold py-5 rounded-2xl"
+                      disabled={skipLoading}
+                      onClick={async () => {
+                        if (!user) return;
+                        setSkipLoading(true);
+                        try {
+                          // Mark launch check as completed (skipped) so user isn't stuck
+                          await supabase.from('user_entitlements').upsert({
+                            user_id: user.id,
+                            email: user.email || '',
+                            launch_check_completed: true,
+                            updated_at: new Date().toISOString(),
+                          }, { onConflict: 'user_id' });
+
+                          // Save assessment as skipped
+                          await supabase.from('assessment_results').upsert({
+                            student_id: user.id,
+                            score: 0,
+                            total_questions: 0,
+                            assigned_level: 'beginner',
+                            time_taken_seconds: 0,
+                            answers: [{ status: 'skipped' }],
+                          }, { onConflict: 'student_id' });
+
+                          toast({ title: 'Assessment skipped ✓', description: 'Choose your level on the next screen.' });
+                          navigate('/level-selection');
+                        } catch (err) {
+                          console.error('Skip error:', err);
+                          toast({ title: 'Error', description: 'Something went wrong. Please try again.', variant: 'destructive' });
+                        } finally {
+                          setSkipLoading(false);
+                        }
+                      }}
+                    >
+                      {skipLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Yes, Choose Level Manually'}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="w-full text-white/70 hover:text-white hover:bg-white/10"
+                      onClick={() => setShowSkipModal(false)}
+                    >
+                      No, I'll Take the Assessment
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </Layout>
