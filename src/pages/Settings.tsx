@@ -197,15 +197,15 @@ export default function Settings() {
             {activeSection === 'identity' && (
               <div className="pixo-card space-y-5 animate-fade-in">
                 <h3 className="font-display font-bold text-lg flex items-center gap-2">
-                  <User className="h-5 w-5 text-primary" /> Identity
+                  <User className="h-5 w-5 text-primary" /> {t('identity')}
                 </h3>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Display Name</label>
+                  <label className="text-sm font-medium">{t('displayName')}</label>
                   <div className="flex gap-2">
                     <Input
                       value={displayName}
                       onChange={e => setDisplayName(e.target.value)}
-                      placeholder="Enter your name"
+                      placeholder={t('enterName')}
                     />
                     <Button size="sm" onClick={saveName} disabled={savingName}>
                       {savingName ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
@@ -213,15 +213,15 @@ export default function Settings() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Email</label>
+                  <label className="text-sm font-medium">{t('email')}</label>
                   <Input value={profile?.email || ''} disabled className="bg-muted" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Role</label>
+                  <label className="text-sm font-medium">{t('role')}</label>
                   <div className="px-3 py-2 bg-muted rounded-xl text-sm capitalize">{profile?.role}</div>
                 </div>
                 <Button variant="outline" size="sm" onClick={() => navigate('/profile')}>
-                  View Full Profile <ChevronRight className="h-4 w-4 ml-1" />
+                  {t('viewFullProfile')} <ChevronRight className="h-4 w-4 ml-1" />
                 </Button>
               </div>
             )}
