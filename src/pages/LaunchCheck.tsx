@@ -343,11 +343,7 @@ export default function LaunchCheck() {
               <Button
                 variant="ghost"
                 className="w-full text-white/60 hover:text-white hover:bg-white/10 text-sm"
-                onClick={() => {
-                  if (window.confirm('Are you sure you want to skip? Your assessment will be marked as incomplete and the next level will not be unlocked.')) {
-                    navigate('/student');
-                  }
-                }}
+                onClick={() => setShowSkipModal(true)}
               >
                 Skip Assessment
               </Button>
