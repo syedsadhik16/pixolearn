@@ -138,10 +138,36 @@ export default function Auth() {
         });
         setIsResetPassword(false);
       } else if (isSignUp) {
+        // Check if email already exists by attempting sign-in with wrong password
+        const { error: checkError } = await supabase.auth.signInWithPassword({
+          email,
+          password: '__check_existence_only__',
+        });
+        // If error is "Invalid login credentials", the email exists
+        if (checkError && checkError.message.includes('Invalid login')) {
+          // Email exists - switch to sign-in mode with prefilled email
+          setIsSignUp(false);
+          setPassword('');
+          toast({
+            title: t('accountExists') || 'Account already exists',
+            description: t('accountExistsDesc') || 'This email is already registered. Please enter your password to sign in.',
+          });
+          setLoading(false);
+          return;
+        }
+        // If error is something else or no error, proceed with sign-up
         const { error } = await signUp(email, password, fullName, selectedRole);
         if (error) {
           if (error.message.includes('already registered')) {
-            throw new Error(t('emailAlreadyRegistered'));
+            // Fallback: switch to sign-in
+            setIsSignUp(false);
+            setPassword('');
+            toast({
+              title: t('accountExists') || 'Account already exists',
+              description: t('accountExistsDesc') || 'This email is already registered. Please enter your password to sign in.',
+            });
+            setLoading(false);
+            return;
           }
           throw error;
         }
