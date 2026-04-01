@@ -192,6 +192,9 @@ export default function Pricing() {
               currency: 'INR',
             });
 
+            // Store payment IDs for invoice download
+            sessionStorage.setItem('paymentId', response.razorpay_payment_id);
+            sessionStorage.setItem('orderId', response.razorpay_order_id);
             sessionStorage.removeItem('selectedPlan');
             navigate('/payment-success');
           } catch (err: any) {

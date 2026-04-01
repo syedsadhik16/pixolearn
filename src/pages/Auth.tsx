@@ -24,18 +24,27 @@ export default function Auth() {
   const [searchParams] = useSearchParams();
   const [isSignUp, setIsSignUp] = useState(searchParams.get('signup') === 'true');
   const [isResetPassword, setIsResetPassword] = useState(false);
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(searchParams.get('email') || '');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [selectedRole, setSelectedRole] = useState<UserRole>('student');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [accountExistsNotice, setAccountExistsNotice] = useState(searchParams.get('exists') === 'true');
 
   const { signIn, signUp, resetPassword, user, profile } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useTranslation();
+
+  // If redirected with exists=true, show sign-in mode with message
+  useEffect(() => {
+    if (searchParams.get('exists') === 'true') {
+      setIsSignUp(false);
+      setAccountExistsNotice(true);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (user && profile) {
@@ -44,7 +53,6 @@ export default function Auth() {
         navigate(redirectPath);
         return;
       }
-      // Student flow: check entitlement state for proper redirect
       checkStudentFlowState();
     }
   }, [user, profile, navigate]);
@@ -52,7 +60,6 @@ export default function Auth() {
   const checkStudentFlowState = async () => {
     if (!user) return;
 
-    // Check learner profile onboarding first
     const { data: learnerProfile } = await supabase
       .from('learner_profiles')
       .select('onboarding_completed')
@@ -64,14 +71,12 @@ export default function Auth() {
       return;
     }
 
-    // Check entitlement state
     const { data: entitlement } = await supabase
       .from('user_entitlements')
       .select('launch_check_completed, selected_level, is_paid, entitlement_status, entitlement_expiry_date')
       .eq('user_id', user.id)
       .maybeSingle();
 
-    // Premium via profile (trial or existing subscription)
     if (profile?.subscription_type === 'premium') {
       navigate('/student');
       return;
@@ -127,6 +132,7 @@ export default function Auth() {
     if (!validateForm()) return;
 
     setLoading(true);
+    setAccountExistsNotice(false);
 
     try {
       if (isResetPassword) {
@@ -138,33 +144,31 @@ export default function Auth() {
         });
         setIsResetPassword(false);
       } else if (isSignUp) {
-        // Check if email already exists by attempting sign-in with wrong password
-        const { error: checkError } = await supabase.auth.signInWithPassword({
-          email,
-          password: '__check_existence_only__',
-        });
-        // If error is "Invalid login credentials", the email exists
-        if (checkError && checkError.message.includes('Invalid login')) {
-          // Email exists - switch to sign-in mode with prefilled email
-          setIsSignUp(false);
-          setPassword('');
-          toast({
-            title: t('accountExists') || 'Account already exists',
-            description: t('accountExistsDesc') || 'This email is already registered. Please enter your password to sign in.',
-          });
-          setLoading(false);
-          return;
-        }
-        // If error is something else or no error, proceed with sign-up
+        // Directly attempt sign-up. Supabase will return an error if the email is already registered.
         const { error } = await signUp(email, password, fullName, selectedRole);
         if (error) {
-          if (error.message.includes('already registered')) {
-            // Fallback: switch to sign-in
+          // Check if user already exists
+          if (
+            error.message.includes('already registered') ||
+            error.message.includes('User already registered') ||
+            error.message.includes('already been registered')
+          ) {
+            // Switch to sign-in mode with email prefilled
             setIsSignUp(false);
             setPassword('');
+            setAccountExistsNotice(true);
             toast({
               title: t('accountExists') || 'Account already exists',
               description: t('accountExistsDesc') || 'This email is already registered. Please enter your password to sign in.',
+            });
+            setLoading(false);
+            return;
+          }
+          // Check for email confirmation required (not a real error for user)
+          if (error.message.includes('confirm')) {
+            toast({
+              title: t('checkEmail') || 'Check your email',
+              description: 'Please check your email to confirm your account before signing in.',
             });
             setLoading(false);
             return;
@@ -178,8 +182,11 @@ export default function Auth() {
       } else {
         const { error } = await signIn(email, password);
         if (error) {
-          if (error.message.includes('Invalid login')) {
-            throw new Error(t('invalidCredentials'));
+          if (error.message.includes('Invalid login') || error.message.includes('invalid')) {
+            throw new Error(t('invalidCredentials') || 'Invalid email or password. Please try again.');
+          }
+          if (error.message.includes('Email not confirmed')) {
+            throw new Error('Please check your email and confirm your account first.');
           }
           throw error;
         }
@@ -269,6 +276,18 @@ export default function Auth() {
                   : t('continueJourney')}
               </p>
             </div>
+
+            {/* Account exists notice */}
+            {accountExistsNotice && !isSignUp && (
+              <div className="bg-primary/10 border border-primary/20 rounded-2xl p-4 text-center animate-fade-in">
+                <p className="text-sm font-semibold text-primary">
+                  {t('accountExists') || 'Account already exists'}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {t('accountExistsDesc') || 'This email is already registered. Please enter your password to sign in.'}
+                </p>
+              </div>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
               {isSignUp && !isResetPassword && (
@@ -412,7 +431,10 @@ export default function Auth() {
                 <p className="text-sm text-muted-foreground">
                   {isSignUp ? t('alreadyHaveAccount') : t('dontHaveAccount')}{' '}
                   <button
-                    onClick={() => setIsSignUp(!isSignUp)}
+                    onClick={() => {
+                      setIsSignUp(!isSignUp);
+                      setAccountExistsNotice(false);
+                    }}
                     className="text-primary font-semibold hover:underline"
                   >
                     {isSignUp ? t('signIn') : t('signUp')}
