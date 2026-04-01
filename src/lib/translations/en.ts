@@ -396,6 +396,9 @@ export const en = {
 
   // Language updated toast
   languageUpdated: "Language updated",
+  accountExists: "Account already exists",
+  accountExistsDesc: "This email is already registered. Please enter your password to sign in.",
+  downloadInvoice: "Download Invoice",
 } as const;
 
 export type TranslationKey = keyof typeof en;
