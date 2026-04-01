@@ -394,7 +394,7 @@ export default function Settings() {
                   {SUPPORTED_LANGUAGES.map(lang => (
                     <button
                       key={lang.code}
-                      onClick={() => { setAppLang(lang.code as LangCode); toast({ title: `Language set to ${lang.label}` }); }}
+                      onClick={() => { setAppLang(lang.code as LangCode); toast({ title: t('languageUpdated') }); }}
                       className={cn(
                         "flex items-center gap-2 p-3 rounded-xl text-sm font-semibold transition-colors text-left",
                         appLang === lang.code
