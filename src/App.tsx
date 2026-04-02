@@ -56,6 +56,8 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/role-select" element={<RoleSelect />} />
+            <Route path="/access-denied" element={<AccessDenied />} />
             <Route path="/level-selection" element={<LevelSelection />} />
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/launch-check" element={<LaunchCheck />} />
