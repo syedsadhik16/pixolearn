@@ -1,407 +1,437 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { Layout } from '@/components/layout/Layout';
-import { Button } from '@/components/ui/button';
-import { useAuth } from '@/contexts/AuthContext';
-import pixoLogo from '@/assets/pixo-logo.png';
-import { UpcomingPrograms } from '@/components/home/UpcomingPrograms';
-import {
-  Mic,
-  BookOpen,
-  Users,
-  Trophy,
-  Sparkles,
-  CheckCircle2,
-  ArrowRight,
-  Play,
-  Headphones,
-  PenTool,
-  Puzzle,
-  Gamepad2,
-} from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useTranslation } from '@/hooks/useTranslation';
-import { syncEntitlementFromDatabase, getUserAccessState, getRedirectForState } from '@/lib/entitlement';
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { Layout } from "@/components/layout/Layout";
+import { supabase } from "@/integrations/supabase/client";
+import pixoLogo from "@/assets/pixo-logo.png";
+import { Eye, EyeOff, GraduationCap, Users, Loader2 } from "lucide-react";
+import { z } from "zod";
+import { useTranslation } from "@/hooks/useTranslation";
 
-export default function Index() {
-  const { user, profile } = useAuth();
+const authSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  fullName: z.string().min(2, "Name must be at least 2 characters").optional(),
+});
+
+type UserRole = "student" | "parent";
+
+export default function Auth() {
+  const [searchParams] = useSearchParams();
+  const [isSignUp, setIsSignUp] = useState(searchParams.get("signup") === "true");
+  const [isResetPassword, setIsResetPassword] = useState(false);
+  const [email, setEmail] = useState(searchParams.get("email") || "");
+  const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [selectedRole, setSelectedRole] = useState<UserRole>("student");
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [accountExistsNotice, setAccountExistsNotice] = useState(searchParams.get("exists") === "true");
+
+  const { signIn, signUp, resetPassword, user, profile, roles: userRoles, isMultiRole, activeRole } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const { t } = useTranslation();
-  const [hasCompletedLaunchCheck, setHasCompletedLaunchCheck] = useState(false);
+
+  const heroStats = [
+    {
+      value: "Age 5–16",
+      label: "Designed for Kids",
+    },
+    {
+      value: "180 Days",
+      label: "Structured Path",
+    },
+    {
+      value: "30 Min/Day",
+      label: "Daily Learning",
+    },
+  ];
 
   useEffect(() => {
-    if (user) {
-      supabase.from('assessment_results').select('id').eq('student_id', user.id).maybeSingle()
-        .then(({ data }) => setHasCompletedLaunchCheck(!!data));
+    if (searchParams.get("exists") === "true") {
+      setIsSignUp(false);
+      setAccountExistsNotice(true);
     }
-  }, [user]);
+  }, [searchParams]);
 
-  const getDashboardPath = () => {
-    if (!profile) return '/auth';
-    switch (profile.role) {
-      case 'admin': return '/admin';
-      case 'parent': return '/parent';
-      default: return '/student';
+  useEffect(() => {
+    if (user && profile) {
+      if (isMultiRole && !activeRole) {
+        navigate("/role-select");
+        return;
+      }
+
+      const effectiveRole = activeRole || profile.role;
+      if (effectiveRole !== "student") {
+        const redirectPath = effectiveRole === "admin" ? "/admin" : "/parent";
+        navigate(redirectPath);
+        return;
+      }
+
+      checkStudentFlowState();
+    }
+  }, [user, profile, userRoles, activeRole, navigate]);
+
+  const checkStudentFlowState = async () => {
+    if (!user) return;
+
+    const { data: learnerProfile } = await supabase
+      .from("learner_profiles")
+      .select("onboarding_completed")
+      .eq("student_id", user.id)
+      .maybeSingle();
+
+    if (!learnerProfile || !learnerProfile.onboarding_completed) {
+      navigate("/onboarding");
+      return;
+    }
+
+    const { data: entitlement } = await supabase
+      .from("user_entitlements")
+      .select("launch_check_completed, selected_level, is_paid, entitlement_status, entitlement_expiry_date")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (profile?.subscription_type === "premium") {
+      navigate("/student");
+      return;
+    }
+
+    if (!entitlement || !entitlement.launch_check_completed) {
+      navigate("/launch-check");
+      return;
+    }
+    if (!entitlement.selected_level) {
+      navigate("/level-selection");
+      return;
+    }
+    if (!entitlement.is_paid || entitlement.entitlement_status !== "active") {
+      navigate("/pricing");
+      return;
+    }
+    if (entitlement.entitlement_expiry_date && new Date(entitlement.entitlement_expiry_date) <= new Date()) {
+      navigate("/pricing");
+      return;
+    }
+
+    navigate("/student");
+  };
+
+  const validateForm = () => {
+    try {
+      if (isSignUp) {
+        authSchema.parse({ email, password, fullName });
+      } else if (isResetPassword) {
+        z.object({ email: z.string().email() }).parse({ email });
+      } else {
+        authSchema.omit({ fullName: true }).parse({ email, password });
+      }
+      setErrors({});
+      return true;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const newErrors: Record<string, string> = {};
+        error.errors.forEach((err) => {
+          if (err.path[0]) {
+            newErrors[err.path[0] as string] = err.message;
+          }
+        });
+        setErrors(newErrors);
+      }
+      return false;
     }
   };
 
-  const handlePrimaryCTA = async () => {
-    if (!user) {
-      navigate('/auth?signup=true');
-      return;
-    }
-    if (profile?.role === 'admin') { navigate('/admin'); return; }
-    if (profile?.role === 'parent') { navigate('/parent'); return; }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateForm()) return;
 
-    // For students: check entitlement state
-    if (profile?.subscription_type === 'premium') {
-      navigate('/student');
-      return;
-    }
+    setLoading(true);
+    setAccountExistsNotice(false);
 
-    const entitlement = await syncEntitlementFromDatabase(user.id);
-    const state = getUserAccessState(true, entitlement, profile?.subscription_type);
-    navigate(getRedirectForState(state));
+    try {
+      if (isResetPassword) {
+        const { error } = await resetPassword(email);
+        if (error) throw error;
+        toast({
+          title: t("checkEmail"),
+          description: t("resetLinkSent"),
+        });
+        setIsResetPassword(false);
+      } else if (isSignUp) {
+        const { error } = await signUp(email, password, fullName, selectedRole);
+
+        if (error) {
+          if (
+            error.message.includes("already registered") ||
+            error.message.includes("User already registered") ||
+            error.message.includes("already been registered")
+          ) {
+            setIsSignUp(false);
+            setPassword("");
+            setAccountExistsNotice(true);
+            toast({
+              title: t("accountExists") || "Account already exists",
+              description:
+                t("accountExistsDesc") || "This email is already registered. Please enter your password to sign in.",
+            });
+            setLoading(false);
+            return;
+          }
+
+          if (error.message.includes("confirm")) {
+            toast({
+              title: t("checkEmail") || "Check your email",
+              description: "Please check your email to confirm your account before signing in.",
+            });
+            setLoading(false);
+            return;
+          }
+
+          throw error;
+        }
+
+        toast({
+          title: t("welcomeToPIXO"),
+          description: t("accountCreated"),
+        });
+      } else {
+        const { error } = await signIn(email, password);
+        if (error) {
+          if (error.message.includes("Invalid login") || error.message.includes("invalid")) {
+            throw new Error(t("invalidCredentials") || "Invalid email or password. Please try again.");
+          }
+          if (error.message.includes("Email not confirmed")) {
+            throw new Error("Please check your email and confirm your account first.");
+          }
+          throw error;
+        }
+
+        toast({
+          title: t("welcomeBackGreeting"),
+          description: t("signedInSuccess"),
+        });
+      }
+    } catch (error) {
+      toast({
+        title: t("error"),
+        description: error instanceof Error ? error.message : t("somethingWrong"),
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const features = [
+  const roleOptions = [
     {
-      icon: Mic,
-      title: t('speakPractice'),
-      description: t('speakPracticeDesc'),
-      color: 'text-pixo-orange',
-      bg: 'bg-pixo-orange/10',
+      id: "student" as UserRole,
+      title: t("student"),
+      description: t("iWantToLearn"),
+      icon: GraduationCap,
     },
     {
-      icon: BookOpen,
-      title: t('dailyLessons'),
-      description: t('dailyLessonsDesc'),
-      color: 'text-pixo-yellow',
-      bg: 'bg-pixo-yellow/10',
-    },
-    {
-      icon: Trophy,
-      title: t('trackProgress'),
-      description: t('trackProgressDesc'),
-      color: 'text-pixo-green',
-      bg: 'bg-pixo-green/10',
-    },
-    {
+      id: "parent" as UserRole,
+      title: t("parent"),
+      description: t("iWantToMonitor"),
       icon: Users,
-      title: t('parentMonitoring'),
-      description: t('parentMonitoringDesc'),
-      color: 'text-pixo-blue',
-      bg: 'bg-pixo-blue/10',
     },
-  ];
-
-  const dailyBlocks = [
-    { icon: BookOpen, label: t('reading'), time: `5 ${t('min')}`, color: 'text-pixo-blue', bg: 'bg-pixo-blue/10' },
-    { icon: Headphones, label: t('listening'), time: `5 ${t('min')}`, color: 'text-pixo-purple', bg: 'bg-pixo-purple/10' },
-    { icon: Mic, label: t('pronunciation'), time: `5 ${t('min')}`, color: 'text-pixo-orange', bg: 'bg-pixo-orange/10' },
-    { icon: PenTool, label: t('wordBuilding'), time: `5 ${t('min')}`, color: 'text-pixo-green', bg: 'bg-pixo-green/10' },
-    { icon: Puzzle, label: t('miniQuiz'), time: `5 ${t('min')}`, color: 'text-pixo-yellow', bg: 'bg-pixo-yellow/10' },
-    { icon: Gamepad2, label: t('funActivity'), time: `5 ${t('min')}`, color: 'text-pixo-red', bg: 'bg-pixo-red/10' },
-  ];
-
-  const benefits = [
-    t('unlimitedPractice'),
-    t('aiSpeechEval'),
-    t('dailyReminders'),
-    t('progressTracking'),
-    t('parentDashboard'),
-    t('attendanceStreaks'),
   ];
 
   return (
-    <Layout>
-      {/* Hero Section */}
-      <section className="relative overflow-hidden py-20 md:py-32">
-        <div className="absolute inset-0 gradient-bg opacity-5" />
-        <div className="container mx-auto px-4 relative">
-          <div className="flex flex-col lg:flex-row items-center gap-12">
-            <div className="flex-1 text-center lg:text-left animate-fade-in">
-              <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-6">
-                <Sparkles className="h-4 w-4" />
-                {t('heroTagline')}
-              </div>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold mb-6 leading-tight">
-                {t('heroTitle')}{' '}
-                <span className="gradient-text">{t('heroTitleHighlight')}</span>
-              </h1>
-              <p className="text-xl text-muted-foreground mb-8 max-w-xl mx-auto lg:mx-0">
-                {t('heroDescription')}
+    <Layout showNavbar={false}>
+      <div className="min-h-screen flex">
+        {/* Left side - Branding */}
+        <div className="hidden lg:flex lg:w-1/2 gradient-bg items-center justify-center p-12">
+          <div className="w-full max-w-2xl text-center space-y-8 animate-fade-in">
+            <img
+              src={pixoLogo}
+              alt="PIXO Learn"
+              className="h-32 mx-auto animate-float rounded-xl bg-white/90 p-4 shadow-pixo-lg"
+            />
+
+            <div className="space-y-4">
+              <h1 className="text-5xl font-display font-bold text-white tracking-tight">{t("energyLearnGrow")}</h1>
+              <p className="text-xl leading-8 text-white/90 max-w-2xl mx-auto">
+                Structured daily lessons designed to improve pronunciation, fluency, and speaking confidence for
+                children aged 5–16.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                {user ? (
-                  <>
-                    <Button variant="gradient" size="xl" onClick={handlePrimaryCTA}>
-                      {hasCompletedLaunchCheck ? t('goToDashboard') : t('startLaunchCheck')}
-                      <ArrowRight className="h-5 w-5 ml-2" />
-                    </Button>
-                    {!hasCompletedLaunchCheck && (
-                      <Link to={getDashboardPath()}>
-                        <Button variant="outline" size="xl">
-                          {t('goToDashboard')}
-                        </Button>
-                      </Link>
-                    )}
-                  </>
-                ) : (
-                  <>
-                    <Link to="/auth?signup=true">
-                      <Button variant="gradient" size="xl">
-                        {t('startLearningFree')}
-                        <ArrowRight className="h-5 w-5 ml-2" />
-                      </Button>
-                    </Link>
-                    <Link to="/pricing">
-                      <Button variant="outline" size="xl">
-                        {t('viewPricing')}
-                      </Button>
-                    </Link>
-                  </>
-                )}
-              </div>
-              <div className="flex items-center gap-6 mt-8 justify-center lg:justify-start text-sm text-muted-foreground">
-                <div className="flex items-center gap-1">
-                  <Sparkles className="h-4 w-4 text-pixo-yellow" />
-                  <span>{t('helpingStudents')}</span>
-                </div>
-              </div>
             </div>
-            <div className="flex-1 relative animate-float">
-              <div className="relative">
-                <div className="absolute inset-0 gradient-bg rounded-3xl blur-3xl opacity-20" />
-                <div className="relative bg-card rounded-3xl p-8 shadow-2xl border border-border">
-                  <img src={pixoLogo} alt="PIXO" className="w-64 mx-auto mb-6" />
-                  <div className="text-center">
-                    <p className="text-2xl font-display font-bold gradient-text mb-2">
-                      {t('energyLearnGrow')}
-                    </p>
-                    <p className="text-muted-foreground">
-                      {t('childJourneyStarts')}
-                    </p>
-                  </div>
+
+            <div className="grid grid-cols-3 gap-4 pt-4">
+              {heroStats.map((stat) => (
+                <div
+                  key={stat.value}
+                  className="rounded-2xl border border-white/20 bg-white/10 px-4 py-5 backdrop-blur-sm shadow-pixo-md"
+                >
+                  <p className="text-3xl font-bold text-white">{stat.value}</p>
+                  <p className="mt-2 text-sm font-medium text-white/85">{stat.label}</p>
                 </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>
-      </section>
 
-      {/* Features Section */}
-      <section className="py-20 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
-              {t('whyParentsChoose')}
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              {t('whyParentsChooseDesc')}
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {features.map((feature, index) => (
-              <div
-                key={index}
-                className="pixo-card text-center animate-slide-up"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <div className={`w-16 h-16 rounded-2xl ${feature.bg} flex items-center justify-center mx-auto mb-4`}>
-                  <feature.icon className={`h-8 w-8 ${feature.color}`} />
-                </div>
-                <h3 className="font-display font-bold text-lg mb-2">{feature.title}</h3>
-                <p className="text-muted-foreground text-sm">{feature.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+        {/* Right side - Auth Form */}
+        <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
+          <div className="w-full max-w-md space-y-8 animate-slide-up">
+            <div className="lg:hidden text-center mb-8">
+              <img src={pixoLogo} alt="PIXO" className="h-16 mx-auto" />
+            </div>
 
-      {/* How It Works Section */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
-              {t('howPixoWorks')}
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              {t('howPixoWorksDesc')}
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            {[
-              { step: 1, title: t('takeLaunchCheck'), desc: t('takeLaunchCheckDesc'), icon: Sparkles },
-              { step: 2, title: t('learnPracticeDaily'), desc: t('learnPracticeDailyDesc'), icon: Mic },
-              { step: 3, title: t('watchConfidenceGrow'), desc: t('watchConfidenceGrowDesc'), icon: Trophy },
-            ].map((item, index) => (
-              <div key={item.step} className="text-center animate-slide-up" style={{ animationDelay: `${index * 0.15}s` }}>
-                <div className="relative inline-block mb-4">
-                  <div className="w-20 h-20 rounded-full gradient-bg flex items-center justify-center">
-                    <item.icon className="h-10 w-10 text-white" />
-                  </div>
-                  <div className="absolute -top-2 -right-2 w-8 h-8 bg-card border-2 border-primary rounded-full flex items-center justify-center font-bold text-sm">
-                    {item.step}
-                  </div>
-                </div>
-                <h3 className="font-display font-bold text-xl mb-2">{item.title}</h3>
-                <p className="text-muted-foreground">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Daily Learning Model Section */}
-      <section className="py-20 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
-              {t('thirtyMinDay')} <span className="gradient-text">{t('sixFunActivities')}</span>
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              {t('dailyBlocksDesc')}
-            </p>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 max-w-5xl mx-auto">
-            {dailyBlocks.map((block, index) => (
-              <div
-                key={index}
-                className="pixo-card text-center py-6 animate-slide-up"
-                style={{ animationDelay: `${index * 0.08}s` }}
-              >
-                <div className={`w-14 h-14 rounded-2xl ${block.bg} flex items-center justify-center mx-auto mb-3`}>
-                  <block.icon className={`h-7 w-7 ${block.color}`} />
-                </div>
-                <h3 className="font-display font-bold text-sm mb-1">{block.label}</h3>
-                <p className="text-xs text-muted-foreground">{block.time}</p>
-              </div>
-            ))}
-          </div>
-          <div className="text-center mt-8">
-            <p className="text-sm text-muted-foreground">
-              🎯 Structured daily habit · 📈 Progressive difficulty · 🎮 Gamified experience
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Benefits Section */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-display font-bold mb-6">
-                {t('everythingChildNeeds')} <span className="gradient-text">{t('speakConfidently')}</span>
+            <div className="text-center space-y-2">
+              <h2 className="text-3xl font-display font-bold">
+                {isResetPassword ? t("resetPassword") : isSignUp ? t("createAccount") : t("welcomeBack")}
               </h2>
-              <p className="text-lg text-muted-foreground mb-8">
-                {t('completeExperience')}
+              <p className="text-muted-foreground">
+                {isResetPassword ? t("enterResetEmail") : isSignUp ? t("startJourneyToday") : t("continueJourney")}
               </p>
-              <div className="grid grid-cols-2 gap-4">
-                {benefits.map((benefit) => (
-                  <div key={benefit} className="flex items-center gap-2">
-                    <CheckCircle2 className="h-5 w-5 text-pixo-green flex-shrink-0" />
-                    <span className="text-sm">{benefit}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-8">
-                {!user && (
-                  <Link to="/auth?signup=true">
-                    <Button variant="gradient" size="lg">
-                      {t('startFreeTrial')}
-                      <Play className="h-4 w-4 ml-2" />
-                    </Button>
-                  </Link>
-                )}
-              </div>
             </div>
-            <div className="relative">
-              <div className="pixo-card p-8">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-4 p-4 bg-muted rounded-xl">
-                    <div className="w-12 h-12 rounded-full gradient-bg flex items-center justify-center">
-                      <Mic className="h-6 w-6 text-white" />
-                    </div>
-                    <div>
-                      <p className="font-semibold">Daily Speaking Practice</p>
-                      <p className="text-sm text-muted-foreground">30 min/day</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4 p-4 bg-muted rounded-xl">
-                    <div className="w-12 h-12 rounded-full bg-pixo-green/20 flex items-center justify-center">
-                      <Trophy className="h-6 w-6 text-pixo-green" />
-                    </div>
-                    <div>
-                      <p className="font-semibold">Speaking Score: 92%</p>
-                      <p className="text-sm text-muted-foreground">+12% this week</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4 p-4 bg-muted rounded-xl">
-                    <div className="w-12 h-12 rounded-full bg-pixo-orange/20 flex items-center justify-center">
-                      <Sparkles className="h-6 w-6 text-pixo-orange" />
-                    </div>
-                    <div>
-                      <p className="font-semibold">7 Day Streak! 🔥</p>
-                      <p className="text-sm text-muted-foreground">Keep it up!</p>
-                    </div>
-                  </div>
-                </div>
+
+            {accountExistsNotice && !isSignUp && (
+              <div className="bg-primary/10 border border-primary/20 rounded-2xl p-4 text-center animate-fade-in">
+                <p className="text-sm font-semibold text-primary">{t("accountExists") || "Account already exists"}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {t("accountExistsDesc") || "This email is already registered. Please enter your password to sign in."}
+                </p>
               </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Upcoming Programs */}
-      <UpcomingPrograms />
-
-      {/* CTA Section */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="pixo-card gradient-bg text-white text-center py-16 px-8">
-            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
-              {t('readyToBuild')}
-            </h2>
-            <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-              {t('readyToBuildDesc')}
-            </p>
-            {user ? (
-              <Button
-                variant="outline"
-                size="xl"
-                className="border-white text-white hover:bg-white hover:text-primary"
-                onClick={handlePrimaryCTA}
-              >
-                {hasCompletedLaunchCheck ? t('goToDashboard') : t('startLaunchCheck')}
-                <ArrowRight className="h-5 w-5 ml-2" />
-              </Button>
-            ) : (
-              <Link to="/auth?signup=true">
-                <Button variant="outline" size="xl" className="border-white text-white hover:bg-white hover:text-primary">
-                  {t('getStartedFree')}
-                  <ArrowRight className="h-5 w-5 ml-2" />
-                </Button>
-              </Link>
             )}
-          </div>
-        </div>
-      </section>
 
-      {/* Footer */}
-      <footer className="py-12 border-t border-border">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <img src={pixoLogo} alt="PIXO" className="h-8" />
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {isSignUp && !isResetPassword && (
+                <>
+                  <div className="space-y-3">
+                    <Label>{t("iAmA")}</Label>
+                    <div className="grid grid-cols-2 gap-4">
+                      {roleOptions.map((role) => (
+                        <button
+                          key={role.id}
+                          type="button"
+                          onClick={() => setSelectedRole(role.id)}
+                          className={`p-4 rounded-xl border-2 transition-all duration-300 text-left ${
+                            selectedRole === role.id
+                              ? "border-primary bg-primary/5 shadow-pixo-md"
+                              : "border-border hover:border-primary/50"
+                          }`}
+                        >
+                          <role.icon
+                            className={`h-8 w-8 mb-2 ${
+                              selectedRole === role.id ? "text-primary" : "text-muted-foreground"
+                            }`}
+                          />
+                          <p className="font-semibold">{role.title}</p>
+                          <p className="text-xs text-muted-foreground">{role.description}</p>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="fullName">{t("fullName")}</Label>
+                    <Input
+                      id="fullName"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      placeholder={t("enterFullName")}
+                      className={errors.fullName ? "border-destructive" : ""}
+                    />
+                    {errors.fullName && <p className="text-sm text-destructive">{errors.fullName}</p>}
+                  </div>
+                </>
+              )}
+
+              <div className="space-y-2">
+                <Label htmlFor="email">{t("email")}</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  className={errors.email ? "border-destructive" : ""}
+                />
+                {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
+              </div>
+
+              {!isResetPassword && (
+                <div className="space-y-2">
+                  <Label htmlFor="password">{t("password")}</Label>
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder={t("enterPassword")}
+                      className={errors.password ? "border-destructive pr-10" : "pr-10"}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                  {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
+                </div>
+              )}
+
+              {!isSignUp && !isResetPassword && (
+                <button
+                  type="button"
+                  onClick={() => setIsResetPassword(true)}
+                  className="text-sm text-primary hover:underline"
+                >
+                  {t("forgotPassword")}
+                </button>
+              )}
+
+              <Button type="submit" variant="gradient" size="lg" className="w-full" disabled={loading}>
+                {loading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : isResetPassword ? (
+                  t("sendResetLink")
+                ) : isSignUp ? (
+                  t("createAccount")
+                ) : (
+                  t("signIn")
+                )}
+              </Button>
+            </form>
+
+            <div className="text-center">
+              {isResetPassword ? (
+                <button
+                  onClick={() => setIsResetPassword(false)}
+                  className="text-sm text-muted-foreground hover:text-foreground"
+                >
+                  {t("backToSignIn")}
+                </button>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  {isSignUp ? t("alreadyHaveAccount") : t("dontHaveAccount")}{" "}
+                  <button
+                    onClick={() => {
+                      setIsSignUp(!isSignUp);
+                      setAccountExistsNotice(false);
+                    }}
+                    className="text-primary font-semibold hover:underline"
+                  >
+                    {isSignUp ? t("signIn") : t("signUp")}
+                  </button>
+                </p>
+              )}
             </div>
-            <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} PIXO. {t('allRightsReserved')}
-            </p>
           </div>
         </div>
-      </footer>
+      </div>
     </Layout>
   );
 }
