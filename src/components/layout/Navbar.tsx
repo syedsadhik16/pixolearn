@@ -67,8 +67,9 @@ export function Navbar() {
   };
 
   const getDashboardPath = () => {
-    if (!profile) return '/';
-    switch (profile.role) {
+    if (isMultiRole && !activeRole) return '/role-select';
+    const role = activeRole || profile?.role;
+    switch (role) {
       case 'admin': return '/admin';
       case 'parent': return '/parent';
       default: return '/student';
