@@ -7,6 +7,8 @@ import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useLanguage, type LangCode } from '@/contexts/LanguageContext';
 import { SUPPORTED_LANGUAGES } from '@/components/shared/LanguageSelector';
+import { PortalSwitcher } from '@/components/shared/PortalSwitcher';
+import { SyncStatus } from '@/components/shared/SyncStatus';
 
 function NavLanguageSwitcher() {
   const { language, setLanguage } = useLanguage();
