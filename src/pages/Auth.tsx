@@ -48,14 +48,21 @@ export default function Auth() {
 
   useEffect(() => {
     if (user && profile) {
-      if (profile.role !== 'student') {
-        const redirectPath = profile.role === 'admin' ? '/admin' : '/parent';
+      // Multi-role users go to role selection
+      if (isMultiRole && !activeRole) {
+        navigate('/role-select');
+        return;
+      }
+      
+      const effectiveRole = activeRole || profile.role;
+      if (effectiveRole !== 'student') {
+        const redirectPath = effectiveRole === 'admin' ? '/admin' : '/parent';
         navigate(redirectPath);
         return;
       }
       checkStudentFlowState();
     }
-  }, [user, profile, navigate]);
+  }, [user, profile, roles, activeRole, navigate]);
 
   const checkStudentFlowState = async () => {
     if (!user) return;
