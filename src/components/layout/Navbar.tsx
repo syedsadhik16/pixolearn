@@ -56,7 +56,7 @@ function NavLanguageSwitcher() {
 }
 
 export function Navbar() {
-  const { user, profile, signOut } = useAuth();
+  const { user, profile, signOut, isMultiRole, activeRole } = useAuth();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { t } = useTranslation();
