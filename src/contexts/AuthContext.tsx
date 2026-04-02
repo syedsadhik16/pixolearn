@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -20,6 +20,11 @@ interface AuthContextType {
   session: Session | null;
   profile: Profile | null;
   loading: boolean;
+  roles: UserRole[];
+  activeRole: UserRole | null;
+  setActiveRole: (role: UserRole) => void;
+  hasRole: (role: UserRole) => boolean;
+  isMultiRole: boolean;
   signUp: (email: string, password: string, fullName: string, role: UserRole) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
@@ -33,6 +38,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [roles, setRoles] = useState<UserRole[]>([]);
+  const [activeRole, setActiveRoleState] = useState<UserRole | null>(() => {
+    const saved = localStorage.getItem('pixo-active-role');
+    return saved as UserRole | null;
+  });
+
+  const setActiveRole = useCallback((role: UserRole) => {
+    setActiveRoleState(role);
+    localStorage.setItem('pixo-active-role', role);
+  }, []);
+
+  const hasRole = useCallback((role: UserRole) => roles.includes(role), [roles]);
+  const isMultiRole = roles.length > 1;
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -43,9 +61,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (session?.user) {
           setTimeout(() => {
             fetchProfile(session.user.id);
+            fetchRoles(session.user.id);
           }, 0);
         } else {
           setProfile(null);
+          setRoles([]);
         }
       }
     );
@@ -56,12 +76,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       if (session?.user) {
         fetchProfile(session.user.id);
+        fetchRoles(session.user.id);
       }
       setLoading(false);
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const fetchRoles = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .eq('is_active', true);
+
+      if (!error && data) {
+        const userRoles = data.map(r => r.role as UserRole);
+        setRoles(userRoles);
+        
+        // Set active role if not set or invalid
+        const savedRole = localStorage.getItem('pixo-active-role') as UserRole | null;
+        if (savedRole && userRoles.includes(savedRole)) {
+          setActiveRoleState(savedRole);
+        } else if (userRoles.length === 1) {
+          setActiveRole(userRoles[0]);
+        } else if (userRoles.length > 1 && !savedRole) {
+          // Will need role selection - don't set yet
+          setActiveRoleState(null);
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching roles:', err);
+    }
+  };
 
   const fetchProfile = async (userId: string) => {
     try {
@@ -73,7 +122,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (!error && data) {
         const profileData = data as unknown as Profile;
-        // Client-side trial expiry check
         if (
           profileData.subscription_type === 'premium' &&
           profileData.trial_expires_at &&
@@ -123,6 +171,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = async () => {
     await supabase.auth.signOut();
     setProfile(null);
+    setRoles([]);
+    setActiveRoleState(null);
+    localStorage.removeItem('pixo-active-role');
   };
 
   const resetPassword = async (email: string) => {
@@ -140,6 +191,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         session,
         profile,
         loading,
+        roles,
+        activeRole,
+        setActiveRole,
+        hasRole,
+        isMultiRole,
         signUp,
         signIn,
         signOut,
@@ -158,4 +214,3 @@ export function useAuth() {
   }
   return context;
 }
-
