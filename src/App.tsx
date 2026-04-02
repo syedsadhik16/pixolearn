@@ -33,6 +33,8 @@ import AdminKnowledgeIngestion from "./pages/AdminKnowledgeIngestion";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import Billing from "./pages/Billing";
 import TrophyRoom from "./pages/TrophyRoom";
+import RoleSelect from "./pages/RoleSelect";
+import AccessDenied from "./pages/AccessDenied";
 import { LanguageOverlay } from "./components/shared/LanguageSelector";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { ProtectedRoute } from "./components/shared/ProtectedRoute";
