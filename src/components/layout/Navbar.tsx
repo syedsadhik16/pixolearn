@@ -86,6 +86,8 @@ export function Navbar() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-3">
+            <SyncStatus />
+            <PortalSwitcher />
             <NavLanguageSwitcher />
             {user && profile ? (
               <>
