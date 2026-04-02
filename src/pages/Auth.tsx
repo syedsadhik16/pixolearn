@@ -38,7 +38,6 @@ export default function Auth() {
   const { toast } = useToast();
   const { t } = useTranslation();
 
-  // If redirected with exists=true, show sign-in mode with message
   useEffect(() => {
     if (searchParams.get("exists") === "true") {
       setIsSignUp(false);
@@ -48,7 +47,6 @@ export default function Auth() {
 
   useEffect(() => {
     if (user && profile) {
-      // Multi-role users go to role selection
       if (isMultiRole && !activeRole) {
         navigate("/role-select");
         return;
@@ -151,16 +149,13 @@ export default function Auth() {
         });
         setIsResetPassword(false);
       } else if (isSignUp) {
-        // Directly attempt sign-up. Supabase will return an error if the email is already registered.
         const { error } = await signUp(email, password, fullName, selectedRole);
         if (error) {
-          // Check if user already exists
           if (
             error.message.includes("already registered") ||
             error.message.includes("User already registered") ||
             error.message.includes("already been registered")
           ) {
-            // Switch to sign-in mode with email prefilled
             setIsSignUp(false);
             setPassword("");
             setAccountExistsNotice(true);
@@ -172,7 +167,7 @@ export default function Auth() {
             setLoading(false);
             return;
           }
-          // Check for email confirmation required (not a real error for user)
+
           if (error.message.includes("confirm")) {
             toast({
               title: t("checkEmail") || "Check your email",
@@ -181,8 +176,10 @@ export default function Auth() {
             setLoading(false);
             return;
           }
+
           throw error;
         }
+
         toast({
           title: t("welcomeToPIXO"),
           description: t("accountCreated"),
@@ -198,6 +195,7 @@ export default function Auth() {
           }
           throw error;
         }
+
         toast({
           title: t("welcomeBackGreeting"),
           description: t("signedInSuccess"),
@@ -236,22 +234,29 @@ export default function Auth() {
         <div className="hidden lg:flex lg:w-1/2 gradient-bg items-center justify-center p-12">
           <div className="text-center space-y-8 animate-fade-in">
             <img src={pixoLogo} alt="PIXO" className="h-32 mx-auto animate-float" />
+
             <div className="space-y-4">
-              <h1 className="text-4xl font-display font-bold text-white">{t("energyLearnGrow")}</h1>
-              <p className="text-xl text-white/90 max-w-md">{t("heroDescription")}</p>
+              <h1 className="text-4xl font-display font-bold text-white">Structured English Growth for Every Child</h1>
+              <p className="text-xl text-white/90 max-w-2xl mx-auto">
+                From first sounds to confident speaking, PIXO Learn gives children a guided daily path with engaging
+                lessons, adaptive support, and visible progress parents can trust.
+              </p>
             </div>
-            <div className="flex justify-center gap-6 text-white/80">
+
+            <div className="grid grid-cols-3 gap-6 text-white/90 pt-2">
               <div className="text-center">
-                <p className="text-3xl font-bold">Adaptive Learning, Interactive Lessons</p>
-                <p className="text-sm">Confidence First</p>
+                <p className="text-2xl lg:text-3xl font-bold">180-Day Program</p>
+                <p className="text-sm lg:text-base text-white/80">Built for Real Progress</p>
               </div>
+
               <div className="text-center">
-                <p className="text-3xl font-bold">500+</p>
-                <p className="text-sm">{t("lessons")}</p>
+                <p className="text-2xl lg:text-3xl font-bold">Daily 30-Min Lessons</p>
+                <p className="text-sm lg:text-base text-white/80">Simple and Consistent</p>
               </div>
+
               <div className="text-center">
-                <p className="text-3xl font-bold">95%</p>
-                <p className="text-sm">Success</p>
+                <p className="text-2xl lg:text-3xl font-bold">Adaptive Learning</p>
+                <p className="text-sm lg:text-base text-white/80">Supports Every Child</p>
               </div>
             </div>
           </div>
@@ -273,7 +278,6 @@ export default function Auth() {
               </p>
             </div>
 
-            {/* Account exists notice */}
             {accountExistsNotice && !isSignUp && (
               <div className="bg-primary/10 border border-primary/20 rounded-2xl p-4 text-center animate-fade-in">
                 <p className="text-sm font-semibold text-primary">{t("accountExists") || "Account already exists"}</p>
@@ -286,7 +290,6 @@ export default function Auth() {
             <form onSubmit={handleSubmit} className="space-y-6">
               {isSignUp && !isResetPassword && (
                 <>
-                  {/* Role Selection */}
                   <div className="space-y-3">
                     <Label>{t("iAmA")}</Label>
                     <div className="grid grid-cols-2 gap-4">
@@ -313,7 +316,6 @@ export default function Auth() {
                     </div>
                   </div>
 
-                  {/* Full Name */}
                   <div className="space-y-2">
                     <Label htmlFor="fullName">{t("fullName")}</Label>
                     <Input
@@ -328,7 +330,6 @@ export default function Auth() {
                 </>
               )}
 
-              {/* Email */}
               <div className="space-y-2">
                 <Label htmlFor="email">{t("email")}</Label>
                 <Input
@@ -342,7 +343,6 @@ export default function Auth() {
                 {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
               </div>
 
-              {/* Password */}
               {!isResetPassword && (
                 <div className="space-y-2">
                   <Label htmlFor="password">{t("password")}</Label>
@@ -367,7 +367,6 @@ export default function Auth() {
                 </div>
               )}
 
-              {/* Forgot Password Link */}
               {!isSignUp && !isResetPassword && (
                 <button
                   type="button"
@@ -378,7 +377,6 @@ export default function Auth() {
                 </button>
               )}
 
-              {/* Submit Button */}
               <Button type="submit" variant="gradient" size="lg" className="w-full" disabled={loading}>
                 {loading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -392,7 +390,6 @@ export default function Auth() {
               </Button>
             </form>
 
-            {/* Toggle Auth Mode */}
             <div className="text-center">
               {isResetPassword ? (
                 <button
