@@ -1284,6 +1284,36 @@ export type Database = {
           },
         ]
       }
+      organizations: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          logo_url: string | null
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       parent_ai_outputs: {
         Row: {
           created_at: string
@@ -1858,6 +1888,42 @@ export type Database = {
           },
         ]
       }
+      sync_queue: {
+        Row: {
+          action_type: string
+          created_at: string
+          id: string
+          payload: Json
+          portal_type: string
+          retry_count: number
+          sync_status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          id?: string
+          payload?: Json
+          portal_type?: string
+          retry_count?: number
+          sync_status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          id?: string
+          payload?: Json
+          portal_type?: string
+          retry_count?: number
+          sync_status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_entitlements: {
         Row: {
           amount_paid: number | null
@@ -1926,6 +1992,44 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          granted_by: string | null
+          id: string
+          is_active: boolean
+          organization_id: string | null
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          granted_by?: string | null
+          id?: string
+          is_active?: boolean
+          organization_id?: string | null
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          granted_by?: string | null
+          id?: string
+          is_active?: boolean
+          organization_id?: string | null
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       writing_submissions: {
         Row: {
@@ -2040,6 +2144,17 @@ export type Database = {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["user_role"]
       }
+      get_user_roles: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Enums"]["app_role"][]
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       purchase_shop_item: {
         Args: { _item_id: string; _student_id: string }
         Returns: Json
@@ -2103,6 +2218,7 @@ export type Database = {
           }
     }
     Enums: {
+      app_role: "student" | "parent" | "admin"
       lesson_level: "beginner" | "intermediate" | "advanced"
       subscription_type: "free" | "premium"
       user_role: "student" | "parent" | "admin"
@@ -2233,6 +2349,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["student", "parent", "admin"],
       lesson_level: ["beginner", "intermediate", "advanced"],
       subscription_type: ["free", "premium"],
       user_role: ["student", "parent", "admin"],

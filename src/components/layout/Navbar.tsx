@@ -7,6 +7,8 @@ import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useLanguage, type LangCode } from '@/contexts/LanguageContext';
 import { SUPPORTED_LANGUAGES } from '@/components/shared/LanguageSelector';
+import { PortalSwitcher } from '@/components/shared/PortalSwitcher';
+import { SyncStatus } from '@/components/shared/SyncStatus';
 
 function NavLanguageSwitcher() {
   const { language, setLanguage } = useLanguage();
@@ -54,7 +56,7 @@ function NavLanguageSwitcher() {
 }
 
 export function Navbar() {
-  const { user, profile, signOut } = useAuth();
+  const { user, profile, signOut, isMultiRole, activeRole } = useAuth();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { t } = useTranslation();
@@ -65,8 +67,9 @@ export function Navbar() {
   };
 
   const getDashboardPath = () => {
-    if (!profile) return '/';
-    switch (profile.role) {
+    if (isMultiRole && !activeRole) return '/role-select';
+    const role = activeRole || profile?.role;
+    switch (role) {
       case 'admin': return '/admin';
       case 'parent': return '/parent';
       default: return '/student';
@@ -83,6 +86,8 @@ export function Navbar() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-3">
+            <SyncStatus />
+            <PortalSwitcher />
             <NavLanguageSwitcher />
             {user && profile ? (
               <>

@@ -33,7 +33,7 @@ export default function Auth() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [accountExistsNotice, setAccountExistsNotice] = useState(searchParams.get('exists') === 'true');
 
-  const { signIn, signUp, resetPassword, user, profile } = useAuth();
+  const { signIn, signUp, resetPassword, user, profile, roles: userRoles, isMultiRole, activeRole } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useTranslation();
@@ -48,14 +48,21 @@ export default function Auth() {
 
   useEffect(() => {
     if (user && profile) {
-      if (profile.role !== 'student') {
-        const redirectPath = profile.role === 'admin' ? '/admin' : '/parent';
+      // Multi-role users go to role selection
+      if (isMultiRole && !activeRole) {
+        navigate('/role-select');
+        return;
+      }
+      
+      const effectiveRole = activeRole || profile.role;
+      if (effectiveRole !== 'student') {
+        const redirectPath = effectiveRole === 'admin' ? '/admin' : '/parent';
         navigate(redirectPath);
         return;
       }
       checkStudentFlowState();
     }
-  }, [user, profile, navigate]);
+  }, [user, profile, userRoles, activeRole, navigate]);
 
   const checkStudentFlowState = async () => {
     if (!user) return;
@@ -206,7 +213,7 @@ export default function Auth() {
     }
   };
 
-  const roles = [
+  const roleOptions = [
     {
       id: 'student' as UserRole,
       title: t('student'),
@@ -296,7 +303,7 @@ export default function Auth() {
                   <div className="space-y-3">
                     <Label>{t('iAmA')}</Label>
                     <div className="grid grid-cols-2 gap-4">
-                      {roles.map((role) => (
+                      {roleOptions.map((role) => (
                         <button
                           key={role.id}
                           type="button"
