@@ -33,7 +33,7 @@ export default function Auth() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [accountExistsNotice, setAccountExistsNotice] = useState(searchParams.get('exists') === 'true');
 
-  const { signIn, signUp, resetPassword, user, profile } = useAuth();
+  const { signIn, signUp, resetPassword, user, profile, roles, isMultiRole, activeRole } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useTranslation();
