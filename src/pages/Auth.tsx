@@ -213,7 +213,7 @@ export default function Auth() {
     }
   };
 
-  const roles = [
+  const roleOptions = [
     {
       id: 'student' as UserRole,
       title: t('student'),
