@@ -303,7 +303,7 @@ export default function Auth() {
                   <div className="space-y-3">
                     <Label>{t('iAmA')}</Label>
                     <div className="grid grid-cols-2 gap-4">
-                      {roles.map((role) => (
+                      {roleOptions.map((role) => (
                         <button
                           key={role.id}
                           type="button"
