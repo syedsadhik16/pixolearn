@@ -62,7 +62,7 @@ export default function Auth() {
       }
       checkStudentFlowState();
     }
-  }, [user, profile, roles, activeRole, navigate]);
+  }, [user, profile, userRoles, activeRole, navigate]);
 
   const checkStudentFlowState = async () => {
     if (!user) return;
