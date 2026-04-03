@@ -152,17 +152,32 @@ export default function AdminDashboard() {
 
   const fetchData = async () => {
     try {
-      const [profilesRes, lessonsRes, completionsRes] = await Promise.all([
+      const [profilesRes, lessonsRes, completionsRes, rolesRes, linksRes] = await Promise.all([
         supabase.from('profiles').select('*').order('created_at', { ascending: false }),
         supabase.from('lessons').select('*').order('level').order('day_number'),
         supabase.from('lesson_completions').select('lesson_id'),
+        supabase.from('user_roles').select('user_id, role').eq('is_active', true),
+        supabase.from('parent_children').select('parent_id, child_id'),
       ]);
 
       if (profilesRes.error) throw profilesRes.error;
       if (lessonsRes.error) throw lessonsRes.error;
 
-      setStudents((profilesRes.data || []).filter((p) => p.role === 'student'));
+      const allProfiles = profilesRes.data || [];
+      setAllUsers(allProfiles);
+      setStudents(allProfiles.filter((p) => p.role === 'student'));
       setLessons(lessonsRes.data || []);
+
+      // Roles map
+      const rmap: Record<string, string[]> = {};
+      (rolesRes.data || []).forEach((r: any) => {
+        if (!rmap[r.user_id]) rmap[r.user_id] = [];
+        rmap[r.user_id].push(r.role);
+      });
+      setUserRolesMap(rmap);
+
+      // Parent links
+      setParentLinks((linksRes.data || []) as { parent_id: string; child_id: string }[]);
 
       // Count completions per lesson
       const counts: Record<string, number> = {};
@@ -175,6 +190,44 @@ export default function AdminDashboard() {
       toast({ title: 'Error', description: 'Failed to load dashboard data', variant: 'destructive' });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleAssignRole = async () => {
+    if (!inviteEmail.trim() || !inviteRole) return;
+    const targetUser = allUsers.find(u => u.email === inviteEmail.trim());
+    if (!targetUser) {
+      toast({ title: 'Not found', description: 'No user with that email exists.', variant: 'destructive' });
+      return;
+    }
+    try {
+      const { error } = await supabase.from('user_roles').upsert(
+        { user_id: targetUser.id, role: inviteRole, is_active: true } as any,
+        { onConflict: 'user_id,role' }
+      );
+      if (error) throw error;
+      toast({ title: 'Role assigned', description: `${inviteRole} role assigned to ${inviteEmail}` });
+      setInviteEmail('');
+      fetchData();
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    }
+  };
+
+  const handleLinkParentChild = async () => {
+    if (!linkParentId || !linkChildId) return;
+    try {
+      const { error } = await supabase.from('parent_children').insert({
+        parent_id: linkParentId,
+        child_id: linkChildId,
+      });
+      if (error) throw error;
+      toast({ title: 'Linked', description: 'Parent-student relationship created.' });
+      setLinkParentId('');
+      setLinkChildId('');
+      fetchData();
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
     }
   };
 
