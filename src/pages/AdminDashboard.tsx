@@ -278,7 +278,15 @@ export default function AdminDashboard() {
       s.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Engagement metrics
+  // User & Role Management
+  const [allUsers, setAllUsers] = useState<Profile[]>([]);
+  const [userRolesMap, setUserRolesMap] = useState<Record<string, string[]>>({});
+  const [parentLinks, setParentLinks] = useState<{ parent_id: string; child_id: string }[]>([]);
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteRole, setInviteRole] = useState<string>('student');
+  const [linkParentId, setLinkParentId] = useState('');
+  const [linkChildId, setLinkChildId] = useState('');
+
   const totalStudents = students.length;
   const totalLessons = lessons.length;
   const totalCompletions = Object.values(completionCounts).reduce((a, b) => a + b, 0);
