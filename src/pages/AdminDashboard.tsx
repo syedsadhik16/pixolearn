@@ -43,6 +43,9 @@ import {
   Pencil,
   Search,
   BarChart3,
+  Shield,
+  UserPlus,
+  Link2,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -149,17 +152,32 @@ export default function AdminDashboard() {
 
   const fetchData = async () => {
     try {
-      const [profilesRes, lessonsRes, completionsRes] = await Promise.all([
+      const [profilesRes, lessonsRes, completionsRes, rolesRes, linksRes] = await Promise.all([
         supabase.from('profiles').select('*').order('created_at', { ascending: false }),
         supabase.from('lessons').select('*').order('level').order('day_number'),
         supabase.from('lesson_completions').select('lesson_id'),
+        supabase.from('user_roles').select('user_id, role').eq('is_active', true),
+        supabase.from('parent_children').select('parent_id, child_id'),
       ]);
 
       if (profilesRes.error) throw profilesRes.error;
       if (lessonsRes.error) throw lessonsRes.error;
 
-      setStudents((profilesRes.data || []).filter((p) => p.role === 'student'));
+      const allProfiles = profilesRes.data || [];
+      setAllUsers(allProfiles);
+      setStudents(allProfiles.filter((p) => p.role === 'student'));
       setLessons(lessonsRes.data || []);
+
+      // Roles map
+      const rmap: Record<string, string[]> = {};
+      (rolesRes.data || []).forEach((r: any) => {
+        if (!rmap[r.user_id]) rmap[r.user_id] = [];
+        rmap[r.user_id].push(r.role);
+      });
+      setUserRolesMap(rmap);
+
+      // Parent links
+      setParentLinks((linksRes.data || []) as { parent_id: string; child_id: string }[]);
 
       // Count completions per lesson
       const counts: Record<string, number> = {};
@@ -172,6 +190,44 @@ export default function AdminDashboard() {
       toast({ title: 'Error', description: 'Failed to load dashboard data', variant: 'destructive' });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleAssignRole = async () => {
+    if (!inviteEmail.trim() || !inviteRole) return;
+    const targetUser = allUsers.find(u => u.email === inviteEmail.trim());
+    if (!targetUser) {
+      toast({ title: 'Not found', description: 'No user with that email exists.', variant: 'destructive' });
+      return;
+    }
+    try {
+      const { error } = await supabase.from('user_roles').upsert(
+        { user_id: targetUser.id, role: inviteRole, is_active: true } as any,
+        { onConflict: 'user_id,role' }
+      );
+      if (error) throw error;
+      toast({ title: 'Role assigned', description: `${inviteRole} role assigned to ${inviteEmail}` });
+      setInviteEmail('');
+      fetchData();
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    }
+  };
+
+  const handleLinkParentChild = async () => {
+    if (!linkParentId || !linkChildId) return;
+    try {
+      const { error } = await supabase.from('parent_children').insert({
+        parent_id: linkParentId,
+        child_id: linkChildId,
+      });
+      if (error) throw error;
+      toast({ title: 'Linked', description: 'Parent-student relationship created.' });
+      setLinkParentId('');
+      setLinkChildId('');
+      fetchData();
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
     }
   };
 
@@ -275,7 +331,15 @@ export default function AdminDashboard() {
       s.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Engagement metrics
+  // User & Role Management
+  const [allUsers, setAllUsers] = useState<Profile[]>([]);
+  const [userRolesMap, setUserRolesMap] = useState<Record<string, string[]>>({});
+  const [parentLinks, setParentLinks] = useState<{ parent_id: string; child_id: string }[]>([]);
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteRole, setInviteRole] = useState<string>('student');
+  const [linkParentId, setLinkParentId] = useState('');
+  const [linkChildId, setLinkChildId] = useState('');
+
   const totalStudents = students.length;
   const totalLessons = lessons.length;
   const totalCompletions = Object.values(completionCounts).reduce((a, b) => a + b, 0);
@@ -344,6 +408,10 @@ export default function AdminDashboard() {
             <TabsTrigger value="students">
               <Users className="h-4 w-4 mr-2" />
               Students
+            </TabsTrigger>
+            <TabsTrigger value="users-roles">
+              <Shield className="h-4 w-4 mr-2" />
+              Users & Roles
             </TabsTrigger>
             <TabsTrigger value="analytics">
               <BarChart3 className="h-4 w-4 mr-2" />
@@ -575,6 +643,133 @@ export default function AdminDashboard() {
                     )}
                   </TableBody>
                 </Table>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Users & Roles Tab */}
+          <TabsContent value="users-roles">
+            <div className="space-y-6">
+              {/* Assign Role */}
+              <div className="pixo-card">
+                <h2 className="text-xl font-display font-bold mb-4 flex items-center gap-2">
+                  <UserPlus className="h-5 w-5" /> Assign Role
+                </h2>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Input
+                    placeholder="User email"
+                    value={inviteEmail}
+                    onChange={(e) => setInviteEmail(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Select value={inviteRole} onValueChange={setInviteRole}>
+                    <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="student">Student</SelectItem>
+                      <SelectItem value="parent">Parent</SelectItem>
+                      <SelectItem value="admin">Admin</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button onClick={handleAssignRole} variant="gradient">
+                    <Plus className="h-4 w-4 mr-2" /> Assign
+                  </Button>
+                </div>
+              </div>
+
+              {/* Link Parent to Student */}
+              <div className="pixo-card">
+                <h2 className="text-xl font-display font-bold mb-4 flex items-center gap-2">
+                  <Link2 className="h-5 w-5" /> Link Parent to Student
+                </h2>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Select value={linkParentId} onValueChange={setLinkParentId}>
+                    <SelectTrigger className="flex-1"><SelectValue placeholder="Select parent" /></SelectTrigger>
+                    <SelectContent>
+                      {allUsers.filter(u => u.role === 'parent').map(u => (
+                        <SelectItem key={u.id} value={u.id}>{u.full_name || u.email}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select value={linkChildId} onValueChange={setLinkChildId}>
+                    <SelectTrigger className="flex-1"><SelectValue placeholder="Select student" /></SelectTrigger>
+                    <SelectContent>
+                      {allUsers.filter(u => u.role === 'student').map(u => (
+                        <SelectItem key={u.id} value={u.id}>{u.full_name || u.email}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button onClick={handleLinkParentChild} variant="gradient">
+                    <Link2 className="h-4 w-4 mr-2" /> Link
+                  </Button>
+                </div>
+                {parentLinks.length > 0 && (
+                  <div className="mt-4 rounded-xl border overflow-hidden">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Parent</TableHead>
+                          <TableHead>Student</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {parentLinks.map((link, i) => {
+                          const parent = allUsers.find(u => u.id === link.parent_id);
+                          const child = allUsers.find(u => u.id === link.child_id);
+                          return (
+                            <TableRow key={i}>
+                              <TableCell>{parent?.full_name || parent?.email || link.parent_id.slice(0, 8)}</TableCell>
+                              <TableCell>{child?.full_name || child?.email || link.child_id.slice(0, 8)}</TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </div>
+
+              {/* All Users with Roles */}
+              <div className="pixo-card">
+                <h2 className="text-xl font-display font-bold mb-4">All Users & Roles</h2>
+                <div className="rounded-xl border overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Profile Role</TableHead>
+                        <TableHead>Active Roles</TableHead>
+                        <TableHead>Plan</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {allUsers.map((u) => (
+                        <TableRow key={u.id}>
+                          <TableCell className="font-medium">{u.full_name || '—'}</TableCell>
+                          <TableCell className="text-muted-foreground text-sm">{u.email}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline">{u.role}</Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex gap-1 flex-wrap">
+                              {(userRolesMap[u.id] || []).map(r => (
+                                <Badge key={r} variant="secondary" className="text-xs">{r}</Badge>
+                              ))}
+                              {!(userRolesMap[u.id]?.length) && (
+                                <span className="text-xs text-muted-foreground">none</span>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={u.subscription_type === 'premium' ? 'default' : 'secondary'}>
+                              {u.subscription_type}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               </div>
             </div>
           </TabsContent>

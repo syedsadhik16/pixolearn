@@ -413,6 +413,42 @@ export default function Auth() {
                 </p>
               )}
             </div>
+
+            {/* Demo Mode Login Helper */}
+            {import.meta.env.DEV && (
+              <div className="border border-dashed border-amber-400/50 rounded-2xl p-4 bg-amber-50/50 dark:bg-amber-950/20 space-y-3">
+                <p className="text-xs font-semibold text-amber-700 dark:text-amber-400 text-center">
+                  🧪 Demo Mode — Test Accounts
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { label: "Student", email: "student@pixolearn.test", icon: "🎓" },
+                    { label: "Parent", email: "parent@pixolearn.test", icon: "👨‍👩‍👦" },
+                    { label: "Admin", email: "admin@pixolearn.test", icon: "🛡️" },
+                    { label: "Multi-role", email: "multirole@pixolearn.test", icon: "🔄" },
+                  ].map((demo) => (
+                    <button
+                      key={demo.email}
+                      type="button"
+                      onClick={() => {
+                        setEmail(demo.email);
+                        setPassword("password");
+                        setIsSignUp(false);
+                        setIsResetPassword(false);
+                      }}
+                      className="flex items-center gap-2 px-3 py-2 rounded-lg border border-border bg-card hover:bg-accent/50 transition-colors text-left text-xs"
+                    >
+                      <span>{demo.icon}</span>
+                      <span className="font-medium">{demo.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <p className="text-center text-[11px] text-muted-foreground/60">
+              PIXO Learn • Organization Access Only
+            </p>
           </div>
         </div>
       </div>
