@@ -163,7 +163,7 @@ export function PIXOChatPanel({
     >
       <CardHeader className="border-b border-border bg-gradient-to-r from-primary/10 to-secondary/10 px-4 py-3">
         <CardTitle className="flex items-center gap-3 text-base">
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white/80 shadow-sm">
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white/80 shadow-sm overflow-hidden">
             <img src={chatbotMascot} alt="PIXO Chat Assistant" className="h-9 w-9 object-contain" />
           </div>
           <span className="text-foreground">{mode === "student" ? "Ask PIXO 🦊" : "PIXO Insights"}</span>
@@ -173,7 +173,7 @@ export function PIXOChatPanel({
       <CardContent className="flex-1 space-y-3 overflow-y-auto p-3">
         {messages.length === 0 && (
           <div className="space-y-3 py-8 text-center">
-            <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-3xl bg-white/80 p-2 shadow-sm">
+            <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-3xl bg-white/80 p-2 shadow-sm overflow-hidden">
               <img src={chatbotMascot} alt="PIXO Chat Assistant" className="h-20 w-20 object-contain" />
             </div>
 
@@ -321,7 +321,7 @@ export function PIXOChatBubble(props: Omit<PIXOChatPanelProps, "isFullPage">) {
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Open PIXO Chat"
         className={cn(
-          "flex h-16 w-16 items-center justify-center rounded-2xl shadow-lg transition-all",
+          "flex h-16 w-16 items-center justify-center rounded-2xl shadow-lg transition-all overflow-hidden",
           isOpen ? "bg-muted text-muted-foreground hover:bg-destructive/10" : "bg-white/95 hover:scale-105",
         )}
       >
