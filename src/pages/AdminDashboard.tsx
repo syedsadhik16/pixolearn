@@ -647,6 +647,133 @@ export default function AdminDashboard() {
             </div>
           </TabsContent>
 
+          {/* Users & Roles Tab */}
+          <TabsContent value="users-roles">
+            <div className="space-y-6">
+              {/* Assign Role */}
+              <div className="pixo-card">
+                <h2 className="text-xl font-display font-bold mb-4 flex items-center gap-2">
+                  <UserPlus className="h-5 w-5" /> Assign Role
+                </h2>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Input
+                    placeholder="User email"
+                    value={inviteEmail}
+                    onChange={(e) => setInviteEmail(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Select value={inviteRole} onValueChange={setInviteRole}>
+                    <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="student">Student</SelectItem>
+                      <SelectItem value="parent">Parent</SelectItem>
+                      <SelectItem value="admin">Admin</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button onClick={handleAssignRole} variant="gradient">
+                    <Plus className="h-4 w-4 mr-2" /> Assign
+                  </Button>
+                </div>
+              </div>
+
+              {/* Link Parent to Student */}
+              <div className="pixo-card">
+                <h2 className="text-xl font-display font-bold mb-4 flex items-center gap-2">
+                  <Link2 className="h-5 w-5" /> Link Parent to Student
+                </h2>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Select value={linkParentId} onValueChange={setLinkParentId}>
+                    <SelectTrigger className="flex-1"><SelectValue placeholder="Select parent" /></SelectTrigger>
+                    <SelectContent>
+                      {allUsers.filter(u => u.role === 'parent').map(u => (
+                        <SelectItem key={u.id} value={u.id}>{u.full_name || u.email}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select value={linkChildId} onValueChange={setLinkChildId}>
+                    <SelectTrigger className="flex-1"><SelectValue placeholder="Select student" /></SelectTrigger>
+                    <SelectContent>
+                      {allUsers.filter(u => u.role === 'student').map(u => (
+                        <SelectItem key={u.id} value={u.id}>{u.full_name || u.email}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button onClick={handleLinkParentChild} variant="gradient">
+                    <Link2 className="h-4 w-4 mr-2" /> Link
+                  </Button>
+                </div>
+                {parentLinks.length > 0 && (
+                  <div className="mt-4 rounded-xl border overflow-hidden">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Parent</TableHead>
+                          <TableHead>Student</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {parentLinks.map((link, i) => {
+                          const parent = allUsers.find(u => u.id === link.parent_id);
+                          const child = allUsers.find(u => u.id === link.child_id);
+                          return (
+                            <TableRow key={i}>
+                              <TableCell>{parent?.full_name || parent?.email || link.parent_id.slice(0, 8)}</TableCell>
+                              <TableCell>{child?.full_name || child?.email || link.child_id.slice(0, 8)}</TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </div>
+
+              {/* All Users with Roles */}
+              <div className="pixo-card">
+                <h2 className="text-xl font-display font-bold mb-4">All Users & Roles</h2>
+                <div className="rounded-xl border overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Profile Role</TableHead>
+                        <TableHead>Active Roles</TableHead>
+                        <TableHead>Plan</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {allUsers.map((u) => (
+                        <TableRow key={u.id}>
+                          <TableCell className="font-medium">{u.full_name || '—'}</TableCell>
+                          <TableCell className="text-muted-foreground text-sm">{u.email}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline">{u.role}</Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex gap-1 flex-wrap">
+                              {(userRolesMap[u.id] || []).map(r => (
+                                <Badge key={r} variant="secondary" className="text-xs">{r}</Badge>
+                              ))}
+                              {!(userRolesMap[u.id]?.length) && (
+                                <span className="text-xs text-muted-foreground">none</span>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={u.subscription_type === 'premium' ? 'default' : 'secondary'}>
+                              {u.subscription_type}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+
           {/* Analytics Tab */}
           <TabsContent value="analytics">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
