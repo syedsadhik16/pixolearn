@@ -7,7 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { handlePaymentSuccess } from '@/lib/entitlement';
 import { useToast } from '@/hooks/use-toast';
 import pixoLogo from '@/assets/pixo-logo.png';
-import { Check, ArrowRight, Star, Sparkles, ArrowLeft, Loader2, Shield } from 'lucide-react';
+import { Check, ArrowRight, Star, Sparkles, ArrowLeft, Loader2, Shield, Clock } from 'lucide-react';
 import { ComparisonTable } from '@/components/pricing/ComparisonTable';
 import { PricingFAQ } from '@/components/pricing/PricingFAQ';
 import { Testimonials } from '@/components/pricing/Testimonials';
@@ -44,7 +44,7 @@ const plans = [
       'Role play studio',
     ],
     supportingLine: 'Best for parents who want to begin with one focused level',
-    cta: 'Choose Plan',
+    cta: 'Make Payment',
     highlighted: false,
   },
   {
@@ -68,7 +68,7 @@ const plans = [
       'Priority support',
     ],
     supportingLine: 'Best for deeper structured learning',
-    cta: 'Choose Plan',
+    cta: 'Make Payment',
     highlighted: true,
     badge: 'Popular',
   },
@@ -95,7 +95,7 @@ const plans = [
       'Early feature access',
     ],
     supportingLine: 'Best for the complete learning journey',
-    cta: 'Choose Plan',
+    cta: 'Make Payment',
     highlighted: false,
     badge: 'Best Value',
   },
@@ -107,6 +107,42 @@ export default function Pricing() {
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const [trialState, setTrialState] = useState<'none' | 'active' | 'expired' | 'loading'>('loading');
+  const [trialTimeLeft, setTrialTimeLeft] = useState<string>('');
+
+  // Check trial status on mount and update countdown
+  useEffect(() => {
+    if (!profile) {
+      setTrialState('none');
+      return;
+    }
+
+    const checkTrial = () => {
+      if (profile.subscription_type === 'premium' && profile.trial_started_at) {
+        const expiresAt = profile.trial_expires_at ? new Date(profile.trial_expires_at) : null;
+        if (expiresAt && expiresAt > new Date()) {
+          setTrialState('active');
+          const diff = expiresAt.getTime() - Date.now();
+          const hours = Math.floor(diff / (1000 * 60 * 60));
+          const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+          setTrialTimeLeft(`${hours} hours ${minutes} minutes`);
+        } else if (profile.trial_started_at) {
+          setTrialState('expired');
+        } else {
+          setTrialState('none');
+        }
+      } else if (profile.trial_started_at) {
+        // Trial was started but subscription is no longer premium (expired by cron)
+        setTrialState('expired');
+      } else {
+        setTrialState('none');
+      }
+    };
+
+    checkTrial();
+    const interval = setInterval(checkTrial, 30000); // update every 30s
+    return () => clearInterval(interval);
+  }, [profile]);
 
   useEffect(() => {
     if (searchParams.get('proceed') === 'payment' && user) {
@@ -150,11 +186,17 @@ export default function Pricing() {
       });
       if (error || !data?.order_id) throw new Error(data?.error || error?.message || 'Failed to create order');
 
+      // Validate that the key looks like a live key in production
+      const keyId = data.key_id;
+      if (!keyId) {
+        throw new Error('Payment configuration error. Please contact support.');
+      }
+
       const options = {
-        key: data.key_id,
+        key: keyId,
         amount: data.amount,
         currency: data.currency,
-        name: 'PIXO',
+        name: 'PIXO Learn',
         description: `${planName} Plan - ${duration}`,
         image: pixoLogo,
         order_id: data.order_id,
@@ -171,7 +213,6 @@ export default function Pricing() {
             });
             if (verifyError || !verifyData?.success) throw new Error(verifyData?.error || 'Payment verification failed');
 
-            // Determine plan duration in months
             const planDurationMap: Record<string, number> = {
               '6-months': 6,
               '12-months': 12,
@@ -179,7 +220,6 @@ export default function Pricing() {
             };
             const durationMonths = planDurationMap[planId] || 6;
 
-            // Write entitlement to database + sessionStorage
             await handlePaymentSuccess({
               userId: user.id,
               email: profile?.email || user.email || '',
@@ -192,7 +232,6 @@ export default function Pricing() {
               currency: 'INR',
             });
 
-            // Store payment IDs for invoice download
             sessionStorage.setItem('paymentId', response.razorpay_payment_id);
             sessionStorage.setItem('orderId', response.razorpay_order_id);
             sessionStorage.removeItem('selectedPlan');
@@ -228,8 +267,28 @@ export default function Pricing() {
       navigate('/auth?signup=true&trial=true');
       return;
     }
+
+    // If trial is active, show remaining time and allow access
+    if (trialState === 'active') {
+      toast({
+        title: 'Your PIXO free trial is active ✨',
+        description: `Time left: ${trialTimeLeft}`,
+      });
+      navigate('/student');
+      return;
+    }
+
+    // If trial expired, redirect to assessment flow
+    if (trialState === 'expired') {
+      toast({
+        title: 'Your free trial is over',
+        description: 'To continue using PIXO Learn, please enroll in a premium plan.',
+      });
+      navigate('/launch-check');
+      return;
+    }
+
     if (profile?.subscription_type === 'premium') {
-      // Already premium — don't show error, just redirect
       navigate('/student');
       return;
     }
@@ -240,14 +299,17 @@ export default function Pricing() {
       });
 
       if (error || !data?.success) {
-        // Extract message from various error shapes
         let msg = data?.error || '';
         if (!msg && error) {
           try { msg = JSON.parse((error as any)?.context?.body || '{}')?.error || ''; } catch {}
           if (!msg) msg = error.message || 'Failed to activate trial';
         }
         if (msg.toLowerCase().includes('already been used')) {
-          toast({ title: 'Trial Already Used', description: 'Your free trial has expired. Choose a plan below to continue learning!' });
+          toast({
+            title: 'Your free trial is over',
+            description: 'To continue using PIXO Learn, please enroll in a premium plan.',
+          });
+          navigate('/launch-check');
           return;
         }
         throw new Error(msg);
@@ -274,21 +336,15 @@ export default function Pricing() {
       return;
     }
 
-    sessionStorage.setItem('selectedPlan', JSON.stringify({
-      id: plan.id,
-      name: plan.name,
-      priceAmount: plan.priceAmount,
-      duration: plan.duration,
-      levelCount: plan.levelCount,
-    }));
-    navigate('/launch-check?from=pricing');
+    // Direct to payment - user can pay first, level selection happens via entitlement flow
+    initiatePayment(plan.id, plan.name, plan.priceAmount, plan.duration);
   };
 
-  const isPremium = profile?.subscription_type === 'premium';
+  const isPremium = profile?.subscription_type === 'premium' && trialState !== 'active';
 
   return (
     <Layout>
-      {!isPremium && <StickyPricingBar onTrialClick={handleTrialClick} loading={loadingPlan === 'trial'} />}
+      {!isPremium && trialState !== 'active' && <StickyPricingBar onTrialClick={handleTrialClick} loading={loadingPlan === 'trial'} />}
       <div className="min-h-screen">
         {/* Hero */}
         <section className="py-16 md:py-24 text-center relative overflow-hidden">
@@ -313,7 +369,7 @@ export default function Pricing() {
           </div>
         </section>
 
-        {/* Premium Active or Free Trial CTA */}
+        {/* Premium Active / Trial Active / Free Trial CTA */}
         <section className="pb-10">
           <div className="container mx-auto px-4 text-center">
             {isPremium ? (
@@ -334,6 +390,38 @@ export default function Pricing() {
                   Go to Dashboard
                   <ArrowRight className="h-4 w-4 ml-2" />
                 </Button>
+              </div>
+            ) : trialState === 'active' ? (
+              <div className="max-w-md mx-auto pixo-card p-6 animate-slide-up bg-gradient-to-r from-pixo-yellow/10 to-pixo-orange/10 border-pixo-yellow/30">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <Clock className="h-5 w-5 text-pixo-orange" />
+                  <h2 className="text-lg font-display font-bold">Your PIXO free trial is active ✨</h2>
+                </div>
+                <p className="text-sm text-muted-foreground mb-1">
+                  Time left: <strong className="text-foreground">{trialTimeLeft}</strong>
+                </p>
+                <p className="text-xs text-muted-foreground/70 mb-4">
+                  Upgrade to a premium plan before your trial ends to keep learning!
+                </p>
+                <Button
+                  variant="gradient"
+                  size="lg"
+                  className="w-full"
+                  onClick={() => navigate('/student')}
+                >
+                  Continue Learning
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
+              </div>
+            ) : trialState === 'expired' ? (
+              <div className="max-w-md mx-auto pixo-card p-6 animate-slide-up bg-gradient-to-r from-destructive/10 to-pixo-orange/10 border-destructive/30">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <Clock className="h-5 w-5 text-destructive" />
+                  <h2 className="text-lg font-display font-bold">Your free trial is over</h2>
+                </div>
+                <p className="text-sm text-muted-foreground mb-4">
+                  To continue using PIXO Learn, please enroll in a premium plan below.
+                </p>
               </div>
             ) : (
               <div className="max-w-md mx-auto pixo-card p-6 animate-slide-up">
