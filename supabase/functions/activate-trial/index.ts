@@ -34,8 +34,8 @@ serve(async (req) => {
     });
 
     const token = authHeader.replace('Bearer ', '');
-    const { data: claimsData, error: claimsError } = await userClient.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims?.sub) {
+    const { data: { user }, error: userError } = await userClient.auth.getUser(token);
+    if (userError || !user) {
       return new Response(JSON.stringify({ success: false, error: 'Unauthorized' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -43,7 +43,7 @@ serve(async (req) => {
     }
 
     // Use the verified user ID from the JWT, NOT from the request body
-    const user_id = claimsData.claims.sub;
+    const user_id = user.id;
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
@@ -58,8 +58,8 @@ serve(async (req) => {
       throw new Error('Failed to fetch user profile');
     }
 
-    // If already premium, no need for trial
-    if (profile.subscription_type === 'premium') {
+    // If already premium (paid, not trial), no need for trial
+    if (profile.subscription_type === 'premium' && !profile.trial_started_at) {
       return new Response(JSON.stringify({
         success: false,
         error: 'You already have a premium subscription!',
@@ -75,10 +75,15 @@ serve(async (req) => {
       const now = new Date();
 
       if (now < expiresAt) {
+        // Trial still active - return remaining time
+        const diffMs = expiresAt.getTime() - now.getTime();
+        const hours = Math.floor(diffMs / (1000 * 60 * 60));
+        const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
         return new Response(JSON.stringify({
           success: true,
-          message: 'Trial is already active',
+          message: `Your free trial is active. Time left: ${hours} hours ${minutes} minutes`,
           trial_expires_at: profile.trial_expires_at,
+          time_left: { hours, minutes },
         }), {
           status: 200,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },

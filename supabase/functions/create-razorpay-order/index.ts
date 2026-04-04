@@ -18,8 +18,20 @@ serve(async (req) => {
     const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY');
 
     if (!RAZORPAY_KEY_ID || !RAZORPAY_KEY_SECRET) {
-      throw new Error('Razorpay credentials not configured');
+      console.error('Razorpay credentials not configured. KEY_ID present:', !!RAZORPAY_KEY_ID, 'KEY_SECRET present:', !!RAZORPAY_KEY_SECRET);
+      return new Response(JSON.stringify({ error: 'Payment gateway is not configured. Please contact support.' }), {
+        status: 503,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
+
+    // Validate that we're using live keys (live keys start with rzp_live_)
+    if (!RAZORPAY_KEY_ID.startsWith('rzp_live_')) {
+      console.error('WARNING: Razorpay KEY_ID does not appear to be a live key. Prefix:', RAZORPAY_KEY_ID.substring(0, 9));
+      // In production, block test keys entirely
+      // Allow test keys only if explicitly in test mode (no env var override needed - just log warning)
+    }
+
     if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
       throw new Error('Supabase configuration missing');
     }
@@ -38,8 +50,8 @@ serve(async (req) => {
     });
 
     const token = authHeader.replace('Bearer ', '');
-    const { data: claimsData, error: claimsError } = await userClient.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims?.sub) {
+    const { data: { user }, error: userError } = await userClient.auth.getUser(token);
+    if (userError || !user) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -47,8 +59,8 @@ serve(async (req) => {
     }
 
     // Use verified user ID from JWT, NOT from request body
-    const user_id = claimsData.claims.sub;
-    const user_email = claimsData.claims.email || '';
+    const user_id = user.id;
+    const user_email = user.email || '';
 
     const { amount, currency, plan_id, user_name } = await req.json();
 
@@ -78,6 +90,7 @@ serve(async (req) => {
 
     if (!orderResponse.ok) {
       const errorData = await orderResponse.text();
+      console.error('Razorpay order creation failed:', errorData);
       throw new Error(`Razorpay order creation failed [${orderResponse.status}]`);
     }
 
@@ -94,7 +107,7 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error('Error creating Razorpay order:', error);
-    return new Response(JSON.stringify({ error: 'Failed to create order' }), {
+    return new Response(JSON.stringify({ error: 'Failed to create order. Please try again.' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
