@@ -1,437 +1,736 @@
-import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
-import { Layout } from "@/components/layout/Layout";
-import { supabase } from "@/integrations/supabase/client";
-import pixoLogo from "@/assets/pixo-logo.png";
-import { Eye, EyeOff, GraduationCap, Users, Loader2 } from "lucide-react";
-import { z } from "zod";
-import { useTranslation } from "@/hooks/useTranslation";
+const trustPoints = [
+  "Safe for kids",
+  "Parent dashboard included",
+  "Daily bite-sized lessons",
+  "Gamified learning journey",
+  "AI-guided English practice",
+];
 
-const authSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  fullName: z.string().min(2, "Name must be at least 2 characters").optional(),
-});
+const howItWorks = [
+  {
+    step: "01",
+    title: "Take Launch Check",
+    desc: "A quick assessment places the child at the right level without pressure or confusion.",
+  },
+  {
+    step: "02",
+    title: "Get smart level placement",
+    desc: "PIXO Learn maps the learner into the right journey based on age, confidence, and readiness.",
+  },
+  {
+    step: "03",
+    title: "Learn daily with AI + games",
+    desc: "Short daily sessions build phonics, speaking, reading, and confidence through structured practice.",
+  },
+  {
+    step: "04",
+    title: "Track growth and rewards",
+    desc: "Parents see progress, while children unlock XP, streaks, badges, and momentum.",
+  },
+];
 
-type UserRole = "student" | "parent";
+const levels = [
+  {
+    title: "Level 1",
+    age: "Ages 5 to 8",
+    desc: "Sound awareness, phonics foundation, early speaking, blending, and pre-reading confidence.",
+  },
+  {
+    title: "Level 2",
+    age: "Ages 9 to 12",
+    desc: "Stronger reading fluency, vocabulary, sentence building, and real communication growth.",
+  },
+  {
+    title: "Level 3",
+    age: "Ages 13 to 16",
+    desc: "Advanced comprehension, confident English usage, structured expression, and fluency development.",
+  },
+];
 
-export default function Auth() {
-  const [searchParams] = useSearchParams();
-  const [isSignUp, setIsSignUp] = useState(searchParams.get("signup") === "true");
-  const [isResetPassword, setIsResetPassword] = useState(false);
-  const [email, setEmail] = useState(searchParams.get("email") || "");
-  const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [selectedRole, setSelectedRole] = useState<UserRole>("student");
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [accountExistsNotice, setAccountExistsNotice] = useState(searchParams.get("exists") === "true");
+const features = [
+  "Phonics-first learning",
+  "Speaking practice",
+  "Reading development",
+  "Gamified lessons",
+  "Daily XP, streaks, and badges",
+  "AI-powered assistance",
+  "Parent progress dashboard",
+  "Multi-language support",
+];
 
-  const { signIn, signUp, resetPassword, user, profile, roles: userRoles, isMultiRole, activeRole } = useAuth();
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const { t } = useTranslation();
+const plans = [
+  {
+    title: "6 Months",
+    price: "₹5,999",
+    highlight: false,
+    desc: "Perfect to start one focused learning journey.",
+    points: ["Structured daily lessons", "Launch Check", "Rewards and streaks", "Parent dashboard access"],
+  },
+  {
+    title: "12 Months",
+    price: "₹9,999",
+    highlight: true,
+    desc: "Best value for deeper growth and stronger consistency.",
+    points: [
+      "Everything in 6 Months",
+      "Longer learning runway",
+      "More progress visibility",
+      "Better retention and confidence",
+    ],
+  },
+  {
+    title: "18 Months",
+    price: "₹14,999",
+    highlight: false,
+    desc: "Built for full transformation across multiple learning stages.",
+    points: ["Everything in 12 Months", "Long-term mastery path", "Stronger parent ROI", "Maximum compounding effect"],
+  },
+];
 
-  const heroStats = [
-    {
-      value: "Age 5–16",
-      label: "Designed for Kids",
-    },
-    {
-      value: "180 Days",
-      label: "Structured Path",
-    },
-    {
-      value: "30 Min/Day",
-      label: "Daily Learning",
-    },
-  ];
+const testimonials = [
+  {
+    name: "Parent of a 6-year-old",
+    quote:
+      "My child stopped fearing English practice. The biggest shift was confidence. The lessons feel calm, fun, and structured.",
+  },
+  {
+    name: "Parent of a 10-year-old",
+    quote:
+      "The daily format is simple enough to continue, and the dashboard helps us see real progress instead of guessing.",
+  },
+  {
+    name: "Parent of a 13-year-old",
+    quote: "PIXO Learn feels modern and intelligent. It is not random screen time. It feels like guided growth.",
+  },
+];
 
-  useEffect(() => {
-    if (searchParams.get("exists") === "true") {
-      setIsSignUp(false);
-      setAccountExistsNotice(true);
-    }
-  }, [searchParams]);
+const faqs = [
+  {
+    q: "What age is PIXO Learn for?",
+    a: "PIXO Learn is designed for children aged 5 to 16 through 3 structured levels.",
+  },
+  {
+    q: "How does the assessment work?",
+    a: "The Launch Check is a quick, low-pressure placement flow that identifies the right starting point for each learner.",
+  },
+  {
+    q: "Is it beginner friendly?",
+    a: "Yes. The learning path is confidence-first and adaptive, so beginners can start without feeling overwhelmed.",
+  },
+  {
+    q: "Can parents track progress?",
+    a: "Yes. Parents can view lesson progress, confidence signals, learned sounds or words, and home practice guidance.",
+  },
+  {
+    q: "Is it mobile friendly?",
+    a: "Yes. The product is designed to work smoothly across mobile, tablet, and desktop experiences.",
+  },
+  {
+    q: "What happens after freemium access ends?",
+    a: "The learner is guided to a premium plan to continue the full curriculum, progress tracking, and advanced features.",
+  },
+];
 
-  useEffect(() => {
-    if (user && profile) {
-      if (isMultiRole && !activeRole) {
-        navigate("/role-select");
-        return;
-      }
-
-      const effectiveRole = activeRole || profile.role;
-      if (effectiveRole !== "student") {
-        const redirectPath = effectiveRole === "admin" ? "/admin" : "/parent";
-        navigate(redirectPath);
-        return;
-      }
-
-      checkStudentFlowState();
-    }
-  }, [user, profile, userRoles, activeRole, navigate]);
-
-  const checkStudentFlowState = async () => {
-    if (!user) return;
-
-    const { data: learnerProfile } = await supabase
-      .from("learner_profiles")
-      .select("onboarding_completed")
-      .eq("student_id", user.id)
-      .maybeSingle();
-
-    if (!learnerProfile || !learnerProfile.onboarding_completed) {
-      navigate("/onboarding");
-      return;
-    }
-
-    const { data: entitlement } = await supabase
-      .from("user_entitlements")
-      .select("launch_check_completed, selected_level, is_paid, entitlement_status, entitlement_expiry_date")
-      .eq("user_id", user.id)
-      .maybeSingle();
-
-    if (profile?.subscription_type === "premium") {
-      navigate("/student");
-      return;
-    }
-
-    if (!entitlement || !entitlement.launch_check_completed) {
-      navigate("/launch-check");
-      return;
-    }
-    if (!entitlement.selected_level) {
-      navigate("/level-selection");
-      return;
-    }
-    if (!entitlement.is_paid || entitlement.entitlement_status !== "active") {
-      navigate("/pricing");
-      return;
-    }
-    if (entitlement.entitlement_expiry_date && new Date(entitlement.entitlement_expiry_date) <= new Date()) {
-      navigate("/pricing");
-      return;
-    }
-
-    navigate("/student");
-  };
-
-  const validateForm = () => {
-    try {
-      if (isSignUp) {
-        authSchema.parse({ email, password, fullName });
-      } else if (isResetPassword) {
-        z.object({ email: z.string().email() }).parse({ email });
-      } else {
-        authSchema.omit({ fullName: true }).parse({ email, password });
-      }
-      setErrors({});
-      return true;
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const newErrors: Record<string, string> = {};
-        error.errors.forEach((err) => {
-          if (err.path[0]) {
-            newErrors[err.path[0] as string] = err.message;
-          }
-        });
-        setErrors(newErrors);
-      }
-      return false;
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validateForm()) return;
-
-    setLoading(true);
-    setAccountExistsNotice(false);
-
-    try {
-      if (isResetPassword) {
-        const { error } = await resetPassword(email);
-        if (error) throw error;
-        toast({
-          title: t("checkEmail"),
-          description: t("resetLinkSent"),
-        });
-        setIsResetPassword(false);
-      } else if (isSignUp) {
-        const { error } = await signUp(email, password, fullName, selectedRole);
-
-        if (error) {
-          if (
-            error.message.includes("already registered") ||
-            error.message.includes("User already registered") ||
-            error.message.includes("already been registered")
-          ) {
-            setIsSignUp(false);
-            setPassword("");
-            setAccountExistsNotice(true);
-            toast({
-              title: t("accountExists") || "Account already exists",
-              description:
-                t("accountExistsDesc") || "This email is already registered. Please enter your password to sign in.",
-            });
-            setLoading(false);
-            return;
-          }
-
-          if (error.message.includes("confirm")) {
-            toast({
-              title: t("checkEmail") || "Check your email",
-              description: "Please check your email to confirm your account before signing in.",
-            });
-            setLoading(false);
-            return;
-          }
-
-          throw error;
-        }
-
-        toast({
-          title: t("welcomeToPIXO"),
-          description: t("accountCreated"),
-        });
-      } else {
-        const { error } = await signIn(email, password);
-        if (error) {
-          if (error.message.includes("Invalid login") || error.message.includes("invalid")) {
-            throw new Error(t("invalidCredentials") || "Invalid email or password. Please try again.");
-          }
-          if (error.message.includes("Email not confirmed")) {
-            throw new Error("Please check your email and confirm your account first.");
-          }
-          throw error;
-        }
-
-        toast({
-          title: t("welcomeBackGreeting"),
-          description: t("signedInSuccess"),
-        });
-      }
-    } catch (error) {
-      toast({
-        title: t("error"),
-        description: error instanceof Error ? error.message : t("somethingWrong"),
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const roleOptions = [
-    {
-      id: "student" as UserRole,
-      title: t("student"),
-      description: t("iWantToLearn"),
-      icon: GraduationCap,
-    },
-    {
-      id: "parent" as UserRole,
-      title: t("parent"),
-      description: t("iWantToMonitor"),
-      icon: Users,
-    },
-  ];
-
+function SectionTitle({ eyebrow, title, desc }: { eyebrow: string; title: string; desc: string }) {
   return (
-    <Layout showNavbar={false}>
-      <div className="min-h-screen flex">
-        {/* Left side - Branding */}
-        <div className="hidden lg:flex lg:w-1/2 gradient-bg items-center justify-center p-12">
-          <div className="w-full max-w-2xl text-center space-y-8 animate-fade-in">
-            <img
-              src={pixoLogo}
-              alt="PIXO Learn"
-              className="h-32 mx-auto animate-float rounded-xl bg-white/90 p-4 shadow-pixo-lg"
-            />
+    <div className="mx-auto mb-12 max-w-3xl text-center">
+      <div className="mb-3 inline-flex rounded-full border border-cyan-400/20 bg-cyan-400/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-cyan-300">
+        {eyebrow}
+      </div>
+      <h2 className="text-3xl font-semibold tracking-tight text-white md:text-5xl">{title}</h2>
+      <p className="mt-4 text-sm leading-7 text-slate-300 md:text-base">{desc}</p>
+    </div>
+  );
+}
 
-            <div className="space-y-4">
-              <h1 className="text-5xl font-display font-bold text-white tracking-tight">{t("energyLearnGrow")}</h1>
-              <p className="text-xl leading-8 text-white/90 max-w-2xl mx-auto">
-                Structured daily lessons designed to improve pronunciation, fluency, and speaking confidence for
-                children aged 5–16.
-              </p>
+export default function Index() {
+  return (
+    <div className="min-h-screen overflow-x-hidden bg-slate-950 text-white">
+      <div className="fixed inset-0 -z-10">
+        <div className="absolute inset-0 bg-slate-950" />
+        <div className="absolute left-[-10%] top-[-10%] h-[420px] w-[420px] rounded-full bg-fuchsia-500/20 blur-3xl" />
+        <div className="absolute right-[-10%] top-[10%] h-[420px] w-[420px] rounded-full bg-cyan-500/20 blur-3xl" />
+        <div className="absolute bottom-[-10%] left-[25%] h-[380px] w-[380px] rounded-full bg-violet-500/20 blur-3xl" />
+        <div
+          className="absolute inset-0 opacity-[0.08]"
+          style={{
+            backgroundImage:
+              "linear-gradient(rgba(255,255,255,0.10) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.10) 1px, transparent 1px)",
+            backgroundSize: "56px 56px",
+          }}
+        />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.10),transparent_35%),radial-gradient(circle_at_bottom,rgba(217,70,239,0.10),transparent_25%)]" />
+      </div>
+
+      <header className="sticky top-0 z-50 border-b border-white/10 bg-slate-950/70 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-400 to-violet-500 text-lg font-bold text-slate-950 shadow-lg shadow-cyan-500/20">
+              P
             </div>
-
-            <div className="grid grid-cols-3 gap-4 pt-4">
-              {heroStats.map((stat) => (
-                <div
-                  key={stat.value}
-                  className="rounded-2xl border border-white/20 bg-white/10 px-4 py-5 backdrop-blur-sm shadow-pixo-md"
-                >
-                  <p className="text-3xl font-bold text-white">{stat.value}</p>
-                  <p className="mt-2 text-sm font-medium text-white/85">{stat.label}</p>
-                </div>
-              ))}
+            <div>
+              <div className="text-lg font-semibold tracking-tight">PIXO Learn</div>
+              <div className="text-xs text-slate-400">AI-Powered English Learning for Kids</div>
             </div>
           </div>
+
+          <nav className="hidden items-center gap-8 text-sm text-slate-300 md:flex">
+            <a href="#how" className="transition hover:text-white">
+              How it works
+            </a>
+            <a href="#levels" className="transition hover:text-white">
+              Levels
+            </a>
+            <a href="#features" className="transition hover:text-white">
+              Features
+            </a>
+            <a href="#pricing" className="transition hover:text-white">
+              Pricing
+            </a>
+            <a href="#faq" className="transition hover:text-white">
+              FAQ
+            </a>
+          </nav>
+
+          <div className="flex items-center gap-3">
+            <a
+              href="#pricing"
+              className="hidden rounded-full border border-white/10 px-4 py-2 text-sm text-slate-200 transition hover:border-white/20 hover:bg-white/5 md:inline-flex"
+            >
+              Explore Plans
+            </a>
+            <a
+              href="#cta"
+              className="inline-flex rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-slate-950 shadow-xl shadow-white/10 transition hover:scale-[1.02]"
+            >
+              Start Free Assessment
+            </a>
+          </div>
         </div>
+      </header>
 
-        {/* Right side - Auth Form */}
-        <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
-          <div className="w-full max-w-md space-y-8 animate-slide-up">
-            <div className="lg:hidden text-center mb-8">
-              <img src={pixoLogo} alt="PIXO" className="h-16 mx-auto" />
-            </div>
-
-            <div className="text-center space-y-2">
-              <h2 className="text-3xl font-display font-bold">
-                {isResetPassword ? t("resetPassword") : isSignUp ? t("createAccount") : t("welcomeBack")}
-              </h2>
-              <p className="text-muted-foreground">
-                {isResetPassword ? t("enterResetEmail") : isSignUp ? t("startJourneyToday") : t("continueJourney")}
-              </p>
-            </div>
-
-            {accountExistsNotice && !isSignUp && (
-              <div className="bg-primary/10 border border-primary/20 rounded-2xl p-4 text-center animate-fade-in">
-                <p className="text-sm font-semibold text-primary">{t("accountExists") || "Account already exists"}</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {t("accountExistsDesc") || "This email is already registered. Please enter your password to sign in."}
-                </p>
+      <main>
+        <section className="relative mx-auto max-w-7xl px-6 pb-20 pt-16 md:pb-28 md:pt-24">
+          <div className="grid items-center gap-14 lg:grid-cols-[1.05fr_0.95fr]">
+            <div>
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-white/5 px-4 py-2 text-xs font-medium text-cyan-200 backdrop-blur-xl">
+                <span className="h-2 w-2 rounded-full bg-cyan-300" />
+                Confidence-first English learning for kids
               </div>
-            )}
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {isSignUp && !isResetPassword && (
-                <>
-                  <div className="space-y-3">
-                    <Label>{t("iAmA")}</Label>
-                    <div className="grid grid-cols-2 gap-4">
-                      {roleOptions.map((role) => (
-                        <button
-                          key={role.id}
-                          type="button"
-                          onClick={() => setSelectedRole(role.id)}
-                          className={`p-4 rounded-xl border-2 transition-all duration-300 text-left ${
-                            selectedRole === role.id
-                              ? "border-primary bg-primary/5 shadow-pixo-md"
-                              : "border-border hover:border-primary/50"
-                          }`}
-                        >
-                          <role.icon
-                            className={`h-8 w-8 mb-2 ${
-                              selectedRole === role.id ? "text-primary" : "text-muted-foreground"
-                            }`}
-                          />
-                          <p className="font-semibold">{role.title}</p>
-                          <p className="text-xs text-muted-foreground">{role.description}</p>
-                        </button>
-                      ))}
+              <h1 className="max-w-4xl text-4xl font-semibold leading-tight tracking-tight text-white md:text-6xl">
+                AI-Powered English Learning that turns{" "}
+                <span className="bg-gradient-to-r from-cyan-300 via-white to-fuchsia-300 bg-clip-text text-transparent">
+                  screen time into speaking, reading, and real confidence
+                </span>
+              </h1>
+
+              <p className="mt-6 max-w-2xl text-base leading-8 text-slate-300 md:text-lg">
+                PIXO Learn helps children move from sounds to sentences through structured daily lessons, games, AI
+                guidance, and parent visibility. It feels modern, safe, and built for real progress.
+              </p>
+
+              <div className="mt-8 flex flex-col gap-4 sm:flex-row">
+                <a
+                  href="#cta"
+                  className="inline-flex items-center justify-center rounded-full bg-white px-6 py-3.5 text-sm font-semibold text-slate-950 transition hover:scale-[1.02]"
+                >
+                  Start Free Assessment
+                </a>
+                <a
+                  href="#pricing"
+                  className="inline-flex items-center justify-center rounded-full border border-white/15 bg-white/5 px-6 py-3.5 text-sm font-semibold text-white backdrop-blur-xl transition hover:border-white/25 hover:bg-white/10"
+                >
+                  Explore Plans
+                </a>
+              </div>
+
+              <div className="mt-10 grid gap-4 sm:grid-cols-3">
+                {[
+                  { value: "3", label: "Structured Levels" },
+                  { value: "180", label: "Days per learning path" },
+                  { value: "Daily", label: "Gamified lesson rhythm" },
+                ].map((item) => (
+                  <div key={item.label} className="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
+                    <div className="text-2xl font-semibold text-white">{item.value}</div>
+                    <div className="mt-1 text-sm text-slate-400">{item.label}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="relative">
+              <div className="absolute -left-8 top-12 h-24 w-24 rounded-full bg-cyan-400/20 blur-2xl" />
+              <div className="absolute -right-8 bottom-12 h-24 w-24 rounded-full bg-fuchsia-400/20 blur-2xl" />
+
+              <div className="relative rounded-[32px] border border-white/10 bg-white/5 p-4 shadow-2xl shadow-cyan-500/10 backdrop-blur-2xl">
+                <div className="rounded-[28px] border border-white/10 bg-slate-900/80 p-5">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-sm text-slate-400">Today’s Lesson</div>
+                      <div className="mt-1 text-lg font-semibold">/a/ Sound Discovery</div>
+                    </div>
+                    <div className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-xs text-cyan-300">
+                      Level 1
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="fullName">{t("fullName")}</Label>
-                    <Input
-                      id="fullName"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      placeholder={t("enterFullName")}
-                      className={errors.fullName ? "border-destructive" : ""}
-                    />
-                    {errors.fullName && <p className="text-sm text-destructive">{errors.fullName}</p>}
-                  </div>
-                </>
-              )}
+                  <div className="mt-5 grid gap-4 md:grid-cols-2">
+                    <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-cyan-400/10 to-violet-500/10 p-4">
+                      <div className="text-sm text-slate-400">Learning Focus</div>
+                      <div className="mt-2 text-xl font-semibold">Phonics + Listening</div>
+                      <div className="mt-3 flex gap-2">
+                        {["apple", "ant", "axe"].map((word) => (
+                          <span
+                            key={word}
+                            className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200"
+                          >
+                            {word}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="email">{t("email")}</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  className={errors.email ? "border-destructive" : ""}
-                />
-                {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
-              </div>
-
-              {!isResetPassword && (
-                <div className="space-y-2">
-                  <Label htmlFor="password">{t("password")}</Label>
-                  <div className="relative">
-                    <Input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder={t("enterPassword")}
-                      className={errors.password ? "border-destructive pr-10" : "pr-10"}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                    >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
+                    <div className="rounded-3xl border border-white/10 bg-white/5 p-4">
+                      <div className="text-sm text-slate-400">Progress</div>
+                      <div className="mt-3 h-3 rounded-full bg-white/10">
+                        <div className="h-3 w-[72%] rounded-full bg-gradient-to-r from-cyan-400 to-fuchsia-400" />
+                      </div>
+                      <div className="mt-3 flex items-center justify-between text-sm">
+                        <span className="text-slate-300">Confidence Score</span>
+                        <span className="font-semibold text-white">72%</span>
+                      </div>
+                    </div>
                   </div>
-                  {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
+
+                  <div className="mt-4 grid gap-4 sm:grid-cols-3">
+                    {[
+                      { label: "Daily XP", value: "50" },
+                      { label: "Streak", value: "12 days" },
+                      { label: "Badge", value: "Sound Star" },
+                    ].map((card) => (
+                      <div key={card.label} className="rounded-3xl border border-white/10 bg-white/5 p-4">
+                        <div className="text-xs text-slate-400">{card.label}</div>
+                        <div className="mt-2 text-lg font-semibold">{card.value}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-5 rounded-3xl border border-white/10 bg-gradient-to-r from-white/5 to-white/10 p-4">
+                    <div className="text-sm text-slate-400">Parent Insight</div>
+                    <div className="mt-2 text-sm leading-7 text-slate-200">
+                      Your child completed today’s lesson with calm effort and growing confidence.
+                    </div>
+                  </div>
                 </div>
-              )}
+              </div>
+            </div>
+          </div>
+        </section>
 
-              {!isSignUp && !isResetPassword && (
-                <button
-                  type="button"
-                  onClick={() => setIsResetPassword(true)}
-                  className="text-sm text-primary hover:underline"
-                >
-                  {t("forgotPassword")}
-                </button>
-              )}
+        <section className="mx-auto max-w-7xl px-6 pb-16">
+          <div className="grid gap-4 rounded-[32px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl md:grid-cols-5">
+            {trustPoints.map((item) => (
+              <div
+                key={item}
+                className="rounded-2xl border border-white/10 bg-slate-900/50 px-4 py-4 text-center text-sm text-slate-200"
+              >
+                {item}
+              </div>
+            ))}
+          </div>
+        </section>
 
-              <Button type="submit" variant="gradient" size="lg" className="w-full" disabled={loading}>
-                {loading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : isResetPassword ? (
-                  t("sendResetLink")
-                ) : isSignUp ? (
-                  t("createAccount")
-                ) : (
-                  t("signIn")
-                )}
-              </Button>
-            </form>
+        <section id="how" className="mx-auto max-w-7xl px-6 py-20">
+          <SectionTitle
+            eyebrow="How it works"
+            title="A clean learning engine for parents and kids"
+            desc="PIXO Learn removes confusion. It creates one clear path from assessment to daily progress to visible growth."
+          />
 
-            <div className="text-center">
-              {isResetPassword ? (
-                <button
-                  onClick={() => setIsResetPassword(false)}
-                  className="text-sm text-muted-foreground hover:text-foreground"
-                >
-                  {t("backToSignIn")}
-                </button>
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  {isSignUp ? t("alreadyHaveAccount") : t("dontHaveAccount")}{" "}
-                  <button
-                    onClick={() => {
-                      setIsSignUp(!isSignUp);
-                      setAccountExistsNotice(false);
-                    }}
-                    className="text-primary font-semibold hover:underline"
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+            {howItWorks.map((item) => (
+              <div key={item.step} className="rounded-[28px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
+                <div className="mb-5 inline-flex rounded-2xl bg-gradient-to-br from-cyan-400/20 to-fuchsia-400/20 px-4 py-2 text-sm font-semibold text-cyan-200">
+                  {item.step}
+                </div>
+                <h3 className="text-xl font-semibold">{item.title}</h3>
+                <p className="mt-3 text-sm leading-7 text-slate-300">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section id="levels" className="mx-auto max-w-7xl px-6 py-20">
+          <SectionTitle
+            eyebrow="Levels"
+            title="Three learning levels, one clear journey"
+            desc="Each level is designed around age, readiness, and confidence, so the child grows in the right sequence instead of being pushed into the wrong one."
+          />
+
+          <div className="grid gap-6 lg:grid-cols-3">
+            {levels.map((level, index) => (
+              <div
+                key={level.title}
+                className="relative overflow-hidden rounded-[32px] border border-white/10 bg-white/5 p-7 backdrop-blur-xl"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-cyan-400/5 via-transparent to-fuchsia-500/10" />
+                <div className="relative">
+                  <div className="mb-4 inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-300">
+                    {index === 0 ? "Foundation" : index === 1 ? "Growth" : "Fluency"}
+                  </div>
+                  <h3 className="text-2xl font-semibold">{level.title}</h3>
+                  <div className="mt-1 text-sm text-cyan-300">{level.age}</div>
+                  <p className="mt-5 text-sm leading-7 text-slate-300">{level.desc}</p>
+                  <div className="mt-6 h-1.5 rounded-full bg-white/10">
+                    <div
+                      className={`h-1.5 rounded-full ${
+                        index === 0
+                          ? "w-[35%] bg-cyan-400"
+                          : index === 1
+                            ? "w-[65%] bg-fuchsia-400"
+                            : "w-[90%] bg-violet-400"
+                      }`}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section id="features" className="mx-auto max-w-7xl px-6 py-20">
+          <SectionTitle
+            eyebrow="Features"
+            title="Built like a premium product, not a random worksheet app"
+            desc="The experience is designed to make learning repeatable, trackable, and rewarding, while keeping the child emotionally safe."
+          />
+
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+            {features.map((feature) => (
+              <div
+                key={feature}
+                className="rounded-[28px] border border-white/10 bg-white/5 p-5 text-sm text-slate-200 backdrop-blur-xl"
+              >
+                <div className="mb-4 h-10 w-10 rounded-2xl bg-gradient-to-br from-cyan-400/20 to-fuchsia-400/20" />
+                <div className="font-medium">{feature}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-7xl px-6 py-20">
+          <div className="grid items-center gap-10 lg:grid-cols-[0.9fr_1.1fr]">
+            <div>
+              <div className="mb-3 inline-flex rounded-full border border-fuchsia-400/20 bg-fuchsia-400/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-fuchsia-300">
+                Parent dashboard
+              </div>
+              <h2 className="text-3xl font-semibold tracking-tight md:text-5xl">
+                Parents get visibility without turning learning into pressure
+              </h2>
+              <p className="mt-5 text-base leading-8 text-slate-300">
+                PIXO Learn gives parents a clean view of progress, confidence, daily lessons, and home reinforcement. No
+                chaos. No guesswork. Just signal.
+              </p>
+
+              <div className="mt-8 space-y-4">
+                {[
+                  "Today’s target and completed lesson",
+                  "Confidence note and skill visibility",
+                  "Sounds or words learned",
+                  "Home practice prompts",
+                  "Level-wise growth tracking",
+                ].map((item) => (
+                  <div key={item} className="flex items-start gap-3">
+                    <div className="mt-1 h-2.5 w-2.5 rounded-full bg-cyan-300" />
+                    <div className="text-sm leading-7 text-slate-300">{item}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-[32px] border border-white/10 bg-white/5 p-5 backdrop-blur-2xl">
+              <div className="rounded-[28px] border border-white/10 bg-slate-900/70 p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-sm text-slate-400">Parent Overview</div>
+                    <div className="mt-1 text-xl font-semibold">Learner Progress Summary</div>
+                  </div>
+                  <div className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-xs text-cyan-300">
+                    Live Progress
+                  </div>
+                </div>
+
+                <div className="mt-6 grid gap-4 md:grid-cols-2">
+                  <div className="rounded-3xl border border-white/10 bg-white/5 p-4">
+                    <div className="text-xs text-slate-400">Today’s Target</div>
+                    <div className="mt-2 text-lg font-semibold">/m/ Sound + Blend Practice</div>
+                  </div>
+                  <div className="rounded-3xl border border-white/10 bg-white/5 p-4">
+                    <div className="text-xs text-slate-400">Confidence Note</div>
+                    <div className="mt-2 text-sm leading-6 text-slate-200">
+                      Calm effort with improving recognition and better response speed.
+                    </div>
+                  </div>
+                  <div className="rounded-3xl border border-white/10 bg-white/5 p-4">
+                    <div className="text-xs text-slate-400">Words Learned</div>
+                    <div className="mt-2 text-lg font-semibold">moon, mango, monkey</div>
+                  </div>
+                  <div className="rounded-3xl border border-white/10 bg-white/5 p-4">
+                    <div className="text-xs text-slate-400">Home Practice</div>
+                    <div className="mt-2 text-sm leading-6 text-slate-200">
+                      Say the /m/ sound slowly and find 3 words at home that begin with it.
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-5 rounded-3xl border border-white/10 bg-gradient-to-r from-cyan-400/10 to-fuchsia-500/10 p-4">
+                  <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                    <div>
+                      <div className="text-xs text-slate-400">Level Progress</div>
+                      <div className="mt-2 text-lg font-semibold">Level 1 - 68% Completed</div>
+                    </div>
+                    <div className="w-full max-w-xs rounded-full bg-white/10 md:w-64">
+                      <div className="h-3 w-[68%] rounded-full bg-gradient-to-r from-cyan-400 to-fuchsia-400" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-7xl px-6 py-20">
+          <SectionTitle
+            eyebrow="Why parents choose PIXO Learn"
+            title="Less passive screen time. More structured growth."
+            desc="The product is designed to shift children from empty consumption into guided English development."
+          />
+
+          <div className="grid gap-6 lg:grid-cols-2">
+            <div className="rounded-[32px] border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
+              <div className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">Usual screen time</div>
+              <div className="mt-6 space-y-4">
+                {[
+                  "Passive viewing",
+                  "No learning structure",
+                  "Low parent visibility",
+                  "No confidence tracking",
+                  "No skill progression logic",
+                ].map((item) => (
+                  <div
+                    key={item}
+                    className="rounded-2xl border border-red-400/10 bg-red-400/5 px-4 py-3 text-sm text-slate-300"
                   >
-                    {isSignUp ? t("signIn") : t("signUp")}
-                  </button>
-                </p>
-              )}
+                    {item}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-[32px] border border-cyan-400/20 bg-gradient-to-br from-cyan-400/10 to-fuchsia-500/10 p-8 backdrop-blur-xl">
+              <div className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-300">PIXO Learn</div>
+              <div className="mt-6 space-y-4">
+                {[
+                  "Daily active learning",
+                  "Phonics to reading progression",
+                  "Parent dashboard insight",
+                  "Confidence-first design",
+                  "Clear growth path across levels",
+                ].map((item) => (
+                  <div
+                    key={item}
+                    className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white"
+                  >
+                    {item}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="pricing" className="mx-auto max-w-7xl px-6 py-20">
+          <SectionTitle
+            eyebrow="Pricing"
+            title="Choose the learning horizon that matches your ambition"
+            desc="Short-term access creates exposure. Longer access creates compounding. That is where real confidence is built."
+          />
+
+          <div className="grid gap-6 lg:grid-cols-3">
+            {plans.map((plan) => (
+              <div
+                key={plan.title}
+                className={`relative rounded-[32px] border p-8 backdrop-blur-xl ${
+                  plan.highlight
+                    ? "border-cyan-400/30 bg-gradient-to-br from-cyan-400/10 to-fuchsia-500/10 shadow-2xl shadow-cyan-500/10"
+                    : "border-white/10 bg-white/5"
+                }`}
+              >
+                {plan.highlight && (
+                  <div className="absolute right-5 top-5 rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-950">
+                    Most Popular
+                  </div>
+                )}
+
+                <div className="text-sm uppercase tracking-[0.18em] text-slate-400">{plan.title}</div>
+                <div className="mt-4 text-4xl font-semibold">{plan.price}</div>
+                <p className="mt-4 text-sm leading-7 text-slate-300">{plan.desc}</p>
+
+                <div className="mt-6 space-y-3">
+                  {plan.points.map((point) => (
+                    <div key={point} className="flex items-start gap-3">
+                      <div className="mt-1 h-2.5 w-2.5 rounded-full bg-cyan-300" />
+                      <div className="text-sm leading-7 text-slate-200">{point}</div>
+                    </div>
+                  ))}
+                </div>
+
+                <a
+                  href="#cta"
+                  className={`mt-8 inline-flex w-full items-center justify-center rounded-full px-5 py-3 text-sm font-semibold transition ${
+                    plan.highlight
+                      ? "bg-white text-slate-950 hover:scale-[1.02]"
+                      : "border border-white/15 bg-white/5 text-white hover:bg-white/10"
+                  }`}
+                >
+                  Choose Plan
+                </a>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-7xl px-6 py-20">
+          <SectionTitle
+            eyebrow="Testimonials"
+            title="What parents feel after the product starts working"
+            desc="The real signal is not just completion. It is when the child begins to approach English with less fear and more confidence."
+          />
+
+          <div className="grid gap-6 lg:grid-cols-3">
+            {testimonials.map((item) => (
+              <div key={item.name} className="rounded-[32px] border border-white/10 bg-white/5 p-7 backdrop-blur-xl">
+                <div className="text-lg leading-8 text-slate-200">“{item.quote}”</div>
+                <div className="mt-6 text-sm font-medium text-cyan-300">{item.name}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section id="faq" className="mx-auto max-w-5xl px-6 py-20">
+          <SectionTitle
+            eyebrow="FAQ"
+            title="Answers that remove buying friction"
+            desc="Good landing pages do not just look premium. They dissolve uncertainty."
+          />
+
+          <div className="space-y-4">
+            {faqs.map((item) => (
+              <details
+                key={item.q}
+                className="group rounded-[24px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl"
+              >
+                <summary className="cursor-pointer list-none text-left text-base font-semibold text-white">
+                  {item.q}
+                </summary>
+                <p className="mt-4 text-sm leading-7 text-slate-300">{item.a}</p>
+              </details>
+            ))}
+          </div>
+        </section>
+
+        <section id="cta" className="mx-auto max-w-7xl px-6 py-20">
+          <div className="relative overflow-hidden rounded-[36px] border border-white/10 bg-gradient-to-br from-cyan-400/10 via-white/5 to-fuchsia-500/10 p-8 backdrop-blur-2xl md:p-12">
+            <div className="absolute -right-16 top-0 h-48 w-48 rounded-full bg-cyan-400/20 blur-3xl" />
+            <div className="absolute -left-16 bottom-0 h-48 w-48 rounded-full bg-fuchsia-500/20 blur-3xl" />
+
+            <div className="relative mx-auto max-w-4xl text-center">
+              <div className="mb-4 inline-flex rounded-full border border-white/10 bg-white/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-cyan-200">
+                Final CTA
+              </div>
+              <h2 className="text-3xl font-semibold tracking-tight text-white md:text-5xl">
+                Help your child speak, read, and grow with confidence
+              </h2>
+              <p className="mx-auto mt-5 max-w-2xl text-base leading-8 text-slate-300">
+                Start with a freemium entry point. Upgrade to premium when you are ready to unlock the full learning
+                engine.
+              </p>
+
+              <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
+                <a
+                  href="/auth"
+                  className="inline-flex items-center justify-center rounded-full bg-white px-6 py-3.5 text-sm font-semibold text-slate-950 transition hover:scale-[1.02]"
+                >
+                  Start Free Assessment
+                </a>
+                <a
+                  href="#pricing"
+                  className="inline-flex items-center justify-center rounded-full border border-white/15 bg-white/5 px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-white/10"
+                >
+                  View Pricing
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer className="border-t border-white/10 bg-slate-950/70">
+        <div className="mx-auto grid max-w-7xl gap-10 px-6 py-12 md:grid-cols-4">
+          <div>
+            <div className="text-lg font-semibold">PIXO Learn</div>
+            <p className="mt-3 text-sm leading-7 text-slate-400">
+              AI-powered English learning designed to build confidence, skill, and consistent progress for children.
+            </p>
+          </div>
+
+          <div>
+            <div className="text-sm font-semibold text-white">Product</div>
+            <div className="mt-4 space-y-3 text-sm text-slate-400">
+              <a href="#how" className="block hover:text-white">
+                How it works
+              </a>
+              <a href="#levels" className="block hover:text-white">
+                Levels
+              </a>
+              <a href="#features" className="block hover:text-white">
+                Features
+              </a>
+              <a href="#pricing" className="block hover:text-white">
+                Pricing
+              </a>
+            </div>
+          </div>
+
+          <div>
+            <div className="text-sm font-semibold text-white">Company</div>
+            <div className="mt-4 space-y-3 text-sm text-slate-400">
+              <a href="#" className="block hover:text-white">
+                About
+              </a>
+              <a href="#" className="block hover:text-white">
+                Contact
+              </a>
+              <a href="#" className="block hover:text-white">
+                Privacy Policy
+              </a>
+              <a href="#" className="block hover:text-white">
+                Terms of Service
+              </a>
+            </div>
+          </div>
+
+          <div>
+            <div className="text-sm font-semibold text-white">Contact</div>
+            <div className="mt-4 space-y-3 text-sm text-slate-400">
+              <div>support@pixolearn.com</div>
+              <div>India</div>
+              <div>Built for parents, children, and long-term learning confidence.</div>
             </div>
           </div>
         </div>
-      </div>
-    </Layout>
+      </footer>
+    </div>
   );
 }
