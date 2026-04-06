@@ -70,7 +70,7 @@ export const te: Record<TranslationKey, string> = {
   progressTracking: "పురోగతి ట్రాకింగ్",
   parentDashboard: "తల్లిదండ్రుల డాష్‌బోర్డ్",
   attendanceStreaks: "హాజరు స్ట్రీక్‌లు",
-  startFreeTrial: "మీ ఉచిత ట్రయల్ ప్రారంభించండి",
+  startFreeTrial: "ఫ్రీమియం యాక్సెస్ ప్రారంభించండి",
   readyToBuild: "మీ బిడ్డ ఆంగ్ల ఆత్మవిశ్వాసాన్ని పెంచడానికి సిద్ధంగా ఉన్నారా?",
   readyToBuildDesc: "నిర్మాణాత్మక రోజువారీ అభ్యాసం ద్వారా అనేక విద్యార్థుల ఆంగ్ల చదవడం మరియు మాట్లాడే నైపుణ్యాలను మెరుగుపరుస్తున్నాం.",
   getStartedFree: "ఉచితంగా ప్రారంభించండి",
