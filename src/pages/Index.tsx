@@ -1,437 +1,423 @@
-import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
-import { Layout } from "@/components/layout/Layout";
-import { supabase } from "@/integrations/supabase/client";
-import pixoLogo from "@/assets/pixo-logo.png";
-import { Eye, EyeOff, GraduationCap, Users, Loader2 } from "lucide-react";
-import { z } from "zod";
-import { useTranslation } from "@/hooks/useTranslation";
+import React from "react";
+import {
+  ArrowRight,
+  BookOpen,
+  Brain,
+  CheckCircle2,
+  ChevronRight,
+  Globe,
+  GraduationCap,
+  Headphones,
+  Menu,
+  MessageSquareMore,
+  Mic,
+  PhoneCall,
+  PlayCircle,
+  ShieldCheck,
+  Sparkles,
+  Star,
+  Trophy,
+  UserRound,
+  Volume2,
+} from "lucide-react";
 
-const authSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  fullName: z.string().min(2, "Name must be at least 2 characters").optional(),
-});
+const whyCards = [
+  {
+    title: "Speak & Practice",
+    desc: "AI-powered speech evaluation gives instant feedback on pronunciation and clarity.",
+    icon: Mic,
+    iconBg: "bg-orange-100",
+    iconColor: "text-orange-500",
+  },
+  {
+    title: "Daily Lessons",
+    desc: "Structured 30-minute curriculum with vocabulary, phonics, and read-aloud exercises.",
+    icon: BookOpen,
+    iconBg: "bg-amber-100",
+    iconColor: "text-amber-500",
+  },
+  {
+    title: "Track Progress",
+    desc: "Detailed speaking scores, streaks, and skill analytics for parents and kids.",
+    icon: Trophy,
+    iconBg: "bg-green-100",
+    iconColor: "text-green-500",
+  },
+  {
+    title: "Parent Monitoring",
+    desc: "Parents can track their child's learning journey, weak areas, and improvements.",
+    icon: UserRound,
+    iconBg: "bg-sky-100",
+    iconColor: "text-sky-500",
+  },
+];
 
-type UserRole = "student" | "parent";
+const steps = [
+  {
+    no: "1",
+    title: "Take the Launch Check",
+    desc: "A quick assessment finds the right level for your child",
+    icon: Sparkles,
+  },
+  {
+    no: "2",
+    title: "Learn & Practice Daily",
+    desc: "Fun 30-minute lessons with speech AI feedback",
+    icon: Mic,
+  },
+  {
+    no: "3",
+    title: "Watch Confidence Grow",
+    desc: "Track progress and celebrate milestones together",
+    icon: Trophy,
+  },
+];
 
-export default function Auth() {
-  const [searchParams] = useSearchParams();
-  const [isSignUp, setIsSignUp] = useState(searchParams.get("signup") === "true");
-  const [isResetPassword, setIsResetPassword] = useState(false);
-  const [email, setEmail] = useState(searchParams.get("email") || "");
-  const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [selectedRole, setSelectedRole] = useState<UserRole>("student");
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [accountExistsNotice, setAccountExistsNotice] = useState(searchParams.get("exists") === "true");
+const activities = [
+  { title: "Reading", time: "5 min", icon: BookOpen, color: "text-sky-500", bg: "bg-sky-100" },
+  { title: "Listening", time: "5 min", icon: Headphones, color: "text-violet-500", bg: "bg-violet-100" },
+  { title: "Pronunciation", time: "5 min", icon: Volume2, color: "text-orange-500", bg: "bg-orange-100" },
+  { title: "Word Building", time: "5 min", icon: Brain, color: "text-green-500", bg: "bg-green-100" },
+  { title: "Mini Quiz", time: "5 min", icon: CheckCircle2, color: "text-yellow-500", bg: "bg-yellow-100" },
+  { title: "Fun Activity", time: "5 min", icon: PlayCircle, color: "text-rose-500", bg: "bg-rose-100" },
+];
 
-  const { signIn, signUp, resetPassword, user, profile, roles: userRoles, isMultiRole, activeRole } = useAuth();
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const { t } = useTranslation();
+const upcomingPrograms = [
+  { emoji: "🇮🇳", title: "Hindi", desc: "Learn Hindi through stories and games" },
+  { emoji: "🌙", title: "Arabic", desc: "Arabic foundations for young learners" },
+  { emoji: "🇫🇷", title: "French", desc: "Play-based beginner French" },
+  { emoji: "💻", title: "Coding", desc: "Introduction to coding concepts" },
+  { emoji: "🤖", title: "AI & Prompting", desc: "Learn to ask smart questions to AI" },
+];
 
-  const heroStats = [
-    {
-      value: "Age 5–16",
-      label: "Designed for Kids",
-    },
-    {
-      value: "180 Days",
-      label: "Structured Path",
-    },
-    {
-      value: "30 Min/Day",
-      label: "Daily Learning",
-    },
-  ];
+const featureChecklist = [
+  "Unlimited practice attempts",
+  "AI speech evaluation",
+  "Daily lesson reminders",
+  "Progress tracking",
+  "Parent dashboard",
+  "Attendance streaks",
+];
 
-  useEffect(() => {
-    if (searchParams.get("exists") === "true") {
-      setIsSignUp(false);
-      setAccountExistsNotice(true);
-    }
-  }, [searchParams]);
-
-  useEffect(() => {
-    if (user && profile) {
-      if (isMultiRole && !activeRole) {
-        navigate("/role-select");
-        return;
-      }
-
-      const effectiveRole = activeRole || profile.role;
-      if (effectiveRole !== "student") {
-        const redirectPath = effectiveRole === "admin" ? "/admin" : "/parent";
-        navigate(redirectPath);
-        return;
-      }
-
-      checkStudentFlowState();
-    }
-  }, [user, profile, userRoles, activeRole, navigate]);
-
-  const checkStudentFlowState = async () => {
-    if (!user) return;
-
-    const { data: learnerProfile } = await supabase
-      .from("learner_profiles")
-      .select("onboarding_completed")
-      .eq("student_id", user.id)
-      .maybeSingle();
-
-    if (!learnerProfile || !learnerProfile.onboarding_completed) {
-      navigate("/onboarding");
-      return;
-    }
-
-    const { data: entitlement } = await supabase
-      .from("user_entitlements")
-      .select("launch_check_completed, selected_level, is_paid, entitlement_status, entitlement_expiry_date")
-      .eq("user_id", user.id)
-      .maybeSingle();
-
-    if (profile?.subscription_type === "premium") {
-      navigate("/student");
-      return;
-    }
-
-    if (!entitlement || !entitlement.launch_check_completed) {
-      navigate("/launch-check");
-      return;
-    }
-    if (!entitlement.selected_level) {
-      navigate("/level-selection");
-      return;
-    }
-    if (!entitlement.is_paid || entitlement.entitlement_status !== "active") {
-      navigate("/pricing");
-      return;
-    }
-    if (entitlement.entitlement_expiry_date && new Date(entitlement.entitlement_expiry_date) <= new Date()) {
-      navigate("/pricing");
-      return;
-    }
-
-    navigate("/student");
-  };
-
-  const validateForm = () => {
-    try {
-      if (isSignUp) {
-        authSchema.parse({ email, password, fullName });
-      } else if (isResetPassword) {
-        z.object({ email: z.string().email() }).parse({ email });
-      } else {
-        authSchema.omit({ fullName: true }).parse({ email, password });
-      }
-      setErrors({});
-      return true;
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const newErrors: Record<string, string> = {};
-        error.errors.forEach((err) => {
-          if (err.path[0]) {
-            newErrors[err.path[0] as string] = err.message;
-          }
-        });
-        setErrors(newErrors);
-      }
-      return false;
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validateForm()) return;
-
-    setLoading(true);
-    setAccountExistsNotice(false);
-
-    try {
-      if (isResetPassword) {
-        const { error } = await resetPassword(email);
-        if (error) throw error;
-        toast({
-          title: t("checkEmail"),
-          description: t("resetLinkSent"),
-        });
-        setIsResetPassword(false);
-      } else if (isSignUp) {
-        const { error } = await signUp(email, password, fullName, selectedRole);
-
-        if (error) {
-          if (
-            error.message.includes("already registered") ||
-            error.message.includes("User already registered") ||
-            error.message.includes("already been registered")
-          ) {
-            setIsSignUp(false);
-            setPassword("");
-            setAccountExistsNotice(true);
-            toast({
-              title: t("accountExists") || "Account already exists",
-              description:
-                t("accountExistsDesc") || "This email is already registered. Please enter your password to sign in.",
-            });
-            setLoading(false);
-            return;
-          }
-
-          if (error.message.includes("confirm")) {
-            toast({
-              title: t("checkEmail") || "Check your email",
-              description: "Please check your email to confirm your account before signing in.",
-            });
-            setLoading(false);
-            return;
-          }
-
-          throw error;
-        }
-
-        toast({
-          title: t("welcomeToPIXO"),
-          description: t("accountCreated"),
-        });
-      } else {
-        const { error } = await signIn(email, password);
-        if (error) {
-          if (error.message.includes("Invalid login") || error.message.includes("invalid")) {
-            throw new Error(t("invalidCredentials") || "Invalid email or password. Please try again.");
-          }
-          if (error.message.includes("Email not confirmed")) {
-            throw new Error("Please check your email and confirm your account first.");
-          }
-          throw error;
-        }
-
-        toast({
-          title: t("welcomeBackGreeting"),
-          description: t("signedInSuccess"),
-        });
-      }
-    } catch (error) {
-      toast({
-        title: t("error"),
-        description: error instanceof Error ? error.message : t("somethingWrong"),
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const roleOptions = [
-    {
-      id: "student" as UserRole,
-      title: t("student"),
-      description: t("iWantToLearn"),
-      icon: GraduationCap,
-    },
-    {
-      id: "parent" as UserRole,
-      title: t("parent"),
-      description: t("iWantToMonitor"),
-      icon: Users,
-    },
-  ];
-
+export default function Index() {
   return (
-    <Layout showNavbar={false}>
-      <div className="min-h-screen flex">
-        {/* Left side - Branding */}
-        <div className="hidden lg:flex lg:w-1/2 gradient-bg items-center justify-center p-12">
-          <div className="w-full max-w-2xl text-center space-y-8 animate-fade-in">
-            <img
-              src={pixoLogo}
-              alt="PIXO Learn"
-              className="h-32 mx-auto animate-float rounded-xl bg-white/90 p-4 shadow-pixo-lg"
-            />
+    <div
+      className="min-h-screen bg-[#f8f3ea] text-[#231f1b]"
+      style={{
+        fontFamily:
+          "Poppins, Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+      }}
+    >
+      <header className="sticky top-0 z-50 border-b border-[#eadfce] bg-[#f8f3ea]/90 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 md:px-6">
+          <div className="flex items-center gap-3">
+            <div className="text-lg font-bold tracking-tight text-[#201b16]">PIXO</div>
+            <span className="hidden text-sm text-[#7c7064] sm:inline">Online</span>
+          </div>
 
-            <div className="space-y-4">
-              <h1 className="text-5xl font-display font-bold text-white tracking-tight">{t("energyLearnGrow")}</h1>
-              <p className="text-xl leading-8 text-white/90 max-w-2xl mx-auto">
+          <nav className="hidden items-center gap-8 lg:flex">
+            <a href="#why-pixo" className="text-sm font-medium text-[#6b6158] transition hover:text-[#1f1a17]">
+              Why PIXO
+            </a>
+            <a href="#how-it-works" className="text-sm font-medium text-[#6b6158] transition hover:text-[#1f1a17]">
+              How it Works
+            </a>
+            <a href="#features" className="text-sm font-medium text-[#6b6158] transition hover:text-[#1f1a17]">
+              Features
+            </a>
+            <a href="#upcoming" className="text-sm font-medium text-[#6b6158] transition hover:text-[#1f1a17]">
+              Upcoming
+            </a>
+          </nav>
+
+          <div className="hidden items-center gap-3 md:flex">
+            <button className="inline-flex items-center gap-2 rounded-full border border-[#e8ddcf] bg-white px-4 py-2 text-sm font-medium text-[#6a6158]">
+              <Globe className="h-4 w-4" />
+              🇬🇧 EN
+            </button>
+            <button className="px-3 py-2 text-sm font-medium text-[#3d342d]">Sign In</button>
+            <button className="inline-flex items-center rounded-full bg-gradient-to-r from-[#ff7a0f] via-[#f4bd19] to-[#39c45a] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:brightness-95">
+              Get Started
+            </button>
+          </div>
+
+          <button className="grid h-10 w-10 place-items-center rounded-full border border-[#eadfce] bg-white md:hidden">
+            <Menu className="h-5 w-5" />
+          </button>
+        </div>
+      </header>
+
+      <main>
+        <section className="relative overflow-hidden border-b border-[#ece2d4] bg-[linear-gradient(90deg,#f8f0e2_0%,#f5efdf_55%,#eef6e9_100%)]">
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute left-12 top-10 h-44 w-44 rounded-full bg-[#ffb36c]/20 blur-3xl" />
+            <div className="absolute right-10 top-16 h-44 w-44 rounded-full bg-[#39c45a]/15 blur-3xl" />
+          </div>
+
+          <div className="mx-auto grid max-w-7xl gap-10 px-4 py-16 md:px-6 md:py-24 lg:grid-cols-2 lg:items-center">
+            <div className="relative z-10">
+              <div className="inline-flex items-center gap-2 rounded-full bg-[#fff3e5] px-4 py-2 text-sm font-semibold text-[#ff7a0f] ring-1 ring-[#f5d8b8]">
+                <Sparkles className="h-4 w-4" />
+                AI-Powered English Learning for Kids
+              </div>
+
+              <h1 className="mt-5 max-w-2xl text-4xl font-extrabold leading-[1.02] tracking-tight md:text-5xl lg:text-[62px]">
+                Build Your Child&apos;s
+                <span className="block text-[#ff7a0f]">English Confidence</span>
+              </h1>
+
+              <p className="mt-5 max-w-xl text-base leading-7 text-[#6f665e] md:text-lg">
                 Structured daily lessons designed to improve pronunciation, fluency, and speaking confidence for
                 children aged 5–16.
               </p>
+
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <button className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#ff7a0f] via-[#f4bd19] to-[#39c45a] px-7 py-4 text-base font-semibold text-white shadow-md transition hover:brightness-95">
+                  Start Learning Free
+                  <ArrowRight className="h-5 w-5" />
+                </button>
+
+                <button className="inline-flex items-center justify-center gap-2 rounded-full border border-[#e3d7c9] bg-white px-7 py-4 text-base font-semibold text-[#2f2924] transition hover:bg-[#fffaf3]">
+                  View Pricing
+                </button>
+              </div>
+
+              <div className="mt-5 flex items-center gap-2 text-sm text-[#8a7f73]">
+                <Star className="h-4 w-4 fill-[#f4bd19] text-[#f4bd19]" />
+                Helping multiple students improve their English skills every day
+              </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-4 pt-4">
-              {heroStats.map((stat) => (
+            <div className="relative z-10">
+              <div className="mx-auto max-w-md rounded-[28px] bg-white p-6 shadow-[0_20px_60px_rgba(73,55,30,0.12)] ring-1 ring-[#eadfce]">
+                <div className="flex min-h-[250px] flex-col items-center justify-center rounded-[24px] border border-[#efe4d7] bg-[#f9f7f3] p-8 text-center">
+                  <div className="mb-5 grid h-20 w-20 place-items-center rounded-3xl bg-white shadow-sm ring-1 ring-[#eee2d3]">
+                    <div className="text-lg font-bold tracking-wide text-[#ff7a0f]">PIXO</div>
+                  </div>
+
+                  <div className="text-2xl">🎧 📘 🧒</div>
+
+                  <h2 className="mt-5 text-xl font-bold text-[#ff7a0f]">Energy. Learn. Grow.</h2>
+
+                  <p className="mt-2 max-w-xs text-sm leading-6 text-[#867a6f]">
+                    Your child&apos;s journey to fluent English starts here
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="why-pixo" className="mx-auto max-w-7xl px-4 py-16 md:px-6 md:py-24">
+          <div className="text-center">
+            <h2 className="text-3xl font-bold tracking-tight md:text-4xl">Why Parents Choose PIXO</h2>
+            <p className="mx-auto mt-3 max-w-2xl text-base leading-7 text-[#7a7066]">
+              Our interactive approach makes learning English fun and effective for children
+            </p>
+          </div>
+
+          <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+            {whyCards.map((card) => {
+              const Icon = card.icon;
+              return (
                 <div
-                  key={stat.value}
-                  className="rounded-2xl border border-white/20 bg-white/10 px-4 py-5 backdrop-blur-sm shadow-pixo-md"
+                  key={card.title}
+                  className="rounded-[24px] bg-white p-6 text-center shadow-sm ring-1 ring-[#ede2d4]"
                 >
-                  <p className="text-3xl font-bold text-white">{stat.value}</p>
-                  <p className="mt-2 text-sm font-medium text-white/85">{stat.label}</p>
+                  <div className={`mx-auto grid h-12 w-12 place-items-center rounded-full ${card.iconBg}`}>
+                    <Icon className={`h-5 w-5 ${card.iconColor}`} />
+                  </div>
+                  <h3 className="mt-4 text-lg font-semibold">{card.title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-[#7d7268]">{card.desc}</p>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        <section id="how-it-works" className="mx-auto max-w-6xl px-4 py-8 md:px-6 md:py-16">
+          <div className="text-center">
+            <h2 className="text-3xl font-bold tracking-tight md:text-4xl">How PIXO Works</h2>
+            <p className="mx-auto mt-3 max-w-2xl text-base leading-7 text-[#7a7066]">
+              Simple, structured learning in just 30 minutes a day
+            </p>
+          </div>
+
+          <div className="mt-12 grid gap-8 md:grid-cols-3">
+            {steps.map((step) => {
+              const Icon = step.icon;
+              return (
+                <div key={step.no} className="text-center">
+                  <div className="relative mx-auto grid h-16 w-16 place-items-center rounded-full bg-gradient-to-br from-[#ff7a0f] via-[#f4bd19] to-[#39c45a] text-white shadow-md">
+                    <Icon className="h-6 w-6" />
+                    <div className="absolute -right-1 -top-1 grid h-6 w-6 place-items-center rounded-full bg-white text-xs font-bold text-[#ff7a0f] ring-1 ring-[#f0e3d6]">
+                      {step.no}
+                    </div>
+                  </div>
+                  <h3 className="mt-5 text-lg font-semibold">{step.title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-[#7a7066]">{step.desc}</p>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-6xl px-4 py-8 md:px-6 md:py-16">
+          <div className="text-center">
+            <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
+              30 Minutes a Day,
+              <span className="text-[#ff7a0f]"> 6 Fun Activities</span>
+            </h2>
+            <p className="mx-auto mt-3 max-w-2xl text-base leading-7 text-[#7a7066]">
+              Each daily lesson is broken into bite-sized learning blocks that keep kids engaged and excited
+            </p>
+          </div>
+
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
+            {activities.map((item) => {
+              const Icon = item.icon;
+              return (
+                <div
+                  key={item.title}
+                  className="rounded-[22px] bg-white p-5 text-center shadow-sm ring-1 ring-[#ede2d4]"
+                >
+                  <div className={`mx-auto grid h-12 w-12 place-items-center rounded-full ${item.bg}`}>
+                    <Icon className={`h-5 w-5 ${item.color}`} />
+                  </div>
+                  <div className="mt-4 text-sm font-semibold">{item.title}</div>
+                  <div className="mt-1 text-xs text-[#8b8074]">{item.time}</div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="mt-5 text-center text-sm text-[#8b8074]">
+            🎯 Structured daily habit · 📈 Progressive difficulty · 🎮 Gamified experience
+          </div>
+        </section>
+
+        <section id="features" className="mx-auto grid max-w-6xl gap-10 px-4 py-16 md:px-6 lg:grid-cols-[1fr_420px]">
+          <div>
+            <h2 className="max-w-xl text-3xl font-bold tracking-tight md:text-4xl">
+              Everything Your Child Needs to
+              <span className="text-[#ff7a0f]"> Speak Confidently</span>
+            </h2>
+            <p className="mt-4 max-w-xl text-base leading-7 text-[#7a7066]">
+              PIXO provides a complete learning experience with all the tools needed to master spoken English.
+            </p>
+
+            <div className="mt-8 grid gap-3 sm:grid-cols-2">
+              {featureChecklist.map((item) => (
+                <div key={item} className="flex items-center gap-3">
+                  <CheckCircle2 className="h-4 w-4 text-[#39c45a]" />
+                  <span className="text-sm text-[#514840]">{item}</span>
                 </div>
               ))}
             </div>
+
+            <button className="mt-8 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#ff7a0f] via-[#f4bd19] to-[#39c45a] px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:brightness-95">
+              Start Your Free Trial
+              <ChevronRight className="h-4 w-4" />
+            </button>
           </div>
-        </div>
 
-        {/* Right side - Auth Form */}
-        <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
-          <div className="w-full max-w-md space-y-8 animate-slide-up">
-            <div className="lg:hidden text-center mb-8">
-              <img src={pixoLogo} alt="PIXO" className="h-16 mx-auto" />
-            </div>
-
-            <div className="text-center space-y-2">
-              <h2 className="text-3xl font-display font-bold">
-                {isResetPassword ? t("resetPassword") : isSignUp ? t("createAccount") : t("welcomeBack")}
-              </h2>
-              <p className="text-muted-foreground">
-                {isResetPassword ? t("enterResetEmail") : isSignUp ? t("startJourneyToday") : t("continueJourney")}
-              </p>
-            </div>
-
-            {accountExistsNotice && !isSignUp && (
-              <div className="bg-primary/10 border border-primary/20 rounded-2xl p-4 text-center animate-fade-in">
-                <p className="text-sm font-semibold text-primary">{t("accountExists") || "Account already exists"}</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {t("accountExistsDesc") || "This email is already registered. Please enter your password to sign in."}
-                </p>
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {isSignUp && !isResetPassword && (
-                <>
-                  <div className="space-y-3">
-                    <Label>{t("iAmA")}</Label>
-                    <div className="grid grid-cols-2 gap-4">
-                      {roleOptions.map((role) => (
-                        <button
-                          key={role.id}
-                          type="button"
-                          onClick={() => setSelectedRole(role.id)}
-                          className={`p-4 rounded-xl border-2 transition-all duration-300 text-left ${
-                            selectedRole === role.id
-                              ? "border-primary bg-primary/5 shadow-pixo-md"
-                              : "border-border hover:border-primary/50"
-                          }`}
-                        >
-                          <role.icon
-                            className={`h-8 w-8 mb-2 ${
-                              selectedRole === role.id ? "text-primary" : "text-muted-foreground"
-                            }`}
-                          />
-                          <p className="font-semibold">{role.title}</p>
-                          <p className="text-xs text-muted-foreground">{role.description}</p>
-                        </button>
-                      ))}
-                    </div>
+          <div className="rounded-[26px] bg-white p-6 shadow-sm ring-1 ring-[#eadfce]">
+            <div className="space-y-4">
+              <div className="rounded-2xl bg-[#f5f1e8] p-4">
+                <div className="flex items-center gap-3">
+                  <div className="grid h-10 w-10 place-items-center rounded-full bg-[#fff1db]">
+                    <Mic className="h-4 w-4 text-[#ff9f0a]" />
                   </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="fullName">{t("fullName")}</Label>
-                    <Input
-                      id="fullName"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      placeholder={t("enterFullName")}
-                      className={errors.fullName ? "border-destructive" : ""}
-                    />
-                    {errors.fullName && <p className="text-sm text-destructive">{errors.fullName}</p>}
+                  <div>
+                    <div className="text-sm font-semibold">Daily Speaking Practice</div>
+                    <div className="text-xs text-[#857a70]">30 min/day</div>
                   </div>
-                </>
-              )}
-
-              <div className="space-y-2">
-                <Label htmlFor="email">{t("email")}</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  className={errors.email ? "border-destructive" : ""}
-                />
-                {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
-              </div>
-
-              {!isResetPassword && (
-                <div className="space-y-2">
-                  <Label htmlFor="password">{t("password")}</Label>
-                  <div className="relative">
-                    <Input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder={t("enterPassword")}
-                      className={errors.password ? "border-destructive pr-10" : "pr-10"}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                    >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
-                  </div>
-                  {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
                 </div>
-              )}
+              </div>
 
-              {!isSignUp && !isResetPassword && (
-                <button
-                  type="button"
-                  onClick={() => setIsResetPassword(true)}
-                  className="text-sm text-primary hover:underline"
-                >
-                  {t("forgotPassword")}
-                </button>
-              )}
+              <div className="rounded-2xl bg-[#f5f1e8] p-4">
+                <div className="flex items-center gap-3">
+                  <div className="grid h-10 w-10 place-items-center rounded-full bg-[#e8f6ea]">
+                    <Trophy className="h-4 w-4 text-[#39c45a]" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-semibold">Speaking Score: 92%</div>
+                    <div className="text-xs text-[#39c45a]">+12% this week</div>
+                  </div>
+                </div>
+              </div>
 
-              <Button type="submit" variant="gradient" size="lg" className="w-full" disabled={loading}>
-                {loading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : isResetPassword ? (
-                  t("sendResetLink")
-                ) : isSignUp ? (
-                  t("createAccount")
-                ) : (
-                  t("signIn")
-                )}
-              </Button>
-            </form>
-
-            <div className="text-center">
-              {isResetPassword ? (
-                <button
-                  onClick={() => setIsResetPassword(false)}
-                  className="text-sm text-muted-foreground hover:text-foreground"
-                >
-                  {t("backToSignIn")}
-                </button>
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  {isSignUp ? t("alreadyHaveAccount") : t("dontHaveAccount")}{" "}
-                  <button
-                    onClick={() => {
-                      setIsSignUp(!isSignUp);
-                      setAccountExistsNotice(false);
-                    }}
-                    className="text-primary font-semibold hover:underline"
-                  >
-                    {isSignUp ? t("signIn") : t("signUp")}
-                  </button>
-                </p>
-              )}
+              <div className="rounded-2xl bg-[#f5f1e8] p-4">
+                <div className="flex items-center gap-3">
+                  <div className="grid h-10 w-10 place-items-center rounded-full bg-[#fff1e5]">
+                    <Star className="h-4 w-4 text-[#ff7a0f]" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-semibold">7 Day Streak! 🔥</div>
+                    <div className="text-xs text-[#857a70]">Keep it up!</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
-    </Layout>
+        </section>
+
+        <section id="upcoming" className="mx-auto max-w-6xl px-4 py-8 md:px-6 md:py-16">
+          <div className="text-center">
+            <div className="inline-flex items-center gap-2 rounded-full bg-[#fff3e4] px-4 py-2 text-sm font-semibold text-[#ff7a0f]">
+              <Sparkles className="h-4 w-4" />
+              Expanding Soon
+            </div>
+            <h2 className="mt-4 text-3xl font-bold tracking-tight md:text-4xl">🚀 Upcoming Learning Programs</h2>
+            <p className="mx-auto mt-3 max-w-2xl text-base leading-7 text-[#7a7066]">
+              PIXO is growing into a complete learning ecosystem. More exciting tracks are on the way!
+            </p>
+          </div>
+
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+            {upcomingPrograms.map((program) => (
+              <div key={program.title} className="rounded-[22px] bg-white p-5 shadow-sm ring-1 ring-[#ede2d4]">
+                <div className="flex items-center justify-between">
+                  <div className="grid h-10 w-10 place-items-center rounded-full bg-[#f7f1e8] text-lg">
+                    {program.emoji}
+                  </div>
+                  <div className="rounded-full bg-[#f6f1e8] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-[#8a7f73]">
+                    Coming Soon
+                  </div>
+                </div>
+                <div className="mt-4 text-lg font-semibold">{program.title}</div>
+                <div className="mt-2 text-sm leading-6 text-[#7a7066]">{program.desc}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-5xl px-4 py-16 md:px-6">
+          <div className="rounded-[28px] bg-gradient-to-r from-[#ff7a0f] via-[#f4bd19] to-[#39c45a] px-6 py-14 text-center text-white shadow-[0_18px_40px_rgba(112,80,30,0.16)] md:px-12">
+            <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
+              Ready to Build Your Child&apos;s English Confidence?
+            </h2>
+            <p className="mx-auto mt-4 max-w-3xl text-base leading-7 text-white/95">
+              Helping multiple students improve their English reading and speaking skills through structured daily
+              learning.
+            </p>
+            <button className="mt-8 inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/10 px-7 py-3.5 text-sm font-semibold text-white transition hover:bg-white/15">
+              Get Started for Free
+            </button>
+          </div>
+        </section>
+
+        <footer className="border-t border-[#eadfce] bg-[#f8f3ea]">
+          <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 py-8 text-sm text-[#7a7066] md:flex-row md:px-6">
+            <div className="font-semibold text-[#2b251f]">PIXO</div>
+            <div>© 2026 PIXO. All rights reserved.</div>
+          </div>
+        </footer>
+      </main>
+
+      <button className="fixed bottom-5 right-5 grid h-14 w-14 place-items-center rounded-full bg-white shadow-[0_10px_25px_rgba(50,40,20,0.16)] ring-1 ring-[#eadfce]">
+        <MessageSquareMore className="h-6 w-6 text-[#ff7a0f]" />
+      </button>
+    </div>
   );
 }
