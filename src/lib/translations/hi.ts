@@ -76,7 +76,7 @@ export const hi: Record<TranslationKey, string> = {
   progressTracking: "प्रगति ट्रैकिंग",
   parentDashboard: "अभिभावक डैशबोर्ड",
   attendanceStreaks: "उपस्थिति स्ट्रीक्स",
-  startFreeTrial: "अपना मुफ़्त ट्रायल शुरू करें",
+  startFreeTrial: "फ्रीमियम एक्सेस शुरू करें",
 
   readyToBuild: "अपने बच्चे का अंग्रेज़ी आत्मविश्वास बनाने के लिए तैयार?",
   readyToBuildDesc: "संरचित दैनिक शिक्षा के माध्यम से कई छात्रों की अंग्रेज़ी पढ़ने और बोलने के कौशल में सुधार कर रहे हैं।",
