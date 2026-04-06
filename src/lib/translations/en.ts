@@ -81,12 +81,12 @@ export const en = {
   progressTracking: "Progress tracking",
   parentDashboard: "Parent dashboard",
   attendanceStreaks: "Attendance streaks",
-  startFreeTrial: "Start Freemium Access",
+  startFreeTrial: "Start Your Free Trial",
 
   // CTA section
   readyToBuild: "Ready to Build Your Child's English Confidence?",
   readyToBuildDesc: "Helping multiple students improve their English reading and speaking skills through structured daily learning.",
-  getStartedFree: "Get Started Free",
+  getStartedFree: "Get Started for Free",
 
   // Auth
   createAccount: "Create Account",
@@ -341,12 +341,12 @@ export const en = {
   forDuration: "for",
   popular: "Popular",
   bestValueLabel: "Best Value",
-  alreadyPremium: "Premium Access Active",
-  trialAlreadyUsed: "Freemium Access Already Used",
-  trialExpiredChoosePlan: "Your Freemium access has ended. Upgrade to Premium to continue learning!",
-  freeTrialActivated: "🎉 Freemium Access Activated!",
-  enjoy24Hours: "Enjoy 24 hours of full access to explore PIXO Learn.",
-  trialError: "Activation Error",
+  alreadyPremium: "You already have an active premium subscription",
+  trialAlreadyUsed: "Trial Already Used",
+  trialExpiredChoosePlan: "Your free trial has expired. Choose a plan below to continue learning!",
+  freeTrialActivated: "🎉 Free Trial Activated!",
+  enjoy24Hours: "Enjoy 24 hours of full premium access.",
+  trialError: "Trial Error",
   verificationIssue: "Verification Issue",
   paymentReceivedPending: "Payment received but verification pending. Please contact support.",
   paymentFailed: "Payment Failed",

@@ -21,24 +21,11 @@ export function PremiumRoute({ children }: PremiumRouteProps) {
       return;
     }
 
-    // Check profile-level premium (freemium window or paid subscription)
+    // Check profile-level premium (trial or subscription)
     if (profile?.subscription_type === 'premium') {
-      // If this is a freemium (trial) user, check if it's still active
-      if (profile.trial_started_at && profile.trial_expires_at) {
-        const expiresAt = new Date(profile.trial_expires_at);
-        if (expiresAt > new Date()) {
-          // Freemium still active
-          setHasAccess(true);
-          setChecking(false);
-          return;
-        }
-        // Freemium expired — fall through to DB entitlement check
-      } else {
-        // Premium via payment (no trial fields) — allow access
-        setHasAccess(true);
-        setChecking(false);
-        return;
-      }
+      setHasAccess(true);
+      setChecking(false);
+      return;
     }
 
     // Check sessionStorage for immediate post-payment unlock
@@ -54,7 +41,7 @@ export function PremiumRoute({ children }: PremiumRouteProps) {
       sessionStorage.removeItem('expiryDate');
     }
 
-    // Check database entitlement (source of truth)
+    // Check database entitlement
     syncEntitlementFromDatabase(user.id).then((entitlement) => {
       if (entitlement && isEntitlementActive(entitlement)) {
         setHasAccess(true);

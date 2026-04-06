@@ -76,7 +76,7 @@ export const ta: Record<TranslationKey, string> = {
   progressTracking: "முன்னேற்ற கண்காணிப்பு",
   parentDashboard: "பெற்றோர் டாஷ்போர்டு",
   attendanceStreaks: "வருகை ஸ்ட்ரீக்குகள்",
-  startFreeTrial: "ஃப்ரீமியம் அணுகலைத் தொடங்குங்கள்",
+  startFreeTrial: "உங்கள் இலவச சோதனையைத் தொடங்குங்கள்",
 
   readyToBuild: "உங்கள் குழந்தையின் ஆங்கில நம்பிக்கையை வளர்க்க தயாரா?",
   readyToBuildDesc: "கட்டமைக்கப்பட்ட தினசரி கற்றல் மூலம் பல மாணவர்களின் ஆங்கில வாசிப்பு மற்றும் பேச்சுத் திறனை மேம்படுத்துகிறோம்.",

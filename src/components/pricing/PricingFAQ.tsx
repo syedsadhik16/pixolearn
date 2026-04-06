@@ -12,9 +12,9 @@ const faqs = [
       'PIXO is designed for children aged 4–12 who are learning to read and speak English. The curriculum adapts to your child\'s current level, starting from basic phonics all the way to fluent storytelling.',
   },
   {
-    question: 'How does the Freemium access work?',
+    question: 'How does the free trial work?',
     answer:
-      'Freemium access gives your child 24 hours of full access — all lessons, AI practice, and features are unlocked. No payment is required. After 24 hours, you can upgrade to Premium to continue learning.',
+      'The free trial gives your child 24 hours of full premium access — all lessons, AI practice, and features are unlocked. No payment is required. After 24 hours, the account reverts to the free plan automatically.',
   },
   {
     question: 'Can I choose my child\'s level manually?',

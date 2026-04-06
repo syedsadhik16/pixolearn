@@ -140,7 +140,7 @@ export default function StudentDashboard() {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8 pb-24">
-        {/* Freemium Countdown */}
+        {/* Trial Countdown */}
         {profile?.trial_expires_at && (
           <div className="mb-6">
             <TrialCountdown trialExpiresAt={profile.trial_expires_at} />

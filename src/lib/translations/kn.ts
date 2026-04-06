@@ -70,7 +70,7 @@ export const kn: Record<TranslationKey, string> = {
   progressTracking: "ಪ್ರಗತಿ ಟ್ರ್ಯಾಕಿಂಗ್",
   parentDashboard: "ಪೋಷಕರ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
   attendanceStreaks: "ಹಾಜರಾತಿ ಸ್ಟ್ರೀಕ್‌ಗಳು",
-  startFreeTrial: "ಫ್ರೀಮಿಯಂ ಪ್ರವೇಶ ಪ್ರಾರಂಭಿಸಿ",
+  startFreeTrial: "ನಿಮ್ಮ ಉಚಿತ ಪ್ರಯೋಗವನ್ನು ಪ್ರಾರಂಭಿಸಿ",
   readyToBuild: "ನಿಮ್ಮ ಮಗುವಿನ ಇಂಗ್ಲಿಷ್ ಆತ್ಮವಿಶ್ವಾಸವನ್ನು ಬೆಳೆಸಲು ಸಿದ್ಧರಾಗಿದ್ದೀರಾ?",
   readyToBuildDesc: "ರಚನಾತ್ಮಕ ದೈನಂದಿನ ಕಲಿಕೆಯ ಮೂಲಕ ಅನೇಕ ವಿದ್ಯಾರ್ಥಿಗಳ ಇಂಗ್ಲಿಷ್ ಓದುವ ಮತ್ತು ಮಾತನಾಡುವ ಕೌಶಲ್ಯಗಳನ್ನು ಸುಧಾರಿಸುತ್ತಿದ್ದೇವೆ.",
   getStartedFree: "ಉಚಿತವಾಗಿ ಪ್ರಾರಂಭಿಸಿ",

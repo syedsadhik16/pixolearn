@@ -70,7 +70,7 @@ export const ml: Record<TranslationKey, string> = {
   progressTracking: "പുരോഗതി ട്രാക്കിംഗ്",
   parentDashboard: "രക്ഷിതാവ് ഡാഷ്‌ബോർഡ്",
   attendanceStreaks: "ഹാജർ സ്ട്രീക്കുകൾ",
-  startFreeTrial: "ഫ്രീമിയം ആക്സസ് ആരംഭിക്കുക",
+  startFreeTrial: "നിങ്ങളുടെ സൗജന്യ ട്രയൽ ആരംഭിക്കുക",
   readyToBuild: "നിങ്ങളുടെ കുട്ടിയുടെ ഇംഗ്ലീഷ് ആത്മവിശ്വാസം വളർത്താൻ തയ്യാറാണോ?",
   readyToBuildDesc: "ഘടനാപരമായ ദൈനംദിന പഠനത്തിലൂടെ നിരവധി വിദ്യാർത്ഥികളുടെ ഇംഗ്ലീഷ് വായനയും സംസാര കഴിവുകളും മെച്ചപ്പെടുത്തുന്നു.",
   getStartedFree: "സൗജന്യമായി ആരംഭിക്കുക",

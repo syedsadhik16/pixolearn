@@ -107,40 +107,40 @@ export default function Pricing() {
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
-  const [freemiumState, setFreemiumState] = useState<'none' | 'active' | 'ended' | 'loading'>('loading');
-  const [freemiumTimeLeft, setFreemiumTimeLeft] = useState<string>('');
+  const [trialState, setTrialState] = useState<'none' | 'active' | 'expired' | 'loading'>('loading');
+  const [trialTimeLeft, setTrialTimeLeft] = useState<string>('');
 
-  // Check freemium status on mount and update countdown
+  // Check trial status on mount and update countdown
   useEffect(() => {
     if (!profile) {
-      setFreemiumState('none');
+      setTrialState('none');
       return;
     }
 
-    const checkFreemium = () => {
+    const checkTrial = () => {
       if (profile.subscription_type === 'premium' && profile.trial_started_at) {
         const expiresAt = profile.trial_expires_at ? new Date(profile.trial_expires_at) : null;
         if (expiresAt && expiresAt > new Date()) {
-          setFreemiumState('active');
+          setTrialState('active');
           const diff = expiresAt.getTime() - Date.now();
           const hours = Math.floor(diff / (1000 * 60 * 60));
           const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-          setFreemiumTimeLeft(`${hours} hours ${minutes} minutes`);
+          setTrialTimeLeft(`${hours} hours ${minutes} minutes`);
         } else if (profile.trial_started_at) {
-          setFreemiumState('ended');
+          setTrialState('expired');
         } else {
-          setFreemiumState('none');
+          setTrialState('none');
         }
       } else if (profile.trial_started_at) {
-        // Freemium was used but subscription is no longer premium (expired)
-        setFreemiumState('ended');
+        // Trial was started but subscription is no longer premium (expired by cron)
+        setTrialState('expired');
       } else {
-        setFreemiumState('none');
+        setTrialState('none');
       }
     };
 
-    checkFreemium();
-    const interval = setInterval(checkFreemium, 30000);
+    checkTrial();
+    const interval = setInterval(checkTrial, 30000); // update every 30s
     return () => clearInterval(interval);
   }, [profile]);
 
@@ -186,6 +186,7 @@ export default function Pricing() {
       });
       if (error || !data?.order_id) throw new Error(data?.error || error?.message || 'Failed to create order');
 
+      // Validate that the key looks like a live key in production
       const keyId = data.key_id;
       if (!keyId) {
         throw new Error('Payment configuration error. Please contact support.');
@@ -261,27 +262,27 @@ export default function Pricing() {
     }
   };
 
-  const handleFreemiumClick = async () => {
+  const handleTrialClick = async () => {
     if (!user) {
-      navigate('/auth?signup=true');
+      navigate('/auth?signup=true&trial=true');
       return;
     }
 
-    // If freemium is active, show remaining time and allow access
-    if (freemiumState === 'active') {
+    // If trial is active, show remaining time and allow access
+    if (trialState === 'active') {
       toast({
-        title: 'Your Freemium access is active ✨',
-        description: `Time remaining: ${freemiumTimeLeft}`,
+        title: 'Your PIXO free trial is active ✨',
+        description: `Time left: ${trialTimeLeft}`,
       });
       navigate('/student');
       return;
     }
 
-    // If freemium ended, redirect to assessment flow
-    if (freemiumState === 'ended') {
+    // If trial expired, redirect to assessment flow
+    if (trialState === 'expired') {
       toast({
-        title: 'Your Freemium access has ended',
-        description: 'Upgrade to Premium to continue your learning journey with PIXO Learn.',
+        title: 'Your free trial is over',
+        description: 'To continue using PIXO Learn, please enroll in a premium plan.',
       });
       navigate('/launch-check');
       return;
@@ -291,7 +292,7 @@ export default function Pricing() {
       navigate('/student');
       return;
     }
-    setLoadingPlan('freemium');
+    setLoadingPlan('trial');
     try {
       const { data, error } = await supabase.functions.invoke('activate-trial', {
         body: { user_id: user.id },
@@ -301,22 +302,22 @@ export default function Pricing() {
         let msg = data?.error || '';
         if (!msg && error) {
           try { msg = JSON.parse((error as any)?.context?.body || '{}')?.error || ''; } catch {}
-          if (!msg) msg = error.message || 'Could not activate Freemium access';
+          if (!msg) msg = error.message || 'Failed to activate trial';
         }
         if (msg.toLowerCase().includes('already been used')) {
           toast({
-            title: 'Freemium access already used',
-            description: 'Upgrade to Premium to continue your learning journey with PIXO Learn.',
+            title: 'Your free trial is over',
+            description: 'To continue using PIXO Learn, please enroll in a premium plan.',
           });
           navigate('/launch-check');
           return;
         }
         throw new Error(msg);
       }
-      toast({ title: '🎉 Freemium Access Activated!', description: 'Enjoy 24 hours of full access to explore PIXO Learn.' });
+      toast({ title: '🎉 Free Trial Activated!', description: 'Enjoy 24 hours of full premium access.' });
       navigate('/student');
     } catch (err: any) {
-      toast({ title: 'Activation Error', description: err.message, variant: 'destructive' });
+      toast({ title: 'Trial Error', description: err.message, variant: 'destructive' });
     } finally {
       setLoadingPlan(null);
     }
@@ -335,14 +336,15 @@ export default function Pricing() {
       return;
     }
 
+    // Direct to payment - user can pay first, level selection happens via entitlement flow
     initiatePayment(plan.id, plan.name, plan.priceAmount, plan.duration);
   };
 
-  const isPremium = profile?.subscription_type === 'premium' && freemiumState !== 'active';
+  const isPremium = profile?.subscription_type === 'premium' && trialState !== 'active';
 
   return (
     <Layout>
-      {!isPremium && freemiumState !== 'active' && <StickyPricingBar onFreemiumClick={handleFreemiumClick} loading={loadingPlan === 'freemium'} />}
+      {!isPremium && trialState !== 'active' && <StickyPricingBar onTrialClick={handleTrialClick} loading={loadingPlan === 'trial'} />}
       <div className="min-h-screen">
         {/* Hero */}
         <section className="py-16 md:py-24 text-center relative overflow-hidden">
@@ -367,17 +369,17 @@ export default function Pricing() {
           </div>
         </section>
 
-        {/* Premium Active / Freemium Active / Freemium CTA */}
+        {/* Premium Active / Trial Active / Free Trial CTA */}
         <section className="pb-10">
           <div className="container mx-auto px-4 text-center">
             {isPremium ? (
               <div className="max-w-md mx-auto pixo-card p-6 animate-slide-up bg-gradient-to-r from-pixo-green/10 to-pixo-blue/10 border-pixo-green/30">
                 <div className="flex items-center justify-center gap-2 mb-2">
                   <Shield className="h-5 w-5 text-pixo-green" />
-                  <h2 className="text-lg font-display font-bold">Premium Access Active ✨</h2>
+                  <h2 className="text-lg font-display font-bold">Premium Plan Active ✨</h2>
                 </div>
                 <p className="text-sm text-muted-foreground mb-4">
-                  You have full access to the complete learning program. Keep learning!
+                  You have access to the full learning program. Keep learning!
                 </p>
                 <Button
                   variant="gradient"
@@ -389,17 +391,17 @@ export default function Pricing() {
                   <ArrowRight className="h-4 w-4 ml-2" />
                 </Button>
               </div>
-            ) : freemiumState === 'active' ? (
+            ) : trialState === 'active' ? (
               <div className="max-w-md mx-auto pixo-card p-6 animate-slide-up bg-gradient-to-r from-pixo-yellow/10 to-pixo-orange/10 border-pixo-yellow/30">
                 <div className="flex items-center justify-center gap-2 mb-2">
                   <Clock className="h-5 w-5 text-pixo-orange" />
-                  <h2 className="text-lg font-display font-bold">Your Freemium access is active ✨</h2>
+                  <h2 className="text-lg font-display font-bold">Your PIXO free trial is active ✨</h2>
                 </div>
                 <p className="text-sm text-muted-foreground mb-1">
-                  Time remaining: <strong className="text-foreground">{freemiumTimeLeft}</strong>
+                  Time left: <strong className="text-foreground">{trialTimeLeft}</strong>
                 </p>
                 <p className="text-xs text-muted-foreground/70 mb-4">
-                  Upgrade to Premium before your Freemium access ends to keep learning!
+                  Upgrade to a premium plan before your trial ends to keep learning!
                 </p>
                 <Button
                   variant="gradient"
@@ -411,14 +413,14 @@ export default function Pricing() {
                   <ArrowRight className="h-4 w-4 ml-2" />
                 </Button>
               </div>
-            ) : freemiumState === 'ended' ? (
+            ) : trialState === 'expired' ? (
               <div className="max-w-md mx-auto pixo-card p-6 animate-slide-up bg-gradient-to-r from-destructive/10 to-pixo-orange/10 border-destructive/30">
                 <div className="flex items-center justify-center gap-2 mb-2">
                   <Clock className="h-5 w-5 text-destructive" />
-                  <h2 className="text-lg font-display font-bold">Your Freemium access has ended</h2>
+                  <h2 className="text-lg font-display font-bold">Your free trial is over</h2>
                 </div>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Upgrade to Premium to continue your learning journey with PIXO Learn.
+                  To continue using PIXO Learn, please enroll in a premium plan below.
                 </p>
               </div>
             ) : (
@@ -428,23 +430,23 @@ export default function Pricing() {
                   <h2 className="text-lg font-display font-bold">Not sure yet?</h2>
                 </div>
                 <p className="text-sm text-muted-foreground mb-1">
-                  Explore PIXO Learn free for 24 hours — no payment required.
+                  Try PIXO free for 24 hours — no payment required.
                 </p>
                 <p className="text-xs text-muted-foreground/70 mb-4">
-                  Experience a real lesson before choosing a plan.
+                  Explore a real lesson experience before choosing a plan.
                 </p>
                 <Button
                   variant="gradient"
                   size="lg"
                   className="w-full"
-                  disabled={loadingPlan === 'freemium'}
-                  onClick={handleFreemiumClick}
+                  disabled={loadingPlan === 'trial'}
+                  onClick={handleTrialClick}
                 >
-                  {loadingPlan === 'freemium' ? (
+                  {loadingPlan === 'trial' ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
                     <>
-                      Start Freemium Access
+                      Try PIXO Free for 24 Hours
                       <ArrowRight className="h-4 w-4 ml-2" />
                     </>
                   )}
@@ -524,7 +526,7 @@ export default function Pricing() {
                     {loadingPlan === plan.id ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : isPremium ? (
-                      'Premium Access Active'
+                      'You already have an active premium subscription'
                     ) : (
                       <>
                         {plan.cta}

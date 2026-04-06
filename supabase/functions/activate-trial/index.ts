@@ -47,7 +47,7 @@ serve(async (req) => {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    // Check if user already had freemium access
+    // Check if user already had a trial
     const { data: profile, error: fetchError } = await supabase
       .from('profiles')
       .select('trial_started_at, trial_expires_at, subscription_type')
@@ -58,30 +58,30 @@ serve(async (req) => {
       throw new Error('Failed to fetch user profile');
     }
 
-    // If already premium (paid, not freemium), no need for freemium
+    // If already premium (paid, not trial), no need for trial
     if (profile.subscription_type === 'premium' && !profile.trial_started_at) {
       return new Response(JSON.stringify({
         success: false,
-        error: 'You already have Premium access!',
+        error: 'You already have a premium subscription!',
       }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // If freemium already used
+    // If trial already used
     if (profile.trial_started_at) {
       const expiresAt = new Date(profile.trial_expires_at);
       const now = new Date();
 
       if (now < expiresAt) {
-        // Freemium still active - return remaining time
+        // Trial still active - return remaining time
         const diffMs = expiresAt.getTime() - now.getTime();
         const hours = Math.floor(diffMs / (1000 * 60 * 60));
         const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
         return new Response(JSON.stringify({
           success: true,
-          message: `Your Freemium access is active. Time remaining: ${hours} hours ${minutes} minutes`,
+          message: `Your free trial is active. Time left: ${hours} hours ${minutes} minutes`,
           trial_expires_at: profile.trial_expires_at,
           time_left: { hours, minutes },
         }), {
@@ -92,41 +92,41 @@ serve(async (req) => {
 
       return new Response(JSON.stringify({
         success: false,
-        error: 'Your Freemium access has already been used. Upgrade to Premium to continue learning.',
+        error: 'Your free trial has already been used. Please choose a plan to continue.',
       }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // Activate freemium: set start and expiry (24 hours from now)
-    const freemiumStart = new Date();
-    const freemiumExpiry = new Date(freemiumStart.getTime() + 24 * 60 * 60 * 1000);
+    // Activate trial: set start and expiry (24 hours from now)
+    const trialStart = new Date();
+    const trialExpiry = new Date(trialStart.getTime() + 24 * 60 * 60 * 1000);
 
     const { error: updateError } = await supabase
       .from('profiles')
       .update({
-        trial_started_at: freemiumStart.toISOString(),
-        trial_expires_at: freemiumExpiry.toISOString(),
+        trial_started_at: trialStart.toISOString(),
+        trial_expires_at: trialExpiry.toISOString(),
         subscription_type: 'premium',
       })
       .eq('id', user_id);
 
     if (updateError) {
-      throw new Error('Failed to activate Freemium access');
+      throw new Error('Failed to activate trial');
     }
 
     return new Response(JSON.stringify({
       success: true,
-      message: 'Freemium access activated! Enjoy 24 hours of full access to explore PIXO Learn.',
-      trial_started_at: freemiumStart.toISOString(),
-      trial_expires_at: freemiumExpiry.toISOString(),
+      message: 'Free trial activated! Enjoy 24 hours of premium access.',
+      trial_started_at: trialStart.toISOString(),
+      trial_expires_at: trialExpiry.toISOString(),
     }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error('Freemium activation error:', error);
+    console.error('Trial activation error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return new Response(JSON.stringify({ success: false, error: errorMessage }), {
       status: 500,
