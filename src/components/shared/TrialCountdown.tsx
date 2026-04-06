@@ -23,7 +23,7 @@ export function TrialCountdown({ trialExpiresAt }: TrialCountdownProps) {
 
       if (remaining <= 0) {
         setExpired(true);
-        setTimeLeft('Expired');
+        setTimeLeft('Ended');
         setProgress(0);
         return;
       }
@@ -50,12 +50,12 @@ export function TrialCountdown({ trialExpiresAt }: TrialCountdownProps) {
               <Clock className="h-5 w-5 text-destructive" />
             </div>
             <div>
-              <p className="font-semibold text-sm text-destructive">Free trial has ended</p>
-              <p className="text-xs text-muted-foreground">Upgrade to continue your learning journey!</p>
+              <p className="font-semibold text-sm text-destructive">Your Freemium access has ended</p>
+              <p className="text-xs text-muted-foreground">Upgrade to Premium to continue your learning journey!</p>
             </div>
           </div>
           <Button size="sm" variant="gradient" onClick={() => navigate('/pricing')}>
-            Upgrade Now <ArrowRight className="h-3.5 w-3.5 ml-1" />
+            Upgrade to Premium <ArrowRight className="h-3.5 w-3.5 ml-1" />
           </Button>
         </div>
       </div>
@@ -71,15 +71,15 @@ export function TrialCountdown({ trialExpiresAt }: TrialCountdownProps) {
           </div>
           <div>
             <p className="font-semibold text-sm">
-              Free Trial Active <span className="text-primary">✨</span>
+              Freemium Access Active <span className="text-primary">✨</span>
             </p>
             <p className="text-xs text-muted-foreground">
-              Premium access expires in <span className="font-mono font-bold text-primary">{timeLeft}</span>
+              Full access ends in <span className="font-mono font-bold text-primary">{timeLeft}</span>
             </p>
           </div>
         </div>
         <Button size="sm" variant="outline" onClick={() => navigate('/pricing')}>
-          Upgrade <ArrowRight className="h-3.5 w-3.5 ml-1" />
+          Upgrade to Premium <ArrowRight className="h-3.5 w-3.5 ml-1" />
         </Button>
       </div>
       {/* Progress bar */}

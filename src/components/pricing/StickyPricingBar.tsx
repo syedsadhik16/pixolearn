@@ -3,11 +3,11 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, Sparkles } from 'lucide-react';
 
 interface StickyPricingBarProps {
-  onTrialClick: () => void;
+  onFreemiumClick: () => void;
   loading?: boolean;
 }
 
-export function StickyPricingBar({ onTrialClick, loading }: StickyPricingBarProps) {
+export function StickyPricingBar({ onFreemiumClick, loading }: StickyPricingBarProps) {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -27,7 +27,7 @@ export function StickyPricingBar({ onTrialClick, loading }: StickyPricingBarProp
         <div className="flex items-center gap-2 min-w-0">
           <Sparkles className="h-4 w-4 text-primary flex-shrink-0" />
           <span className="text-sm font-semibold truncate">
-            Try PIXO free for 24 hours
+            Try PIXO Learn free for 24 hours
           </span>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
@@ -35,10 +35,10 @@ export function StickyPricingBar({ onTrialClick, loading }: StickyPricingBarProp
           <Button
             size="sm"
             variant="gradient"
-            onClick={onTrialClick}
+            onClick={onFreemiumClick}
             disabled={loading}
           >
-            Free Trial
+            Start Freemium
             <ArrowRight className="h-3.5 w-3.5 ml-1" />
           </Button>
         </div>
