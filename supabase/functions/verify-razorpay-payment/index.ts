@@ -38,8 +38,8 @@ serve(async (req) => {
     });
 
     const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: userError } = await userClient.auth.getUser(token);
-    if (userError || !user) {
+    const { data: claimsData, error: claimsError } = await userClient.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims?.sub) {
       return new Response(JSON.stringify({ success: false, error: 'Unauthorized' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -47,7 +47,7 @@ serve(async (req) => {
     }
 
     // Use verified user ID from JWT, NOT from request body
-    const user_id = user.id;
+    const user_id = claimsData.claims.sub;
 
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, plan_id } = await req.json();
 
