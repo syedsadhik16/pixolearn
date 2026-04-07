@@ -246,12 +246,12 @@ export default function Pricing() {
           if (!msg) msg = error.message || 'Failed to activate trial';
         }
         if (msg.toLowerCase().includes('already been used')) {
-          toast({ title: 'Trial Already Used', description: 'Your free trial has expired. Choose a plan below to continue learning!' });
+          toast({ title: 'Freemium Already Used', description: 'Your Freemium access has expired. Choose a plan below to upgrade to Premium!' });
           return;
         }
         throw new Error(msg);
       }
-      toast({ title: '🎉 Free Trial Activated!', description: 'Enjoy 24 hours of full premium access.' });
+      toast({ title: '🎉 Freemium Access Activated!', description: 'Enjoy 24 hours of full Premium access.' });
       navigate('/student');
     } catch (err: any) {
       toast({ title: 'Trial Error', description: err.message, variant: 'destructive' });
