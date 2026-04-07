@@ -174,19 +174,35 @@ export default function AdminDashboard() {
 
   const fetchData = async () => {
     try {
-      const [profilesRes, lessonsRes, completionsRes] = await Promise.all([
+      const [profilesRes, lessonsRes, completionsRes, rolesRes, linksRes] = await Promise.all([
         supabase.from('profiles').select('*').order('created_at', { ascending: false }),
         supabase.from('lessons').select('*').order('level').order('day_number'),
         supabase.from('lesson_completions').select('lesson_id'),
+        supabase.from('user_roles').select('*'),
+        supabase.from('parent_children').select('*'),
       ]);
 
       if (profilesRes.error) throw profilesRes.error;
       if (lessonsRes.error) throw lessonsRes.error;
 
-      setStudents((profilesRes.data || []).filter((p) => p.role === 'student'));
+      const profiles = profilesRes.data || [];
+      setAllProfiles(profiles);
+      setStudents(profiles.filter((p) => p.role === 'student'));
       setLessons(lessonsRes.data || []);
+      setUserRoles((rolesRes.data as any) || []);
 
-      // Count completions per lesson
+      // Enrich parent-child links with emails
+      const linkData = (linksRes.data || []).map((link: any) => {
+        const parentProfile = profiles.find(p => p.id === link.parent_id);
+        const childProfile = profiles.find(p => p.id === link.child_id);
+        return {
+          ...link,
+          parent_email: parentProfile?.email || link.parent_id,
+          child_email: childProfile?.email || link.child_id,
+        };
+      });
+      setParentChildLinks(linkData);
+
       const counts: Record<string, number> = {};
       (completionsRes.data || []).forEach((c) => {
         counts[c.lesson_id] = (counts[c.lesson_id] || 0) + 1;
