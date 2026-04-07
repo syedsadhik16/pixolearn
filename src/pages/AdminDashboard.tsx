@@ -310,10 +310,76 @@ export default function AdminDashboard() {
     setLessonForm({ ...lessonForm, sentences: lessonForm.sentences.filter((_, i) => i !== index) });
   };
 
+  const handleAssignRole = async () => {
+    if (!roleAssignEmail.trim()) {
+      toast({ title: 'Required', description: 'Enter user email', variant: 'destructive' });
+      return;
+    }
+    const targetProfile = allProfiles.find(p => p.email.toLowerCase() === roleAssignEmail.toLowerCase().trim());
+    if (!targetProfile) {
+      toast({ title: 'Not found', description: 'No user with that email', variant: 'destructive' });
+      return;
+    }
+    try {
+      const { error } = await supabase.from('user_roles').upsert(
+        { user_id: targetProfile.id, role: roleAssignRole as any, is_active: true },
+        { onConflict: 'user_id,role' }
+      );
+      if (error) throw error;
+      toast({ title: 'Role assigned ✓', description: `${roleAssignRole} role assigned to ${roleAssignEmail}` });
+      setRoleAssignEmail('');
+      fetchData();
+    } catch (e: any) {
+      toast({ title: 'Error', description: e.message || 'Failed to assign role', variant: 'destructive' });
+    }
+  };
+
+  const handleLinkParentChild = async () => {
+    if (!linkParentEmail.trim() || !linkChildEmail.trim()) {
+      toast({ title: 'Required', description: 'Enter both parent and child emails', variant: 'destructive' });
+      return;
+    }
+    const parentProfile = allProfiles.find(p => p.email.toLowerCase() === linkParentEmail.toLowerCase().trim());
+    const childProfile = allProfiles.find(p => p.email.toLowerCase() === linkChildEmail.toLowerCase().trim());
+    if (!parentProfile || !childProfile) {
+      toast({ title: 'Not found', description: 'One or both users not found', variant: 'destructive' });
+      return;
+    }
+    try {
+      const { error } = await supabase.from('parent_children').insert({
+        parent_id: parentProfile.id,
+        child_id: childProfile.id,
+      });
+      if (error) throw error;
+      toast({ title: 'Linked ✓', description: `${linkParentEmail} → ${linkChildEmail}` });
+      setLinkParentEmail('');
+      setLinkChildEmail('');
+      fetchData();
+    } catch (e: any) {
+      toast({ title: 'Error', description: e.message || 'Failed to link', variant: 'destructive' });
+    }
+  };
+
+  const handleUnlinkParentChild = async (linkId: string) => {
+    try {
+      await supabase.from('parent_children').delete().eq('id', linkId);
+      toast({ title: 'Unlinked ✓' });
+      fetchData();
+    } catch (e: any) {
+      toast({ title: 'Error', description: e.message, variant: 'destructive' });
+    }
+  };
+
   const filteredStudents = students.filter(
     (s) =>
       (s.full_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       s.email.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const filteredAllProfiles = allProfiles.filter(
+    (p) =>
+      (p.full_name || '').toLowerCase().includes(rolesSearchQuery.toLowerCase()) ||
+      p.email.toLowerCase().includes(rolesSearchQuery.toLowerCase())
   );
 
   // Engagement metrics
