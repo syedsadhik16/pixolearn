@@ -692,7 +692,140 @@ export default function AdminDashboard() {
             </div>
           </TabsContent>
 
-          {/* Analytics Tab */}
+          {/* Users & Roles Tab */}
+          <TabsContent value="users-roles">
+            <div className="space-y-6">
+              {/* Assign Role */}
+              <div className="pixo-card space-y-4">
+                <h2 className="text-xl font-display font-bold flex items-center gap-2">
+                  <Shield className="h-5 w-5 text-primary" /> Assign Role
+                </h2>
+                <div className="flex flex-col md:flex-row gap-3 items-end">
+                  <div className="flex-1">
+                    <Label>User Email</Label>
+                    <Input value={roleAssignEmail} onChange={e => setRoleAssignEmail(e.target.value)} placeholder="user@example.com" />
+                  </div>
+                  <div className="w-40">
+                    <Label>Role</Label>
+                    <Select value={roleAssignRole} onValueChange={setRoleAssignRole}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="student">Student</SelectItem>
+                        <SelectItem value="parent">Parent</SelectItem>
+                        <SelectItem value="admin">Admin</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button onClick={handleAssignRole} variant="gradient">
+                    <Plus className="h-4 w-4 mr-1" /> Assign
+                  </Button>
+                </div>
+              </div>
+
+              {/* Link Parent-Child */}
+              <div className="pixo-card space-y-4">
+                <h2 className="text-xl font-display font-bold flex items-center gap-2">
+                  <Link className="h-5 w-5 text-primary" /> Parent–Student Linking
+                </h2>
+                <div className="flex flex-col md:flex-row gap-3 items-end">
+                  <div className="flex-1">
+                    <Label>Parent Email</Label>
+                    <Input value={linkParentEmail} onChange={e => setLinkParentEmail(e.target.value)} placeholder="parent@example.com" />
+                  </div>
+                  <div className="flex-1">
+                    <Label>Student Email</Label>
+                    <Input value={linkChildEmail} onChange={e => setLinkChildEmail(e.target.value)} placeholder="student@example.com" />
+                  </div>
+                  <Button onClick={handleLinkParentChild} variant="gradient">
+                    <Plus className="h-4 w-4 mr-1" /> Link
+                  </Button>
+                </div>
+
+                {parentChildLinks.length > 0 && (
+                  <div className="rounded-xl border overflow-hidden mt-4">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Parent</TableHead>
+                          <TableHead>Student</TableHead>
+                          <TableHead className="w-12"></TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {parentChildLinks.map(link => (
+                          <TableRow key={link.id}>
+                            <TableCell className="text-sm">{link.parent_email}</TableCell>
+                            <TableCell className="text-sm">{link.child_email}</TableCell>
+                            <TableCell>
+                              <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleUnlinkParentChild(link.id)}>
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </div>
+
+              {/* Full User Table */}
+              <div className="pixo-card space-y-4">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                  <h2 className="text-xl font-display font-bold">All Users</h2>
+                  <div className="relative max-w-sm">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input placeholder="Search users..." value={rolesSearchQuery} onChange={e => setRolesSearchQuery(e.target.value)} className="pl-9" />
+                  </div>
+                </div>
+                <div className="rounded-xl border overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Profile Role</TableHead>
+                        <TableHead>Active Roles</TableHead>
+                        <TableHead>Plan</TableHead>
+                        <TableHead>Joined</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredAllProfiles.map(p => {
+                        const activeRoles = userRoles.filter(r => r.user_id === p.id && r.is_active).map(r => r.role);
+                        return (
+                          <TableRow key={p.id}>
+                            <TableCell className="font-medium">{p.full_name || '—'}</TableCell>
+                            <TableCell className="text-muted-foreground text-sm">{p.email}</TableCell>
+                            <TableCell>
+                              <Badge variant="outline" className="capitalize">{p.role}</Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex flex-wrap gap-1">
+                                {activeRoles.length > 0 ? activeRoles.map(r => (
+                                  <Badge key={r} variant="secondary" className="capitalize text-xs">{r}</Badge>
+                                )) : <span className="text-xs text-muted-foreground">—</span>}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={p.subscription_type === 'premium' ? 'default' : 'secondary'} className="capitalize">
+                                {p.subscription_type}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-sm text-muted-foreground">
+                              {format(new Date(p.created_at), 'MMM d, yyyy')}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+
+
           <TabsContent value="analytics">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Lesson Distribution */}
