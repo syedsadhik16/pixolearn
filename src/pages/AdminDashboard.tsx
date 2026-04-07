@@ -69,6 +69,21 @@ interface Profile {
   created_at: string;
 }
 
+interface UserRoleRow {
+  id: string;
+  user_id: string;
+  role: string;
+  is_active: boolean;
+}
+
+interface ParentChildLink {
+  id: string;
+  parent_id: string;
+  child_id: string;
+  parent_email?: string;
+  child_email?: string;
+}
+
 interface Lesson {
   id: string;
   title: string;
