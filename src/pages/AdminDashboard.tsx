@@ -131,6 +131,7 @@ export default function AdminDashboard() {
   const { toast } = useToast();
 
   const [students, setStudents] = useState<Profile[]>([]);
+  const [allProfiles, setAllProfiles] = useState<Profile[]>([]);
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [completionCounts, setCompletionCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
@@ -147,6 +148,15 @@ export default function AdminDashboard() {
     sentences: [],
     read_aloud_text: '',
   });
+
+  // Users & Roles state
+  const [userRoles, setUserRoles] = useState<UserRoleRow[]>([]);
+  const [parentChildLinks, setParentChildLinks] = useState<ParentChildLink[]>([]);
+  const [roleAssignEmail, setRoleAssignEmail] = useState('');
+  const [roleAssignRole, setRoleAssignRole] = useState<string>('student');
+  const [linkParentEmail, setLinkParentEmail] = useState('');
+  const [linkChildEmail, setLinkChildEmail] = useState('');
+  const [rolesSearchQuery, setRolesSearchQuery] = useState('');
 
   useEffect(() => {
     if (!authLoading && !user) {
