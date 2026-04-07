@@ -20,6 +20,15 @@ const authSchema = z.object({
 
 type UserRole = 'student' | 'parent';
 
+const IS_DEV = import.meta.env.DEV;
+
+const DEMO_ACCOUNTS = [
+  { label: 'Student', email: 'student@pixolearn.test', password: 'pixo1234', role: 'student' },
+  { label: 'Parent', email: 'parent@pixolearn.test', password: 'pixo1234', role: 'parent' },
+  { label: 'Admin', email: 'admin@pixolearn.test', password: 'pixo1234', role: 'admin' },
+  { label: 'Multi-Role', email: 'multirole@pixolearn.test', password: 'pixo1234', role: 'multi' },
+];
+
 export default function Auth() {
   const [searchParams] = useSearchParams();
   const [isSignUp, setIsSignUp] = useState(searchParams.get('signup') === 'true');
@@ -449,6 +458,35 @@ export default function Auth() {
                 </p>
               )}
             </div>
+
+            {/* Dev Demo Login Helper */}
+            {IS_DEV && (
+              <div className="border border-dashed border-primary/30 rounded-2xl p-4 bg-primary/5 space-y-3">
+                <p className="text-xs font-semibold text-primary text-center">🧪 Dev Quick Login</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {DEMO_ACCOUNTS.map((demo) => (
+                    <button
+                      key={demo.email}
+                      type="button"
+                      onClick={() => {
+                        setEmail(demo.email);
+                        setPassword(demo.password);
+                        setIsSignUp(false);
+                        setIsResetPassword(false);
+                      }}
+                      className="text-xs px-2 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary font-medium transition-colors"
+                    >
+                      {demo.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Organization note */}
+            <p className="text-center text-xs text-muted-foreground">
+              PIXO Learn • Organization Access Only
+            </p>
           </div>
         </div>
       </div>

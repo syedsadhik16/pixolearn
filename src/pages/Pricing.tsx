@@ -44,8 +44,7 @@ const plans = [
       'Role play studio',
     ],
     supportingLine: 'Best for parents who want to begin with one focused level',
-    cta: 'Choose Plan',
-    highlighted: false,
+    cta: 'Make Payment',
   },
   {
     id: '12-months',
@@ -68,7 +67,7 @@ const plans = [
       'Priority support',
     ],
     supportingLine: 'Best for deeper structured learning',
-    cta: 'Choose Plan',
+    cta: 'Make Payment',
     highlighted: true,
     badge: 'Popular',
   },
@@ -95,7 +94,7 @@ const plans = [
       'Early feature access',
     ],
     supportingLine: 'Best for the complete learning journey',
-    cta: 'Choose Plan',
+    cta: 'Make Payment',
     highlighted: false,
     badge: 'Best Value',
   },
@@ -247,12 +246,12 @@ export default function Pricing() {
           if (!msg) msg = error.message || 'Failed to activate trial';
         }
         if (msg.toLowerCase().includes('already been used')) {
-          toast({ title: 'Trial Already Used', description: 'Your free trial has expired. Choose a plan below to continue learning!' });
+          toast({ title: 'Freemium Already Used', description: 'Your Freemium access has expired. Choose a plan below to upgrade to Premium!' });
           return;
         }
         throw new Error(msg);
       }
-      toast({ title: '🎉 Free Trial Activated!', description: 'Enjoy 24 hours of full premium access.' });
+      toast({ title: '🎉 Freemium Access Activated!', description: 'Enjoy 24 hours of full Premium access.' });
       navigate('/student');
     } catch (err: any) {
       toast({ title: 'Trial Error', description: err.message, variant: 'destructive' });
@@ -342,10 +341,10 @@ export default function Pricing() {
                   <h2 className="text-lg font-display font-bold">Not sure yet?</h2>
                 </div>
                 <p className="text-sm text-muted-foreground mb-1">
-                  Try PIXO free for 24 hours — no payment required.
+                  Try PIXO Freemium for 24 hours — no payment required.
                 </p>
                 <p className="text-xs text-muted-foreground/70 mb-4">
-                  Explore a real lesson experience before choosing a plan.
+                  Explore a real lesson experience before upgrading to Premium.
                 </p>
                 <Button
                   variant="gradient"
@@ -358,7 +357,7 @@ export default function Pricing() {
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
                     <>
-                      Try PIXO Free for 24 Hours
+                      Try Freemium for 24 Hours
                       <ArrowRight className="h-4 w-4 ml-2" />
                     </>
                   )}

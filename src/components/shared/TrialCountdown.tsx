@@ -15,7 +15,7 @@ export function TrialCountdown({ trialExpiresAt }: TrialCountdownProps) {
 
   useEffect(() => {
     const expiresAt = new Date(trialExpiresAt).getTime();
-    const totalDuration = 24 * 60 * 60 * 1000; // 24 hours
+    const totalDuration = 24 * 60 * 60 * 1000;
 
     const update = () => {
       const now = Date.now();
@@ -50,8 +50,8 @@ export function TrialCountdown({ trialExpiresAt }: TrialCountdownProps) {
               <Clock className="h-5 w-5 text-destructive" />
             </div>
             <div>
-              <p className="font-semibold text-sm text-destructive">Free trial has ended</p>
-              <p className="text-xs text-muted-foreground">Upgrade to continue your learning journey!</p>
+              <p className="font-semibold text-sm text-destructive">Freemium Access Ended</p>
+              <p className="text-xs text-muted-foreground">Upgrade to Premium to continue your learning journey!</p>
             </div>
           </div>
           <Button size="sm" variant="gradient" onClick={() => navigate('/pricing')}>
@@ -71,7 +71,7 @@ export function TrialCountdown({ trialExpiresAt }: TrialCountdownProps) {
           </div>
           <div>
             <p className="font-semibold text-sm">
-              Free Trial Active <span className="text-primary">✨</span>
+              Freemium Access Active <span className="text-primary">✨</span>
             </p>
             <p className="text-xs text-muted-foreground">
               Premium access expires in <span className="font-mono font-bold text-primary">{timeLeft}</span>
@@ -82,7 +82,6 @@ export function TrialCountdown({ trialExpiresAt }: TrialCountdownProps) {
           Upgrade <ArrowRight className="h-3.5 w-3.5 ml-1" />
         </Button>
       </div>
-      {/* Progress bar */}
       <div className="mt-3 h-1.5 rounded-full bg-muted overflow-hidden">
         <div
           className="h-full rounded-full gradient-bg transition-all duration-1000"

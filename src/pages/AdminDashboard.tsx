@@ -43,6 +43,8 @@ import {
   Pencil,
   Search,
   BarChart3,
+  Shield,
+  Link,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -67,6 +69,21 @@ interface Profile {
   role: string;
   subscription_type: string;
   created_at: string;
+}
+
+interface UserRoleRow {
+  id: string;
+  user_id: string;
+  role: string;
+  is_active: boolean;
+}
+
+interface ParentChildLink {
+  id: string;
+  parent_id: string;
+  child_id: string;
+  parent_email?: string;
+  child_email?: string;
 }
 
 interface Lesson {
@@ -116,6 +133,7 @@ export default function AdminDashboard() {
   const { toast } = useToast();
 
   const [students, setStudents] = useState<Profile[]>([]);
+  const [allProfiles, setAllProfiles] = useState<Profile[]>([]);
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [completionCounts, setCompletionCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
@@ -133,6 +151,15 @@ export default function AdminDashboard() {
     read_aloud_text: '',
   });
 
+  // Users & Roles state
+  const [userRoles, setUserRoles] = useState<UserRoleRow[]>([]);
+  const [parentChildLinks, setParentChildLinks] = useState<ParentChildLink[]>([]);
+  const [roleAssignEmail, setRoleAssignEmail] = useState('');
+  const [roleAssignRole, setRoleAssignRole] = useState<string>('student');
+  const [linkParentEmail, setLinkParentEmail] = useState('');
+  const [linkChildEmail, setLinkChildEmail] = useState('');
+  const [rolesSearchQuery, setRolesSearchQuery] = useState('');
+
   useEffect(() => {
     if (!authLoading && !user) {
       navigate('/auth');
@@ -149,19 +176,35 @@ export default function AdminDashboard() {
 
   const fetchData = async () => {
     try {
-      const [profilesRes, lessonsRes, completionsRes] = await Promise.all([
+      const [profilesRes, lessonsRes, completionsRes, rolesRes, linksRes] = await Promise.all([
         supabase.from('profiles').select('*').order('created_at', { ascending: false }),
         supabase.from('lessons').select('*').order('level').order('day_number'),
         supabase.from('lesson_completions').select('lesson_id'),
+        supabase.from('user_roles').select('*'),
+        supabase.from('parent_children').select('*'),
       ]);
 
       if (profilesRes.error) throw profilesRes.error;
       if (lessonsRes.error) throw lessonsRes.error;
 
-      setStudents((profilesRes.data || []).filter((p) => p.role === 'student'));
+      const profiles = profilesRes.data || [];
+      setAllProfiles(profiles);
+      setStudents(profiles.filter((p) => p.role === 'student'));
       setLessons(lessonsRes.data || []);
+      setUserRoles((rolesRes.data as any) || []);
 
-      // Count completions per lesson
+      // Enrich parent-child links with emails
+      const linkData = (linksRes.data || []).map((link: any) => {
+        const parentProfile = profiles.find(p => p.id === link.parent_id);
+        const childProfile = profiles.find(p => p.id === link.child_id);
+        return {
+          ...link,
+          parent_email: parentProfile?.email || link.parent_id,
+          child_email: childProfile?.email || link.child_id,
+        };
+      });
+      setParentChildLinks(linkData);
+
       const counts: Record<string, number> = {};
       (completionsRes.data || []).forEach((c) => {
         counts[c.lesson_id] = (counts[c.lesson_id] || 0) + 1;
@@ -269,10 +312,76 @@ export default function AdminDashboard() {
     setLessonForm({ ...lessonForm, sentences: lessonForm.sentences.filter((_, i) => i !== index) });
   };
 
+  const handleAssignRole = async () => {
+    if (!roleAssignEmail.trim()) {
+      toast({ title: 'Required', description: 'Enter user email', variant: 'destructive' });
+      return;
+    }
+    const targetProfile = allProfiles.find(p => p.email.toLowerCase() === roleAssignEmail.toLowerCase().trim());
+    if (!targetProfile) {
+      toast({ title: 'Not found', description: 'No user with that email', variant: 'destructive' });
+      return;
+    }
+    try {
+      const { error } = await supabase.from('user_roles').upsert(
+        { user_id: targetProfile.id, role: roleAssignRole as any, is_active: true },
+        { onConflict: 'user_id,role' }
+      );
+      if (error) throw error;
+      toast({ title: 'Role assigned ✓', description: `${roleAssignRole} role assigned to ${roleAssignEmail}` });
+      setRoleAssignEmail('');
+      fetchData();
+    } catch (e: any) {
+      toast({ title: 'Error', description: e.message || 'Failed to assign role', variant: 'destructive' });
+    }
+  };
+
+  const handleLinkParentChild = async () => {
+    if (!linkParentEmail.trim() || !linkChildEmail.trim()) {
+      toast({ title: 'Required', description: 'Enter both parent and child emails', variant: 'destructive' });
+      return;
+    }
+    const parentProfile = allProfiles.find(p => p.email.toLowerCase() === linkParentEmail.toLowerCase().trim());
+    const childProfile = allProfiles.find(p => p.email.toLowerCase() === linkChildEmail.toLowerCase().trim());
+    if (!parentProfile || !childProfile) {
+      toast({ title: 'Not found', description: 'One or both users not found', variant: 'destructive' });
+      return;
+    }
+    try {
+      const { error } = await supabase.from('parent_children').insert({
+        parent_id: parentProfile.id,
+        child_id: childProfile.id,
+      });
+      if (error) throw error;
+      toast({ title: 'Linked ✓', description: `${linkParentEmail} → ${linkChildEmail}` });
+      setLinkParentEmail('');
+      setLinkChildEmail('');
+      fetchData();
+    } catch (e: any) {
+      toast({ title: 'Error', description: e.message || 'Failed to link', variant: 'destructive' });
+    }
+  };
+
+  const handleUnlinkParentChild = async (linkId: string) => {
+    try {
+      await supabase.from('parent_children').delete().eq('id', linkId);
+      toast({ title: 'Unlinked ✓' });
+      fetchData();
+    } catch (e: any) {
+      toast({ title: 'Error', description: e.message, variant: 'destructive' });
+    }
+  };
+
   const filteredStudents = students.filter(
     (s) =>
       (s.full_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       s.email.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const filteredAllProfiles = allProfiles.filter(
+    (p) =>
+      (p.full_name || '').toLowerCase().includes(rolesSearchQuery.toLowerCase()) ||
+      p.email.toLowerCase().includes(rolesSearchQuery.toLowerCase())
   );
 
   // Engagement metrics
@@ -344,6 +453,10 @@ export default function AdminDashboard() {
             <TabsTrigger value="students">
               <Users className="h-4 w-4 mr-2" />
               Students
+            </TabsTrigger>
+            <TabsTrigger value="users-roles">
+              <Shield className="h-4 w-4 mr-2" />
+              Users & Roles
             </TabsTrigger>
             <TabsTrigger value="analytics">
               <BarChart3 className="h-4 w-4 mr-2" />
@@ -579,7 +692,140 @@ export default function AdminDashboard() {
             </div>
           </TabsContent>
 
-          {/* Analytics Tab */}
+          {/* Users & Roles Tab */}
+          <TabsContent value="users-roles">
+            <div className="space-y-6">
+              {/* Assign Role */}
+              <div className="pixo-card space-y-4">
+                <h2 className="text-xl font-display font-bold flex items-center gap-2">
+                  <Shield className="h-5 w-5 text-primary" /> Assign Role
+                </h2>
+                <div className="flex flex-col md:flex-row gap-3 items-end">
+                  <div className="flex-1">
+                    <Label>User Email</Label>
+                    <Input value={roleAssignEmail} onChange={e => setRoleAssignEmail(e.target.value)} placeholder="user@example.com" />
+                  </div>
+                  <div className="w-40">
+                    <Label>Role</Label>
+                    <Select value={roleAssignRole} onValueChange={setRoleAssignRole}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="student">Student</SelectItem>
+                        <SelectItem value="parent">Parent</SelectItem>
+                        <SelectItem value="admin">Admin</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button onClick={handleAssignRole} variant="gradient">
+                    <Plus className="h-4 w-4 mr-1" /> Assign
+                  </Button>
+                </div>
+              </div>
+
+              {/* Link Parent-Child */}
+              <div className="pixo-card space-y-4">
+                <h2 className="text-xl font-display font-bold flex items-center gap-2">
+                  <Link className="h-5 w-5 text-primary" /> Parent–Student Linking
+                </h2>
+                <div className="flex flex-col md:flex-row gap-3 items-end">
+                  <div className="flex-1">
+                    <Label>Parent Email</Label>
+                    <Input value={linkParentEmail} onChange={e => setLinkParentEmail(e.target.value)} placeholder="parent@example.com" />
+                  </div>
+                  <div className="flex-1">
+                    <Label>Student Email</Label>
+                    <Input value={linkChildEmail} onChange={e => setLinkChildEmail(e.target.value)} placeholder="student@example.com" />
+                  </div>
+                  <Button onClick={handleLinkParentChild} variant="gradient">
+                    <Plus className="h-4 w-4 mr-1" /> Link
+                  </Button>
+                </div>
+
+                {parentChildLinks.length > 0 && (
+                  <div className="rounded-xl border overflow-hidden mt-4">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Parent</TableHead>
+                          <TableHead>Student</TableHead>
+                          <TableHead className="w-12"></TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {parentChildLinks.map(link => (
+                          <TableRow key={link.id}>
+                            <TableCell className="text-sm">{link.parent_email}</TableCell>
+                            <TableCell className="text-sm">{link.child_email}</TableCell>
+                            <TableCell>
+                              <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleUnlinkParentChild(link.id)}>
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </div>
+
+              {/* Full User Table */}
+              <div className="pixo-card space-y-4">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                  <h2 className="text-xl font-display font-bold">All Users</h2>
+                  <div className="relative max-w-sm">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input placeholder="Search users..." value={rolesSearchQuery} onChange={e => setRolesSearchQuery(e.target.value)} className="pl-9" />
+                  </div>
+                </div>
+                <div className="rounded-xl border overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Profile Role</TableHead>
+                        <TableHead>Active Roles</TableHead>
+                        <TableHead>Plan</TableHead>
+                        <TableHead>Joined</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredAllProfiles.map(p => {
+                        const activeRoles = userRoles.filter(r => r.user_id === p.id && r.is_active).map(r => r.role);
+                        return (
+                          <TableRow key={p.id}>
+                            <TableCell className="font-medium">{p.full_name || '—'}</TableCell>
+                            <TableCell className="text-muted-foreground text-sm">{p.email}</TableCell>
+                            <TableCell>
+                              <Badge variant="outline" className="capitalize">{p.role}</Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex flex-wrap gap-1">
+                                {activeRoles.length > 0 ? activeRoles.map(r => (
+                                  <Badge key={r} variant="secondary" className="capitalize text-xs">{r}</Badge>
+                                )) : <span className="text-xs text-muted-foreground">—</span>}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={p.subscription_type === 'premium' ? 'default' : 'secondary'} className="capitalize">
+                                {p.subscription_type}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-sm text-muted-foreground">
+                              {format(new Date(p.created_at), 'MMM d, yyyy')}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+
+
           <TabsContent value="analytics">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Lesson Distribution */}

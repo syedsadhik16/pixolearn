@@ -27,7 +27,7 @@ export function StickyPricingBar({ onTrialClick, loading }: StickyPricingBarProp
         <div className="flex items-center gap-2 min-w-0">
           <Sparkles className="h-4 w-4 text-primary flex-shrink-0" />
           <span className="text-sm font-semibold truncate">
-            Try PIXO free for 24 hours
+            Try PIXO Freemium for 24 hours
           </span>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
@@ -38,7 +38,7 @@ export function StickyPricingBar({ onTrialClick, loading }: StickyPricingBarProp
             onClick={onTrialClick}
             disabled={loading}
           >
-            Free Trial
+            Freemium Access
             <ArrowRight className="h-3.5 w-3.5 ml-1" />
           </Button>
         </div>
