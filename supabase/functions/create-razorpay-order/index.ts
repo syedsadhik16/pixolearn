@@ -20,6 +20,13 @@ serve(async (req) => {
     if (!RAZORPAY_KEY_ID || !RAZORPAY_KEY_SECRET) {
       throw new Error('Razorpay credentials not configured');
     }
+
+    // Block test-mode keys in production
+    if (!RAZORPAY_KEY_ID.startsWith('rzp_live_')) {
+      console.warn('WARNING: Razorpay key does not start with rzp_live_. Test mode is blocked in production.');
+      throw new Error('Payment system is not configured for live transactions. Please contact support.');
+    }
+
     if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
       throw new Error('Supabase configuration missing');
     }
