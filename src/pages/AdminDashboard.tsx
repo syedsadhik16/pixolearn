@@ -43,6 +43,8 @@ import {
   Pencil,
   Search,
   BarChart3,
+  Shield,
+  Link,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
