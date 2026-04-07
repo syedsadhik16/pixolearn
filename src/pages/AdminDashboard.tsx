@@ -452,6 +452,10 @@ export default function AdminDashboard() {
               <Users className="h-4 w-4 mr-2" />
               Students
             </TabsTrigger>
+            <TabsTrigger value="users-roles">
+              <Shield className="h-4 w-4 mr-2" />
+              Users & Roles
+            </TabsTrigger>
             <TabsTrigger value="analytics">
               <BarChart3 className="h-4 w-4 mr-2" />
               Analytics
