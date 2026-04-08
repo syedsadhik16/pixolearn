@@ -108,9 +108,20 @@ export default function Pricing() {
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
 
   useEffect(() => {
-    if (searchParams.get('proceed') === 'payment' && user) {
+    if (user) {
+      // Handle redirect back from auth with pending plan
+      if (searchParams.get('proceed') === 'payment') {
+        const stored = sessionStorage.getItem('selectedPlan');
+        if (stored) {
+          try {
+            const plan = JSON.parse(stored);
+            initiatePayment(plan.id, plan.name, plan.priceAmount, plan.duration);
+          } catch {}
+        }
+      }
+      // Handle redirect from auth with stored plan
       const stored = sessionStorage.getItem('selectedPlan');
-      if (stored) {
+      if (stored && searchParams.get('redirect') === 'pricing') {
         try {
           const plan = JSON.parse(stored);
           initiatePayment(plan.id, plan.name, plan.priceAmount, plan.duration);
