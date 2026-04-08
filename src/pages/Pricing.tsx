@@ -269,18 +269,12 @@ export default function Pricing() {
         duration: plan.duration,
         levelCount: plan.levelCount,
       }));
-      navigate('/auth?signup=true&redirect=launch-check');
+      navigate('/auth?signup=true&redirect=pricing');
       return;
     }
 
-    sessionStorage.setItem('selectedPlan', JSON.stringify({
-      id: plan.id,
-      name: plan.name,
-      priceAmount: plan.priceAmount,
-      duration: plan.duration,
-      levelCount: plan.levelCount,
-    }));
-    navigate('/launch-check?from=pricing');
+    // Directly initiate payment — assessment is optional
+    initiatePayment(plan.id, plan.name, plan.priceAmount, plan.duration);
   };
 
   const isPremium = profile?.subscription_type === 'premium';
