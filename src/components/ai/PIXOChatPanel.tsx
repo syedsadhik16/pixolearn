@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { MessageCircle, X, Send, Loader2, RotateCcw, Sparkles, BookOpen, RefreshCw, HelpCircle, BarChart3 } from 'lucide-react';
+import { MessageCircle, X, Send, Loader2, RotateCcw, Sparkles, BookOpen, RefreshCw, HelpCircle, BarChart3, Calendar, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
@@ -8,15 +8,16 @@ import { supabase } from '@/integrations/supabase/client';
 import type { ChatMessage, AIMode, AICard } from '@/lib/pixo-ai-types';
 
 const QUICK_ACTIONS_STUDENT = [
-  { label: "Today's Lesson", icon: BookOpen, key: 'todays_lesson' },
-  { label: "Explain My Mistake", icon: HelpCircle, key: 'explain_mistake' },
-  { label: "Practice Again", icon: RefreshCw, key: 'practice_again' },
+  { label: "What's today's class?", icon: Calendar, key: 'todays_class' },
+  { label: "Today's routine", icon: Target, key: 'todays_routine' },
+  { label: "What's next?", icon: BookOpen, key: 'whats_next' },
   { label: "Ask PIXO", icon: Sparkles, key: 'ask_pixo' },
 ];
 
 const QUICK_ACTIONS_PARENT = [
-  { label: "Parent Insight", icon: BarChart3, key: 'parent_insight' },
-  { label: "Weekly Summary", icon: BookOpen, key: 'weekly_summary' },
+  { label: "Today's lesson topic", icon: Calendar, key: 'todays_lesson' },
+  { label: "Child's progress", icon: BarChart3, key: 'parent_insight' },
+  { label: "Home practice tips", icon: BookOpen, key: 'home_practice' },
   { label: "Ask PIXO", icon: Sparkles, key: 'ask_pixo' },
 ];
 
@@ -126,8 +127,16 @@ export function PIXOChatPanel({ mode: propMode, isFullPage = false, studentId, c
   }, [isLoading, mode, studentId, user, session?.access_token, currentLevel, currentDay]);
 
   const handleQuickAction = (actionKey: string) => {
-    const action = quickActions.find(a => a.key === actionKey);
-    if (action) sendMessage(action.label);
+    const actionMessages: Record<string, string> = {
+      todays_class: "What's today's class about?",
+      todays_routine: "What's the daily lesson routine?",
+      whats_next: "What's coming up next in my curriculum?",
+      ask_pixo: "Hi PIXO! What can you help me with?",
+      todays_lesson: "What is my child learning today?",
+      parent_insight: "How is my child doing? Show me their progress.",
+      home_practice: "What home practice should I do with my child today?",
+    };
+    sendMessage(actionMessages[actionKey] || actionKey);
   };
 
   const handleRetry = () => {
@@ -147,7 +156,7 @@ export function PIXOChatPanel({ mode: propMode, isFullPage = false, studentId, c
         <CardTitle className="text-base flex items-center gap-2">
           <Sparkles className="h-5 w-5 text-primary" />
           <span className="text-foreground">
-            {mode === 'student' ? 'Ask PIXO 🦊' : 'PIXO Insights'}
+            {mode === 'student' ? 'PIXO Course Assistant 🦊' : 'PIXO Parent Insights'}
           </span>
         </CardTitle>
       </CardHeader>
@@ -158,8 +167,8 @@ export function PIXOChatPanel({ mode: propMode, isFullPage = false, studentId, c
             <Sparkles className="h-10 w-10 text-primary mx-auto opacity-60" />
             <p className="text-sm text-muted-foreground">
               {mode === 'student'
-                ? "Hi! I'm PIXO 🦊 Ask me anything about your lesson!"
-                : "Get AI-powered insights about your child's learning journey."}
+                ? "Hi! I'm PIXO 🦊 I know your course schedule, today's lesson, and what's coming next. Ask me anything!"
+                : "Get insights about your child's learning journey, today's topics, and home practice tips."}
             </p>
             <div className="flex flex-wrap justify-center gap-2 mt-4">
               {quickActions.map(action => (
@@ -239,7 +248,7 @@ export function PIXOChatPanel({ mode: propMode, isFullPage = false, studentId, c
             ref={inputRef}
             value={input}
             onChange={e => setInput(e.target.value)}
-            placeholder={mode === 'student' ? "Ask PIXO anything..." : "Ask about your child's progress..."}
+            placeholder={mode === 'student' ? "Ask about today's class, topics, or routine..." : "Ask about your child's learning..."}
             className="flex-1 rounded-full bg-muted px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/30"
             disabled={isLoading}
           />
