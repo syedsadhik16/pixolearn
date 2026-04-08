@@ -98,18 +98,28 @@ export default function Auth() {
       return;
     }
 
-    if (!entitlement || !entitlement.launch_check_completed) {
-      navigate('/launch-check');
-      return;
+    // Check if paid and active
+    if (entitlement?.is_paid && entitlement?.entitlement_status === 'active') {
+      if (entitlement.entitlement_expiry_date && new Date(entitlement.entitlement_expiry_date) > new Date()) {
+        navigate('/student');
+        return;
+      }
     }
-    if (!entitlement.selected_level) {
+
+    // Assessment is optional — if not done, go to pricing directly (not forced to launch-check)
+    // If level not selected, go to level selection
+    if (entitlement && entitlement.launch_check_completed && !entitlement.selected_level) {
       navigate('/level-selection');
       return;
     }
-    if (!entitlement.is_paid || entitlement.entitlement_status !== 'active') {
+
+    // Default: go to pricing for unpaid users
+    if (!entitlement?.is_paid) {
       navigate('/pricing');
       return;
     }
+
+    // Expired
     if (entitlement.entitlement_expiry_date && new Date(entitlement.entitlement_expiry_date) <= new Date()) {
       navigate('/pricing');
       return;

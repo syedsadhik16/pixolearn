@@ -108,9 +108,20 @@ export default function Pricing() {
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
 
   useEffect(() => {
-    if (searchParams.get('proceed') === 'payment' && user) {
+    if (user) {
+      // Handle redirect back from auth with pending plan
+      if (searchParams.get('proceed') === 'payment') {
+        const stored = sessionStorage.getItem('selectedPlan');
+        if (stored) {
+          try {
+            const plan = JSON.parse(stored);
+            initiatePayment(plan.id, plan.name, plan.priceAmount, plan.duration);
+          } catch {}
+        }
+      }
+      // Handle redirect from auth with stored plan
       const stored = sessionStorage.getItem('selectedPlan');
-      if (stored) {
+      if (stored && searchParams.get('redirect') === 'pricing') {
         try {
           const plan = JSON.parse(stored);
           initiatePayment(plan.id, plan.name, plan.priceAmount, plan.duration);
@@ -269,18 +280,12 @@ export default function Pricing() {
         duration: plan.duration,
         levelCount: plan.levelCount,
       }));
-      navigate('/auth?signup=true&redirect=launch-check');
+      navigate('/auth?signup=true&redirect=pricing');
       return;
     }
 
-    sessionStorage.setItem('selectedPlan', JSON.stringify({
-      id: plan.id,
-      name: plan.name,
-      priceAmount: plan.priceAmount,
-      duration: plan.duration,
-      levelCount: plan.levelCount,
-    }));
-    navigate('/launch-check?from=pricing');
+    // Directly initiate payment — assessment is optional
+    initiatePayment(plan.id, plan.name, plan.priceAmount, plan.duration);
   };
 
   const isPremium = profile?.subscription_type === 'premium';
@@ -367,16 +372,24 @@ export default function Pricing() {
           </div>
         </section>
 
-        {/* Level Selection Guidance */}
+        {/* Level Selection / Assessment Guidance */}
         <section className="pb-6">
           <div className="container mx-auto px-4 text-center">
-            <div className="max-w-lg mx-auto bg-primary/5 border border-primary/10 rounded-2xl p-5">
+            <div className="max-w-lg mx-auto bg-primary/5 border border-primary/10 rounded-2xl p-5 space-y-3">
               <p className="text-sm font-semibold text-foreground mb-1">
-                Choose your child's level manually or follow PIXO's recommended level based on the assessment.
+                Not sure which level? Take a quick assessment first.
               </p>
               <p className="text-xs text-muted-foreground">
-                Not sure where to begin? Take the Learning Launch Check and PIXO will recommend the best starting level for your child.
+                PIXO's Learning Launch Check recommends the best starting level for your child. It's optional — you can also pick a plan directly.
               </p>
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-2"
+                onClick={() => navigate('/launch-check')}
+              >
+                Take Assessment (Optional)
+              </Button>
             </div>
           </div>
         </section>
