@@ -88,7 +88,7 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
           <PIXOChatBubble />
-          <NoupeChatbot />
+          
         </BrowserRouter>
       </AuthProvider>
       </LanguageProvider>
