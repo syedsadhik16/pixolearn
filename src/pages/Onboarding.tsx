@@ -103,8 +103,9 @@ export default function Onboarding() {
 
       if (error) throw error;
 
-      toast({ title: t('profileCreated'), description: t('letsCheckLevel') });
-      navigate('/launch-check');
+      toast({ title: t('profileCreated'), description: 'Choose to take an assessment or go directly to plans.' });
+      // Go to pricing — assessment is optional, user can take launch-check from pricing if they want
+      navigate('/pricing');
     } catch (error) {
       console.error('Onboarding error:', error);
       toast({ title: 'Error', description: 'Failed to save profile', variant: 'destructive' });
