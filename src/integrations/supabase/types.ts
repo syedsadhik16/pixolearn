@@ -1024,7 +1024,9 @@ export type Database = {
         Row: {
           age_group: string | null
           avatar_character: string
+          child_name: string | null
           created_at: string
+          english_level: string | null
           id: string
           learning_goals: string[] | null
           onboarding_completed: boolean
@@ -1035,7 +1037,9 @@ export type Database = {
         Insert: {
           age_group?: string | null
           avatar_character?: string
+          child_name?: string | null
           created_at?: string
+          english_level?: string | null
           id?: string
           learning_goals?: string[] | null
           onboarding_completed?: boolean
@@ -1046,7 +1050,9 @@ export type Database = {
         Update: {
           age_group?: string | null
           avatar_character?: string
+          child_name?: string | null
           created_at?: string
+          english_level?: string | null
           id?: string
           learning_goals?: string[] | null
           onboarding_completed?: boolean
@@ -1937,6 +1943,7 @@ export type Database = {
           is_paid: boolean
           launch_check_completed: boolean
           order_id: string | null
+          override_flag: boolean | null
           paid_at: string | null
           payment_id: string | null
           payment_status: string
@@ -1959,6 +1966,7 @@ export type Database = {
           is_paid?: boolean
           launch_check_completed?: boolean
           order_id?: string | null
+          override_flag?: boolean | null
           paid_at?: string | null
           payment_id?: string | null
           payment_status?: string
@@ -1981,6 +1989,7 @@ export type Database = {
           is_paid?: boolean
           launch_check_completed?: boolean
           order_id?: string | null
+          override_flag?: boolean | null
           paid_at?: string | null
           payment_id?: string | null
           payment_status?: string
