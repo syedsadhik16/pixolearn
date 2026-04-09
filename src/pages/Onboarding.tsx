@@ -25,24 +25,37 @@ const avatars = [
 ];
 
 const ageGroups = [
-  { id: 'preschool', label: 'Preschool / Kindergarten', desc: 'Ages 4–6', emoji: '🧒' },
-  { id: 'primary_lower', label: 'Primary School (Grades 1–3)', desc: 'Ages 6–8', emoji: '📚' },
-  { id: 'primary_upper', label: 'Upper Primary (Grades 4–6)', desc: 'Ages 8–11', emoji: '✏️' },
-  { id: 'middle', label: 'Middle School (Grades 7–8)', desc: 'Ages 11–14', emoji: '🎓' },
+  { id: '3-4', label: '3–4 years', emoji: '👶' },
+  { id: '4-5', label: '4–5 years', emoji: '🧒' },
+  { id: '5-6', label: '5–6 years', emoji: '🧒' },
+  { id: '6-8', label: '6–8 years', emoji: '📚' },
+  { id: '8-10', label: '8–10 years', emoji: '✏️' },
+  { id: '10+', label: '10+ years', emoji: '🎓' },
 ];
 
 const learningStages = [
-  { id: 'beginner', label: 'Beginner', desc: 'Just starting to learn English', emoji: '🌱' },
-  { id: 'early_reader', label: 'Early Reader', desc: 'Can read simple words and sentences', emoji: '📖' },
-  { id: 'confident', label: 'Confident Speaker', desc: 'Can speak basic English with some confidence', emoji: '🗣️' },
-  { id: 'fluent', label: 'Fluent', desc: 'Speaks English well, wants to improve further', emoji: '⭐' },
+  { id: 'preschool', label: 'Preschool / Kindergarten', emoji: '🌱' },
+  { id: 'primary_lower', label: 'Primary School (Grades 1–3)', emoji: '📖' },
+  { id: 'primary_upper', label: 'Upper Primary (Grades 4–6)', emoji: '✏️' },
+  { id: 'middle', label: 'Middle School (Grades 7–8)', emoji: '🎓' },
+  { id: 'other', label: 'Other / Not sure', emoji: '❓' },
 ];
 
 const schoolBoards = [
+  { id: 'state', label: 'State Board' },
   { id: 'cbse', label: 'CBSE' },
   { id: 'icse', label: 'ICSE' },
-  { id: 'state', label: 'State Board' },
-  { id: 'other', label: 'Other / Not Sure' },
+  { id: 'ib_igcse', label: 'IB / IGCSE' },
+  { id: 'cambridge', label: 'Cambridge' },
+  { id: 'homeschooling', label: 'Homeschooling' },
+  { id: 'na', label: 'Not applicable' },
+];
+
+const englishLevels = [
+  { id: 'beginner', label: 'Beginner', desc: 'Just starting to learn English', emoji: '🌱' },
+  { id: 'early_reader', label: 'Early Reader', desc: 'Can read simple words and sentences', emoji: '📖' },
+  { id: 'confident', label: 'Confident Speaker', desc: 'Speaks basic English with confidence', emoji: '🗣️' },
+  { id: 'fluent', label: 'Fluent', desc: 'Speaks English well, wants to improve', emoji: '⭐' },
 ];
 
 const goals = [
@@ -62,27 +75,30 @@ export default function Onboarding() {
 
   const [step, setStep] = useState(1);
   const [selectedAvatar, setSelectedAvatar] = useState('pixel');
+  const [childName, setChildName] = useState('');
   const [selectedAge, setSelectedAge] = useState('');
   const [selectedStage, setSelectedStage] = useState('');
   const [selectedBoard, setSelectedBoard] = useState('');
+  const [selectedEnglishLevel, setSelectedEnglishLevel] = useState('');
   const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const totalSteps = 4;
+  const totalSteps = 5;
 
   const toggleGoal = (goalId: string) => {
     setSelectedGoals(prev => {
       if (prev.includes(goalId)) return prev.filter(g => g !== goalId);
-      if (prev.length >= 3) return prev; // Max 3
+      if (prev.length >= 2) return prev;
       return [...prev, goalId];
     });
   };
 
   const canProceed = () => {
     if (step === 1) return !!selectedAvatar;
-    if (step === 2) return !!selectedAge && !!selectedStage;
-    if (step === 3) return selectedGoals.length > 0;
-    if (step === 4) return true; // Board is optional
+    if (step === 2) return !!selectedAge && !!selectedStage && !!childName.trim();
+    if (step === 3) return !!selectedEnglishLevel;
+    if (step === 4) return selectedGoals.length > 0;
+    if (step === 5) return true; // Board is optional
     return false;
   };
 
@@ -95,16 +111,24 @@ export default function Onboarding() {
         .upsert({
           student_id: user.id,
           avatar_character: selectedAvatar,
+          child_name: childName.trim(),
           age_group: selectedAge,
-          school_stage: selectedBoard || selectedStage,
+          school_stage: selectedStage,
+          english_level: selectedEnglishLevel,
           learning_goals: selectedGoals,
           onboarding_completed: true,
-        }, { onConflict: 'student_id' });
+        } as any, { onConflict: 'student_id' });
 
       if (error) throw error;
 
+      // Also save school board to profile if selected
+      if (selectedBoard) {
+        await supabase.from('learner_profiles')
+          .update({ school_stage: `${selectedStage}|${selectedBoard}` } as any)
+          .eq('student_id', user.id);
+      }
+
       toast({ title: t('profileCreated'), description: 'Choose to take an assessment or go directly to plans.' });
-      // Go to pricing — assessment is optional, user can take launch-check from pricing if they want
       navigate('/pricing');
     } catch (error) {
       console.error('Onboarding error:', error);
@@ -181,7 +205,7 @@ export default function Onboarding() {
               </div>
             )}
 
-            {/* Step 2: Child Age & Learning Stage */}
+            {/* Step 2: Child Name + Age + Learning Stage */}
             {step === 2 && (
               <div className="space-y-6 animate-fade-in">
                 <div className="text-center">
@@ -192,46 +216,51 @@ export default function Onboarding() {
                 </div>
 
                 <div className="space-y-3">
-                  <label className="text-sm font-semibold text-white/90">{t('childAgeGroup')}</label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <label className="text-sm font-semibold text-white/90">Child's Name *</label>
+                  <input
+                    type="text"
+                    value={childName}
+                    onChange={(e) => setChildName(e.target.value)}
+                    placeholder="Enter child's name"
+                    className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-white/40 focus:border-white/50 focus:outline-none"
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <label className="text-sm font-semibold text-white/90">{t('childAgeGroup')} *</label>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     {ageGroups.map(ag => (
                       <button
                         key={ag.id}
                         onClick={() => setSelectedAge(ag.id)}
-                        className={`p-4 rounded-xl border-2 text-left transition-all flex items-center gap-3 ${
+                        className={`p-3 rounded-xl border-2 text-center transition-all ${
                           selectedAge === ag.id
                             ? 'border-white bg-white/20 shadow-lg'
                             : 'border-white/20 hover:border-white/40 hover:bg-white/5'
                         }`}
                       >
-                        <span className="text-2xl">{ag.emoji}</span>
-                        <div>
-                          <p className="font-semibold text-white text-sm">{ag.label}</p>
-                          <p className="text-xs text-white/60">{ag.desc}</p>
-                        </div>
+                        <span className="text-xl">{ag.emoji}</span>
+                        <p className="font-semibold text-white text-sm mt-1">{ag.label}</p>
                       </button>
                     ))}
                   </div>
                 </div>
 
                 <div className="space-y-3">
-                  <label className="text-sm font-semibold text-white/90">{t('currentLearningStage')}</label>
+                  <label className="text-sm font-semibold text-white/90">{t('currentLearningStage')} *</label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {learningStages.map(st => (
                       <button
                         key={st.id}
                         onClick={() => setSelectedStage(st.id)}
-                        className={`p-4 rounded-xl border-2 text-left transition-all flex items-center gap-3 ${
+                        className={`p-3 rounded-xl border-2 text-left transition-all flex items-center gap-3 ${
                           selectedStage === st.id
                             ? 'border-white bg-white/20 shadow-lg'
                             : 'border-white/20 hover:border-white/40 hover:bg-white/5'
                         }`}
                       >
-                        <span className="text-2xl">{st.emoji}</span>
-                        <div>
-                          <p className="font-semibold text-white text-sm">{st.label}</p>
-                          <p className="text-xs text-white/60">{st.desc}</p>
-                        </div>
+                        <span className="text-xl">{st.emoji}</span>
+                        <p className="font-semibold text-white text-sm">{st.label}</p>
                       </button>
                     ))}
                   </div>
@@ -239,14 +268,50 @@ export default function Onboarding() {
               </div>
             )}
 
-            {/* Step 3: Goals */}
+            {/* Step 3: English Level (Card Selection) */}
             {step === 3 && (
+              <div className="space-y-6 animate-fade-in">
+                <div className="text-center">
+                  <h2 className="text-2xl font-display font-bold text-white mb-2">
+                    Current English Use Level *
+                  </h2>
+                  <p className="text-white/70">Select the level that best describes your child</p>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {englishLevels.map(level => (
+                    <button
+                      key={level.id}
+                      onClick={() => setSelectedEnglishLevel(level.id)}
+                      className={`p-5 rounded-2xl border-2 text-left transition-all ${
+                        selectedEnglishLevel === level.id
+                          ? 'border-white bg-white/25 shadow-lg scale-[1.02]'
+                          : 'border-white/20 hover:border-white/40 hover:bg-white/10'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className="text-2xl">{level.emoji}</span>
+                        <p className="font-display font-bold text-white text-lg">{level.label}</p>
+                        {selectedEnglishLevel === level.id && (
+                          <div className="ml-auto w-6 h-6 bg-pixo-green rounded-full flex items-center justify-center">
+                            <Check className="h-3.5 w-3.5 text-white" />
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-sm text-white/60">{level.desc}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Step 4: Goals (max 2) */}
+            {step === 4 && (
               <div className="space-y-6 animate-fade-in">
                 <div className="text-center">
                   <h2 className="text-2xl font-display font-bold text-white mb-2">
                     {t('whatShouldWeImprove')}
                   </h2>
-                  <p className="text-white/70">{t('selectUpTo3')}</p>
+                  <p className="text-white/70">Select up to 2 improvement goals</p>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {goals.map(goal => (
@@ -256,7 +321,7 @@ export default function Onboarding() {
                       className={`p-4 rounded-xl border-2 text-left transition-all flex items-center gap-3 ${
                         selectedGoals.includes(goal.id)
                           ? 'border-white bg-white/20 shadow-lg'
-                          : selectedGoals.length >= 3 && !selectedGoals.includes(goal.id)
+                          : selectedGoals.length >= 2 && !selectedGoals.includes(goal.id)
                           ? 'border-white/10 opacity-50 cursor-not-allowed'
                           : 'border-white/20 hover:border-white/40 hover:bg-white/5'
                       }`}
@@ -272,13 +337,13 @@ export default function Onboarding() {
                   ))}
                 </div>
                 <p className="text-center text-xs text-white/50">
-                  {selectedGoals.length}/3 selected
+                  {selectedGoals.length}/2 selected
                 </p>
               </div>
             )}
 
-            {/* Step 4: School Board (Optional) */}
-            {step === 4 && (
+            {/* Step 5: School Board (Optional) */}
+            {step === 5 && (
               <div className="space-y-6 animate-fade-in">
                 <div className="text-center">
                   <h2 className="text-2xl font-display font-bold text-white mb-2">

@@ -68,6 +68,11 @@ export function downloadInvoicePDF(data: InvoiceData): void {
     }
   };
 
+  const subtotal = data.amountPaid;
+  const gstRate = 18;
+  const gstAmount = Math.round((subtotal * gstRate) / (100 + gstRate));
+  const baseAmount = subtotal - gstAmount;
+
   const html = `
 <!DOCTYPE html>
 <html>
@@ -78,14 +83,15 @@ export function downloadInvoicePDF(data: InvoiceData): void {
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1a1a2e; background: #fff; padding: 40px; max-width: 800px; margin: auto; }
     .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; border-bottom: 3px solid #6c5ce7; padding-bottom: 20px; }
+    .brand { display: flex; flex-direction: column; gap: 4px; }
     .brand h1 { font-size: 28px; color: #6c5ce7; font-weight: 800; }
-    .brand p { color: #636e72; font-size: 12px; margin-top: 4px; }
+    .brand .tagline { color: #636e72; font-size: 12px; font-style: italic; }
+    .brand .org-line { color: #636e72; font-size: 11px; margin-top: 2px; }
     .invoice-meta { text-align: right; }
     .invoice-meta h2 { font-size: 22px; color: #2d3436; }
     .invoice-meta p { color: #636e72; font-size: 13px; margin-top: 4px; }
     .section { margin-bottom: 24px; }
     .section-title { font-size: 13px; text-transform: uppercase; color: #6c5ce7; font-weight: 700; margin-bottom: 10px; letter-spacing: 1px; }
-    .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .detail-row { display: flex; justify-content: space-between; padding: 8px 12px; border-radius: 6px; background: #f8f9fa; }
     .detail-row:nth-child(even) { background: #fff; }
     .detail-label { color: #636e72; font-size: 13px; }
@@ -93,8 +99,12 @@ export function downloadInvoicePDF(data: InvoiceData): void {
     .amount-box { background: linear-gradient(135deg, #6c5ce7, #a29bfe); color: white; padding: 20px; border-radius: 12px; text-align: center; margin: 24px 0; }
     .amount-box .amount { font-size: 32px; font-weight: 800; }
     .amount-box .label { font-size: 12px; opacity: 0.9; margin-top: 4px; }
+    .tax-section { margin: 16px 0; }
+    .tax-row { display: flex; justify-content: space-between; padding: 6px 12px; font-size: 13px; }
+    .tax-row.total { font-weight: 700; font-size: 14px; border-top: 2px solid #ddd; padding-top: 10px; margin-top: 6px; }
     .status-badge { display: inline-block; background: #00b894; color: white; padding: 4px 16px; border-radius: 20px; font-size: 12px; font-weight: 700; }
     .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; text-align: center; color: #b2bec3; font-size: 11px; }
+    .footer p { margin-bottom: 4px; }
     @media print { body { padding: 20px; } }
   </style>
 </head>
@@ -102,7 +112,8 @@ export function downloadInvoicePDF(data: InvoiceData): void {
   <div class="header">
     <div class="brand">
       <h1>PIXO Learn</h1>
-      <p>AI-Powered English Learning Platform</p>
+      <p class="tagline">Energy. Learn. Grow.</p>
+      <p class="org-line">AI-Powered English Learning Platform</p>
     </div>
     <div class="invoice-meta">
       <h2>INVOICE</h2>
@@ -114,7 +125,7 @@ export function downloadInvoicePDF(data: InvoiceData): void {
 
   <div class="section">
     <div class="section-title">Account Details</div>
-    <div class="detail-row"><span class="detail-label">Account Holder</span><span class="detail-value">${data.parentName || 'N/A'}</span></div>
+    <div class="detail-row"><span class="detail-label">Account Holder (Parent)</span><span class="detail-value">${data.parentName || 'N/A'}</span></div>
     <div class="detail-row"><span class="detail-label">Learner Name</span><span class="detail-value">${data.learnerName || 'N/A'}</span></div>
     <div class="detail-row"><span class="detail-label">Email</span><span class="detail-value">${data.email}</span></div>
   </div>
@@ -125,6 +136,13 @@ export function downloadInvoicePDF(data: InvoiceData): void {
     <div class="detail-row"><span class="detail-label">Levels Included</span><span class="detail-value">${data.selectedLevels}</span></div>
     <div class="detail-row"><span class="detail-label">Start Date</span><span class="detail-value">${formatDate(data.subscriptionStart)}</span></div>
     <div class="detail-row"><span class="detail-label">Expiry Date</span><span class="detail-value">${formatDate(data.subscriptionExpiry)}</span></div>
+  </div>
+
+  <div class="section tax-section">
+    <div class="section-title">Amount Breakdown</div>
+    <div class="tax-row"><span>Base Amount</span><span>₹${baseAmount.toLocaleString('en-IN')}</span></div>
+    <div class="tax-row"><span>GST (${gstRate}% inclusive)</span><span>₹${gstAmount.toLocaleString('en-IN')}</span></div>
+    <div class="tax-row total"><span>Total Amount Paid</span><span>₹${data.amountPaid.toLocaleString('en-IN')}</span></div>
   </div>
 
   <div class="amount-box">
@@ -142,7 +160,7 @@ export function downloadInvoicePDF(data: InvoiceData): void {
 
   <div class="footer">
     <p>This is a computer-generated invoice and does not require a signature.</p>
-    <p>PIXO Learn — Empowering young learners with AI-powered English education.</p>
+    <p><strong>PIXO Learn</strong> — Energy. Learn. Grow.</p>
     <p>For support: support@pixolearn.com</p>
   </div>
 </body>
