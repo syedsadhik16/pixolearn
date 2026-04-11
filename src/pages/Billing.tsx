@@ -27,6 +27,7 @@ interface PaymentRecord {
   currency: string;
   status: string;
   razorpay_payment_id: string;
+  razorpay_order_id: string;
   created_at: string;
 }
 
