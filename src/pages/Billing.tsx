@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/hooks/useTranslation';
+import { buildInvoiceData, downloadInvoicePDF } from '@/lib/invoice';
 import {
   Crown,
   Calendar,
@@ -16,6 +17,7 @@ import {
   Clock,
   FileText,
   AlertTriangle,
+  Download,
 } from 'lucide-react';
 
 interface PaymentRecord {
