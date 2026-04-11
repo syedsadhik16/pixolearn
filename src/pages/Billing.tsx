@@ -192,25 +192,52 @@ export default function Billing() {
             <p className="text-sm text-muted-foreground text-center py-4">{t('noPaymentsYet')}</p>
           ) : (
             <div className="space-y-3">
-              {payments.map((payment) => (
-                <div key={payment.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-xl">
-                  <div className="flex items-center gap-3">
-                    <FileText className="h-5 w-5 text-muted-foreground" />
-                    <div>
-                      <p className="font-semibold text-sm">{payment.plan_id}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {formatDate(payment.created_at)} • {payment.razorpay_payment_id?.slice(0, 12)}...
-                      </p>
+              {payments.map((payment) => {
+                const handleDownloadInvoice = () => {
+                  const data = buildInvoiceData({
+                    parentName: profile?.full_name || 'N/A',
+                    learnerName: profile?.full_name || 'N/A',
+                    email: profile?.email || user?.email || '',
+                    selectedPlan: payment.plan_id,
+                    selectedLevels: entitlement?.selected_level || 'N/A',
+                    amountPaid: payment.amount,
+                    currency: payment.currency || 'INR',
+                    paymentId: payment.razorpay_payment_id,
+                    orderId: payment.razorpay_order_id || 'N/A',
+                    paidAt: payment.created_at,
+                    startDate: entitlement?.entitlement_start_date || payment.created_at,
+                    expiryDate: entitlement?.entitlement_expiry_date || payment.created_at,
+                  });
+                  downloadInvoicePDF(data);
+                };
+
+                return (
+                  <div key={payment.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-xl">
+                    <div className="flex items-center gap-3">
+                      <FileText className="h-5 w-5 text-muted-foreground" />
+                      <div>
+                        <p className="font-semibold text-sm">{payment.plan_id}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {formatDate(payment.created_at)} • {payment.razorpay_payment_id?.slice(0, 12)}...
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="text-right">
+                        <p className="font-bold text-sm">₹{payment.amount.toLocaleString('en-IN')}</p>
+                        <span className={`text-xs font-medium ${payment.status === 'success' ? 'text-pixo-green' : 'text-destructive'}`}>
+                          {payment.status === 'success' ? '✓ Paid' : payment.status}
+                        </span>
+                      </div>
+                      {payment.status === 'success' && (
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleDownloadInvoice} title="Download Invoice">
+                          <Download className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-bold text-sm">₹{(payment.amount / 100).toLocaleString()}</p>
-                    <span className={`text-xs font-medium ${payment.status === 'success' ? 'text-pixo-green' : 'text-destructive'}`}>
-                      {payment.status === 'success' ? '✓ Paid' : payment.status}
-                    </span>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
