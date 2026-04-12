@@ -1024,6 +1024,7 @@ export type Database = {
         Row: {
           age_group: string | null
           avatar_character: string
+          board: string | null
           child_name: string | null
           created_at: string
           english_level: string | null
@@ -1037,6 +1038,7 @@ export type Database = {
         Insert: {
           age_group?: string | null
           avatar_character?: string
+          board?: string | null
           child_name?: string | null
           created_at?: string
           english_level?: string | null
@@ -1050,6 +1052,7 @@ export type Database = {
         Update: {
           age_group?: string | null
           avatar_character?: string
+          board?: string | null
           child_name?: string | null
           created_at?: string
           english_level?: string | null
