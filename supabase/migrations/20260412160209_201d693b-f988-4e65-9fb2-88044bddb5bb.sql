@@ -1,0 +1,1 @@
+ALTER TABLE public.learner_profiles ADD COLUMN IF NOT EXISTS board text DEFAULT NULL;
