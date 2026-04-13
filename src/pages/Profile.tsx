@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ProfileAvatarSkeleton, StatCardSkeleton } from '@/components/shared/SkeletonLoaders';
+import { Skeleton } from '@/components/ui/skeleton';
 import { PageBreadcrumb } from '@/components/shared/PageBreadcrumb';
 import { toast } from 'sonner';
 
