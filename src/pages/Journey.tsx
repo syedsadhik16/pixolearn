@@ -6,6 +6,8 @@ import { HamburgerMenu } from '@/components/layout/HamburgerMenu';
 import { useAuth } from '@/contexts/AuthContext';
 import { CheckCircle2, Lock, Sparkles, Play, ChevronDown, ChevronUp, Crown } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { PageBreadcrumb } from '@/components/shared/PageBreadcrumb';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { useCompanion } from '@/hooks/useCompanion';
 import { useCurriculumProgress } from '@/hooks/useCurriculumProgress';
@@ -41,12 +43,23 @@ export default function Journey() {
   if (loading) {
     return (
       <Layout>
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="animate-pulse text-center">
-            <div className="text-4xl mb-3">🗺️</div>
-            <p className="text-muted-foreground">Loading your adventure...</p>
+        <div className="container mx-auto px-4 py-6 pb-28">
+          <div className="flex items-center gap-3 mb-6">
+            <Skeleton className="w-12 h-12 rounded-full" />
+            <div className="space-y-2">
+              <Skeleton className="h-6 w-48" />
+              <Skeleton className="h-4 w-64" />
+            </div>
+          </div>
+          <Skeleton className="h-16 rounded-2xl mb-6" />
+          <div className="space-y-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="h-16 rounded-2xl" />
+            ))}
           </div>
         </div>
+        <HamburgerMenu />
+        <BottomNav />
       </Layout>
     );
   }
@@ -87,6 +100,10 @@ export default function Journey() {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-6 pb-28">
+        <PageBreadcrumb segments={[
+          { label: 'Dashboard', href: '/student' },
+          { label: 'My Adventure' },
+        ]} />
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-center gap-3 mb-2">
