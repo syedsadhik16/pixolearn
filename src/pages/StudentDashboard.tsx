@@ -32,6 +32,9 @@ import { useCompanion } from '@/hooks/useCompanion';
 import { TrialCountdown } from '@/components/shared/TrialCountdown';
 import { useCurriculumProgress } from '@/hooks/useCurriculumProgress';
 import { useTranslation } from '@/hooks/useTranslation';
+import { StudentDashboardSkeleton } from '@/components/shared/SkeletonLoaders';
+import { PageBreadcrumb } from '@/components/shared/PageBreadcrumb';
+import { toast } from 'sonner';
 
 export default function StudentDashboard() {
   const { user, profile, loading: authLoading } = useAuth();
@@ -95,12 +98,7 @@ export default function StudentDashboard() {
   if (loading) {
     return (
       <Layout>
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="animate-pulse text-center">
-            <div className="text-4xl mb-3">🚀</div>
-            <p className="text-muted-foreground">{t('loadingPIXO')}</p>
-          </div>
-        </div>
+        <StudentDashboardSkeleton />
       </Layout>
     );
   }
@@ -140,6 +138,10 @@ export default function StudentDashboard() {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8 pb-24">
+        <PageBreadcrumb segments={[
+          { label: 'Home', href: '/' },
+          { label: 'Dashboard' },
+        ]} />
         {/* Trial Countdown */}
         {profile?.trial_expires_at && (
           <div className="mb-6">
