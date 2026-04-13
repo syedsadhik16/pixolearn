@@ -1,4 +1,11 @@
 import { Sparkles } from 'lucide-react';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselPrevious,
+  CarouselNext,
+} from '@/components/ui/carousel';
 
 const programs = [
   { emoji: '🇮🇳', title: 'Hindi', description: 'Learn Hindi through stories and games', gradient: 'from-orange-500 to-amber-500' },
@@ -25,24 +32,29 @@ export function UpcomingPrograms() {
           </p>
         </div>
 
-        <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 snap-x snap-mandatory scrollbar-hide">
-          {programs.map((prog) => (
-            <div
-              key={prog.title}
-              className="snap-start shrink-0 w-52 pixo-card p-5 relative overflow-hidden group hover:shadow-lg transition-all"
-            >
-              <div className="absolute top-3 right-3">
-                <span className="text-[10px] font-bold uppercase tracking-wider bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
-                  Coming Soon
-                </span>
-              </div>
-              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${prog.gradient} flex items-center justify-center mb-3`}>
-                <span className="text-xl">{prog.emoji}</span>
-              </div>
-              <h3 className="font-display font-bold mb-1">{prog.title}</h3>
-              <p className="text-xs text-muted-foreground">{prog.description}</p>
-            </div>
-          ))}
+        <div className="max-w-4xl mx-auto px-12">
+          <Carousel opts={{ align: 'start', loop: true }} className="w-full">
+            <CarouselContent className="-ml-4">
+              {programs.map((prog) => (
+                <CarouselItem key={prog.title} className="pl-4 basis-full sm:basis-1/2 md:basis-1/3">
+                  <div className="pixo-card p-5 relative overflow-hidden group hover:shadow-lg transition-all h-full">
+                    <div className="absolute top-3 right-3">
+                      <span className="text-[10px] font-bold uppercase tracking-wider bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
+                        Coming Soon
+                      </span>
+                    </div>
+                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${prog.gradient} flex items-center justify-center mb-3`}>
+                      <span className="text-xl">{prog.emoji}</span>
+                    </div>
+                    <h3 className="font-display font-bold mb-1">{prog.title}</h3>
+                    <p className="text-xs text-muted-foreground">{prog.description}</p>
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious />
+            <CarouselNext />
+          </Carousel>
         </div>
       </div>
     </section>

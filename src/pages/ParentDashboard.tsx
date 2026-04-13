@@ -24,6 +24,8 @@ import { NotificationBell } from '@/components/shared/NotificationBell';
 import { requestPushPermission, isNotificationEnabled, isNotificationSupported } from '@/lib/pushNotifications';
 import { Button } from '@/components/ui/button';
 import { Bell } from 'lucide-react';
+import { ParentDashboardSkeleton } from '@/components/shared/SkeletonLoaders';
+import { toast } from 'sonner';
 
 export interface ChildProfile {
   id: string;
@@ -167,12 +169,20 @@ export default function ParentDashboard() {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-pulse text-center">
-          <div className="w-16 h-16 bg-primary/20 rounded-full mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading Parents Zone...</p>
+      <SidebarProvider>
+        <div className="min-h-screen flex w-full bg-background">
+          <ParentSidebar
+            activeSection={activeSection}
+            onSectionChange={setActiveSection}
+            children={[]}
+            selectedChildId={null}
+            onChildSelect={() => {}}
+          />
+          <div className="flex-1">
+            <ParentDashboardSkeleton />
+          </div>
         </div>
-      </div>
+      </SidebarProvider>
     );
   }
 

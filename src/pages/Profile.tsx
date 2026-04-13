@@ -15,6 +15,10 @@ import {
   ShoppingBag, Star, Flame, Settings
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ProfileAvatarSkeleton, StatCardSkeleton } from '@/components/shared/SkeletonLoaders';
+import { Skeleton } from '@/components/ui/skeleton';
+import { PageBreadcrumb } from '@/components/shared/PageBreadcrumb';
+import { toast } from 'sonner';
 
 interface EquippedItem {
   item_id: string;
@@ -154,9 +158,30 @@ export default function Profile() {
   if (authLoading || loading) {
     return (
       <Layout>
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="animate-pulse text-muted-foreground">Loading profile...</div>
+        <div className="container mx-auto px-4 py-6 pb-24">
+          <ProfileAvatarSkeleton />
+          <div className="pixo-card mb-6 p-6">
+            <div className="flex items-center gap-4">
+              <Skeleton className="h-14 w-14 rounded-xl" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-5 w-32" />
+                <Skeleton className="h-2.5 w-full rounded-full" />
+                <Skeleton className="h-3 w-28" />
+              </div>
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-3 mb-6">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="pixo-card text-center !p-4">
+                <Skeleton className="h-5 w-5 rounded mx-auto mb-2" />
+                <Skeleton className="h-5 w-8 mx-auto mb-1" />
+                <Skeleton className="h-3 w-12 mx-auto" />
+              </div>
+            ))}
+          </div>
         </div>
+        <HamburgerMenu />
+        <BottomNav />
       </Layout>
     );
   }
@@ -164,6 +189,10 @@ export default function Profile() {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-6 pb-24">
+        <PageBreadcrumb segments={[
+          { label: 'Dashboard', href: '/student' },
+          { label: 'Profile' },
+        ]} />
         {/* Avatar & Name */}
         <div className="text-center mb-6 animate-fade-in">
           <div className="relative inline-block mb-4">

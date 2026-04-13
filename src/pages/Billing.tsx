@@ -19,6 +19,9 @@ import {
   AlertTriangle,
   Download,
 } from 'lucide-react';
+import { BillingCardSkeleton, PaymentRowSkeleton } from '@/components/shared/SkeletonLoaders';
+import { PageBreadcrumb } from '@/components/shared/PageBreadcrumb';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface PaymentRecord {
   id: string;
@@ -86,12 +89,24 @@ export default function Billing() {
   if (loading) {
     return (
       <Layout>
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="animate-pulse text-center">
-            <CreditCard className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-            <p className="text-muted-foreground">{t('loadingBilling')}</p>
+        <div className="container mx-auto px-4 py-8 pb-24 max-w-2xl">
+          <PageBreadcrumb segments={[
+            { label: 'Dashboard', href: '/student' },
+            { label: 'Billing' },
+          ]} />
+          <Skeleton className="h-7 w-48 mb-6" />
+          <BillingCardSkeleton />
+          <div className="pixo-card mt-6">
+            <Skeleton className="h-5 w-32 mb-4" />
+            <div className="space-y-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <PaymentRowSkeleton key={i} />
+              ))}
+            </div>
           </div>
         </div>
+        <HamburgerMenu />
+        <BottomNav />
       </Layout>
     );
   }
@@ -99,6 +114,10 @@ export default function Billing() {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8 pb-24 max-w-2xl">
+        <PageBreadcrumb segments={[
+          { label: 'Dashboard', href: profile?.role === 'parent' ? '/parent' : '/student' },
+          { label: 'Billing & Subscriptions' },
+        ]} />
         <h1 className="text-2xl font-display font-bold mb-6">{t('billingSubscriptions')}</h1>
 
         {/* Current Plan */}
