@@ -202,10 +202,13 @@ export default function Index() {
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Bento-style: first card is larger on lg */}
             {features.map((feature, index) => (
               <div
                 key={index}
-                className="pixo-card text-center animate-slide-up"
+                className={`pixo-card text-center animate-slide-up ${
+                  index === 0 ? 'md:col-span-2 lg:col-span-1' : ''
+                }`}
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <div className={`w-16 h-16 rounded-2xl ${feature.bg} flex items-center justify-center mx-auto mb-4`}>
