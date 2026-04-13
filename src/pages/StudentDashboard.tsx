@@ -190,16 +190,23 @@ export default function StudentDashboard() {
           </div>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
-            <StatCard
-              title={t('completedDays')}
-              value={completedCount}
-              subtitle={`${t('of')} 180 in Level 1`}
-              icon={BookOpen}
-              colorClass="bg-pixo-orange/10 text-pixo-orange"
-            />
+        {/* Bento Stats Grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <div className="col-span-2 lg:col-span-2 animate-slide-up" style={{ animationDelay: '0.1s' }}>
+            <div className="pixo-card bg-gradient-to-br from-pixo-orange/5 to-pixo-yellow/5 border-pixo-orange/20 p-6">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-2xl bg-pixo-orange/10 flex items-center justify-center">
+                  <BookOpen className="h-7 w-7 text-pixo-orange" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm text-muted-foreground">{t('completedDays')}</p>
+                  <p className="text-3xl font-display font-bold">{completedCount} <span className="text-base font-normal text-muted-foreground">/ 180</span></p>
+                  <div className="h-1.5 bg-muted rounded-full mt-2 overflow-hidden">
+                    <div className="h-full bg-pixo-orange rounded-full transition-all duration-700" style={{ width: `${Math.round((completedCount / 180) * 100)}%` }} />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
           <div className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
             <StatCard
@@ -219,15 +226,6 @@ export default function StudentDashboard() {
               subtitle={t('levelCompletion')}
               icon={Calendar}
               colorClass="bg-pixo-blue/10 text-pixo-blue"
-            />
-          </div>
-          <div className="animate-slide-up" style={{ animationDelay: '0.4s' }}>
-            <StatCard
-              title={t('currentDay')}
-              value={`${t('day')} ${currentDay}`}
-              subtitle={t('phonicsFoundation')}
-              icon={Trophy}
-              colorClass="bg-pixo-yellow/10 text-pixo-yellow"
             />
           </div>
         </div>
