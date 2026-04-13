@@ -10,6 +10,8 @@ import { useCurriculumProgress } from '@/hooks/useCurriculumProgress';
 import { useTranslation } from '@/hooks/useTranslation';
 import { ProgressRing } from '@/components/shared/ProgressRing';
 import { Trophy, Star, Medal, Award, Sparkles, Lock, Crown, Map } from 'lucide-react';
+import { TrophyRoomSkeleton } from '@/components/shared/SkeletonLoaders';
+import { PageBreadcrumb } from '@/components/shared/PageBreadcrumb';
 
 interface Badge {
   id: string;
@@ -69,12 +71,9 @@ export default function TrophyRoom() {
   if (loading) {
     return (
       <Layout>
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="animate-pulse text-center">
-            <Trophy className="h-10 w-10 text-pixo-yellow mx-auto mb-3" />
-            <p className="text-muted-foreground">{t('loadingTrophies')}</p>
-          </div>
-        </div>
+        <TrophyRoomSkeleton />
+        <HamburgerMenu />
+        <BottomNav />
       </Layout>
     );
   }
@@ -82,6 +81,10 @@ export default function TrophyRoom() {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8 pb-24">
+        <PageBreadcrumb segments={[
+          { label: 'Dashboard', href: '/student' },
+          { label: 'Trophy Room' },
+        ]} />
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
           <img src={companion.image} alt={companion.name} className="w-14 h-14 object-contain animate-float" />
