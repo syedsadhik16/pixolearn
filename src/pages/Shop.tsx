@@ -10,6 +10,9 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
+import { PageBreadcrumb } from '@/components/shared/PageBreadcrumb';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/hooks/use-toast';
 
 interface ShopItem {
   id: string;
@@ -111,9 +114,25 @@ export default function Shop() {
   if (authLoading || loading) {
     return (
       <Layout>
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="animate-pulse text-muted-foreground">Loading shop...</div>
+        <div className="container mx-auto px-4 py-6 pb-24">
+          <PageBreadcrumb segments={[
+            { label: 'Dashboard', href: '/student' },
+            { label: 'Rewards Shop' },
+          ]} />
+          <div className="text-center mb-6">
+            <Skeleton className="w-16 h-16 rounded-2xl mx-auto mb-3" />
+            <Skeleton className="h-6 w-32 mx-auto mb-2" />
+            <Skeleton className="h-4 w-48 mx-auto mb-3" />
+            <Skeleton className="h-10 w-28 rounded-full mx-auto" />
+          </div>
+          <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <Skeleton key={i} className="h-32 rounded-xl" />
+            ))}
+          </div>
         </div>
+        <HamburgerMenu />
+        <BottomNav />
       </Layout>
     );
   }
@@ -121,6 +140,10 @@ export default function Shop() {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-6 pb-24">
+        <PageBreadcrumb segments={[
+          { label: 'Dashboard', href: '/student' },
+          { label: 'Rewards Shop' },
+        ]} />
         {/* Header */}
         <div className="mb-6 text-center">
           <div className="w-16 h-16 rounded-2xl bg-accent/20 flex items-center justify-center mx-auto mb-3">
