@@ -16,6 +16,7 @@ import {
   CreditCard, Receipt, Crown, Volume2, Globe
 } from 'lucide-react';
 import { useSpeechSettings, getNamedVoices } from '@/hooks/useSpeechSettings';
+import { PageBreadcrumb } from '@/components/shared/PageBreadcrumb';
 import { SUPPORTED_LANGUAGES } from '@/components/shared/LanguageSelector';
 import { useTranslation } from '@/hooks/useTranslation';
 import type { LangCode } from '@/contexts/LanguageContext';
@@ -158,6 +159,10 @@ export default function Settings() {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-6 pb-24 max-w-3xl">
+        <PageBreadcrumb segments={[
+          { label: 'Dashboard', href: profile?.role === 'parent' ? '/parent' : '/student' },
+          { label: 'Settings' },
+        ]} />
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
           <button onClick={() => navigate(-1)} className="text-muted-foreground hover:text-foreground transition-colors">
