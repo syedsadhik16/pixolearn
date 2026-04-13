@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { BillingCardSkeleton, PaymentRowSkeleton } from '@/components/shared/SkeletonLoaders';
 import { PageBreadcrumb } from '@/components/shared/PageBreadcrumb';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface PaymentRecord {
   id: string;
