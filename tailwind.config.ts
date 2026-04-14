@@ -68,12 +68,16 @@ export default {
           green: "hsl(var(--pixo-green))",
           blue: "hsl(var(--pixo-blue))",
           purple: "hsl(var(--pixo-purple))",
+          sky: "hsl(var(--pixo-sky))",
+          cream: "hsl(var(--pixo-cream))",
+          beige: "hsl(var(--pixo-beige))",
+          pink: "hsl(var(--pixo-pink))",
         },
       },
       borderRadius: {
         lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        md: "calc(var(--radius) - 4px)",
+        sm: "calc(var(--radius) - 8px)",
         xl: "calc(var(--radius) + 4px)",
         "2xl": "calc(var(--radius) + 8px)",
         "3xl": "calc(var(--radius) + 16px)",
@@ -83,6 +87,10 @@ export default {
         "pixo-md": "var(--shadow-md)",
         "pixo-lg": "var(--shadow-lg)",
         "pixo-glow": "var(--shadow-glow)",
+      },
+      spacing: {
+        '18': '4.5rem',
+        '22': '5.5rem',
       },
       keyframes: {
         "accordion-down": {
@@ -106,12 +114,17 @@ export default {
           "50%": { transform: "translateY(-8px)" },
         },
         glow_pulse: {
-          "0%, 100%": { boxShadow: "0 0 8px 2px hsl(var(--pixo-orange) / 0.3)" },
-          "50%": { boxShadow: "0 0 20px 6px hsl(var(--pixo-orange) / 0.5)" },
+          "0%, 100%": { boxShadow: "0 0 8px 2px hsl(var(--pixo-yellow) / 0.3)" },
+          "50%": { boxShadow: "0 0 24px 8px hsl(var(--pixo-yellow) / 0.5)" },
         },
         float: {
           "0%, 100%": { transform: "translateY(0)" },
           "50%": { transform: "translateY(-6px)" },
+        },
+        "reward-sparkle": {
+          "0%": { opacity: "0", transform: "scale(0.5) rotate(0deg)" },
+          "50%": { opacity: "1", transform: "scale(1.2) rotate(180deg)" },
+          "100%": { opacity: "0", transform: "scale(0.5) rotate(360deg)" },
         },
       },
       animation: {
@@ -122,6 +135,7 @@ export default {
         "bounce-gentle": "bounce_gentle 1s ease-in-out infinite",
         "glow-pulse": "glow_pulse 2s ease-in-out infinite",
         float: "float 3s ease-in-out infinite",
+        "reward-sparkle": "reward-sparkle 1.5s ease-in-out infinite",
       },
     },
   },

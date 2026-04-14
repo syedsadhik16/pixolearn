@@ -6,79 +6,117 @@
 
 @layer base {
   :root {
-    --background: 48 100% 98%;
+    /* Warm cream background */
+    --background: 38 52% 93%;
     --foreground: 25 20% 15%;
+
+    /* Soft white cards */
     --card: 0 0% 100%;
     --card-foreground: 25 20% 15%;
+
     --popover: 0 0% 100%;
     --popover-foreground: 25 20% 15%;
-    --primary: 25 95% 53%;
+
+    /* Primary Warm Red #B33A26 */
+    --primary: 10 65% 42%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 142 60% 45%;
+
+    /* Success Accent #2E8B57 */
+    --secondary: 150 50% 36%;
     --secondary-foreground: 0 0% 100%;
-    --muted: 45 40% 94%;
-    --muted-foreground: 25 15% 45%;
-    --accent: 45 100% 55%;
+
+    /* Light Beige Card #EEE7DB */
+    --muted: 35 37% 89%;
+    --muted-foreground: 0 0% 40%;
+
+    /* Reward Gold #F2D34F */
+    --accent: 48 87% 63%;
     --accent-foreground: 25 20% 15%;
+
     --destructive: 0 75% 55%;
     --destructive-foreground: 0 0% 100%;
-    --border: 35 30% 88%;
-    --input: 35 30% 88%;
-    --ring: 25 95% 53%;
-    --radius: 1rem;
-    --pixo-red: 0 80% 50%;
-    --pixo-orange: 25 95% 53%;
-    --pixo-yellow: 45 100% 55%;
-    --pixo-green: 142 60% 45%;
-    --pixo-blue: 210 80% 55%;
+
+    /* Soft borders */
+    --border: 35 30% 85%;
+    --input: 35 30% 85%;
+    --ring: 10 65% 42%;
+    --radius: 1.75rem;
+
+    /* PIXO brand colors */
+    --pixo-red: 10 65% 42%;
+    --pixo-orange: 25 80% 50%;
+    --pixo-yellow: 48 87% 63%;
+    --pixo-green: 150 50% 36%;
+    --pixo-blue: 195 85% 29%;
     --pixo-purple: 280 70% 55%;
-    --gradient-primary: linear-gradient(135deg, hsl(0, 80%, 50%), hsl(25, 95%, 53%), hsl(45, 100%, 55%));
-    --gradient-secondary: linear-gradient(135deg, hsl(45, 100%, 55%), hsl(142, 60%, 45%));
-    --gradient-hero: linear-gradient(135deg, hsl(25, 95%, 53%), hsl(45, 100%, 55%), hsl(142, 60%, 45%));
-    --gradient-card: linear-gradient(180deg, hsl(48, 100%, 98%), hsl(45, 40%, 96%));
-    --gradient-success: linear-gradient(135deg, hsl(142, 60%, 45%), hsl(160, 70%, 40%));
-    --shadow-sm: 0 2px 8px -2px hsl(25 95% 53% / 0.15);
-    --shadow-md: 0 8px 24px -8px hsl(25 95% 53% / 0.2);
-    --shadow-lg: 0 16px 48px -12px hsl(25 95% 53% / 0.25);
-    --shadow-glow: 0 0 40px hsl(45 100% 55% / 0.3);
-    --sidebar-background: 48 100% 98%;
+
+    /* Stitch palette extras */
+    --pixo-sky: 205 82% 81%;
+    --pixo-cream: 38 52% 93%;
+    --pixo-beige: 35 37% 89%;
+    --pixo-pink: 17 38% 74%;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(10, 65%, 42%), hsl(25, 80%, 50%), hsl(48, 87%, 63%));
+    --gradient-secondary: linear-gradient(135deg, hsl(48, 87%, 63%), hsl(150, 50%, 36%));
+    --gradient-hero: linear-gradient(135deg, hsl(10, 65%, 42%), hsl(25, 80%, 50%), hsl(48, 87%, 63%));
+    --gradient-card: linear-gradient(180deg, hsl(0, 0%, 100%), hsl(35, 37%, 95%));
+    --gradient-success: linear-gradient(135deg, hsl(150, 50%, 36%), hsl(160, 70%, 40%));
+
+    /* Soft blurred shadows */
+    --shadow-sm: 0 2px 12px -4px hsl(25 40% 50% / 0.08);
+    --shadow-md: 0 8px 28px -8px hsl(25 40% 50% / 0.12);
+    --shadow-lg: 0 20px 48px -16px hsl(25 40% 50% / 0.15);
+    --shadow-glow: 0 0 40px hsl(48 87% 63% / 0.25);
+
+    /* Sidebar */
+    --sidebar-background: 38 52% 93%;
     --sidebar-foreground: 25 20% 25%;
-    --sidebar-primary: 25 95% 53%;
+    --sidebar-primary: 10 65% 42%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 45 60% 92%;
+    --sidebar-accent: 35 37% 92%;
     --sidebar-accent-foreground: 25 20% 25%;
-    --sidebar-border: 35 30% 88%;
-    --sidebar-ring: 25 95% 53%;
+    --sidebar-border: 35 30% 85%;
+    --sidebar-ring: 10 65% 42%;
   }
 
   .dark {
     --background: 25 25% 8%;
-    --foreground: 48 60% 95%;
+    --foreground: 38 40% 92%;
+
     --card: 25 20% 12%;
-    --card-foreground: 48 60% 95%;
+    --card-foreground: 38 40% 92%;
+
     --popover: 25 20% 12%;
-    --popover-foreground: 48 60% 95%;
-    --primary: 25 95% 58%;
-    --primary-foreground: 25 20% 8%;
-    --secondary: 142 50% 40%;
+    --popover-foreground: 38 40% 92%;
+
+    --primary: 10 65% 50%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 150 40% 35%;
     --secondary-foreground: 0 0% 100%;
+
     --muted: 25 15% 18%;
-    --muted-foreground: 45 20% 65%;
-    --accent: 45 90% 50%;
+    --muted-foreground: 35 20% 60%;
+
+    --accent: 48 80% 50%;
     --accent-foreground: 25 20% 8%;
+
     --destructive: 0 65% 45%;
     --destructive-foreground: 0 0% 100%;
+
     --border: 25 15% 20%;
     --input: 25 15% 20%;
-    --ring: 25 95% 58%;
+    --ring: 10 65% 50%;
+
     --sidebar-background: 25 20% 10%;
-    --sidebar-foreground: 48 60% 90%;
-    --sidebar-primary: 25 95% 58%;
-    --sidebar-primary-foreground: 25 20% 8%;
+    --sidebar-foreground: 38 40% 90%;
+    --sidebar-primary: 10 65% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 25 15% 16%;
-    --sidebar-accent-foreground: 48 60% 90%;
+    --sidebar-accent-foreground: 38 40% 90%;
     --sidebar-border: 25 15% 18%;
-    --sidebar-ring: 25 95% 58%;
+    --sidebar-ring: 10 65% 50%;
   }
 }
 
@@ -109,7 +147,7 @@
     box-shadow: var(--shadow-glow);
   }
   .pixo-card {
-    @apply bg-card rounded-2xl p-6 shadow-md border border-border/50;
+    @apply bg-card rounded-3xl p-6 border border-border/40;
     box-shadow: var(--shadow-md);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
@@ -118,7 +156,7 @@
     transform: translateY(-2px);
   }
   .pixo-button {
-    @apply font-semibold rounded-xl px-6 py-3 transition-all duration-300;
+    @apply font-semibold rounded-full px-6 py-3 transition-all duration-300;
     box-shadow: var(--shadow-sm);
   }
   .pixo-button:hover {
@@ -126,7 +164,20 @@
     transform: translateY(-1px);
   }
   .pixo-button:active {
-    transform: translateY(0);
+    transform: translateY(0) scale(0.97);
+  }
+
+  /* Stitch-style word chip */
+  .pixo-chip {
+    @apply inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium;
+    background: hsl(var(--pixo-sky) / 0.3);
+    color: hsl(var(--foreground));
+  }
+
+  /* Stitch-style reward badge */
+  .pixo-badge-glow {
+    @apply rounded-full flex items-center justify-center;
+    box-shadow: 0 0 20px hsl(var(--pixo-yellow) / 0.4);
   }
 }
 
@@ -159,6 +210,20 @@
   .animate-glow-pulse {
     animation: glow-pulse 2s ease-in-out infinite;
   }
+  .animate-shake {
+    animation: shake 0.4s ease-in-out;
+  }
+
+  /* Stitch micro-interactions */
+  .hover-lift {
+    @apply transition-transform duration-200;
+  }
+  .hover-lift:hover {
+    transform: translateY(-2px);
+  }
+  .tap-scale:active {
+    transform: scale(0.97);
+  }
 
   @keyframes float {
     0%, 100% { transform: translateY(0); }
@@ -186,18 +251,12 @@
     to { opacity: 1; transform: scale(1); }
   }
   @keyframes glow-pulse {
-    0%, 100% { box-shadow: 0 0 5px rgba(255,255,255,0.2); }
-    50% { box-shadow: 0 0 20px rgba(255,255,255,0.4), 0 0 40px rgba(255,255,255,0.1); }
+    0%, 100% { box-shadow: 0 0 5px hsl(var(--pixo-yellow) / 0.2); }
+    50% { box-shadow: 0 0 24px hsl(var(--pixo-yellow) / 0.45), 0 0 48px hsl(var(--pixo-yellow) / 0.15); }
   }
   @keyframes shake {
     0%, 100% { transform: translateX(0); }
     25% { transform: translateX(-4px); }
     75% { transform: translateX(4px); }
-  }
-  .animate-shake {
-    animation: shake 0.4s ease-in-out;
-  }
-  .animate-bounce-gentle {
-    animation: bounce-gentle 1s ease-in-out infinite;
   }
 }
