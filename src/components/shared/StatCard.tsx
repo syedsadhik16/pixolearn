@@ -1,4 +1,3 @@
-import { ReactNode } from 'react';
 import { LucideIcon } from 'lucide-react';
 
 interface StatCardProps {
@@ -21,7 +20,7 @@ export function StatCard({
   colorClass = 'bg-primary/10 text-primary',
 }: StatCardProps) {
   return (
-    <div className="pixo-card">
+    <div className="pixo-card hover-lift tap-scale">
       <div className="flex items-start justify-between">
         <div className="space-y-1">
           <p className="text-sm font-medium text-muted-foreground">{title}</p>
@@ -34,7 +33,7 @@ export function StatCard({
               <span
                 className={
                   trend === 'up'
-                    ? 'text-pixo-green'
+                    ? 'text-secondary'
                     : trend === 'down'
                     ? 'text-destructive'
                     : 'text-muted-foreground'
@@ -46,7 +45,7 @@ export function StatCard({
             </div>
           )}
         </div>
-        <div className={`p-3 rounded-xl ${colorClass}`}>
+        <div className={`p-3 rounded-2xl ${colorClass}`}>
           <Icon className="h-6 w-6" />
         </div>
       </div>
