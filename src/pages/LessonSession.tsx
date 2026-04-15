@@ -869,13 +869,19 @@ export default function LessonSession() {
                 Sound {currentIndex + 1} of {lesson.vocabulary.length}
               </p>
 
-              {/* Big sound badge */}
+              {/* Big animated sound badge */}
               <div className="relative">
-                <div className="w-36 h-36 rounded-full bg-gradient-to-b from-accent to-accent/70 flex items-center justify-center shadow-pixo-lg animate-glow-pulse border-4 border-card">
+                {/* Pulse ring behind */}
+                <div className="absolute inset-0 rounded-full bg-accent/20 animate-mic-pulse-ring" />
+                <div className="w-36 h-36 rounded-full bg-gradient-to-b from-accent to-accent/70 flex items-center justify-center shadow-pixo-lg animate-glow-pulse border-4 border-card cursor-pointer hover:scale-105 transition-transform active:scale-95"
+                  onClick={() => speakLesson(lesson.vocabulary[currentIndex].word)}
+                >
                   <span className="text-5xl font-display font-extrabold text-accent-foreground">
                     {lesson.vocabulary[currentIndex].phonetic || lesson.vocabulary[currentIndex].word}
                   </span>
                 </div>
+                {/* Tap to replay hint */}
+                <p className="text-[10px] text-muted-foreground mt-2">Tap to replay</p>
               </div>
 
               <div>
@@ -892,32 +898,54 @@ export default function LessonSession() {
                 </div>
               )}
 
+              {/* Waveform visualization when recording */}
+              {isRecording && (
+                <div className="flex items-end gap-1 h-8 justify-center">
+                  {Array.from({ length: 12 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="w-1.5 bg-primary rounded-full animate-wave-bar"
+                      style={{
+                        animationDelay: `${i * 0.1}s`,
+                        height: `${8 + Math.random() * 16}px`,
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+
               {/* Listen & Record buttons */}
               <div className="flex items-center gap-4">
                 <button
                   onClick={() => speakLesson(lesson.vocabulary[currentIndex].word)}
                   disabled={isSpeaking}
-                  className="w-14 h-14 rounded-full bg-pixo-blue/10 text-pixo-blue flex items-center justify-center hover:bg-pixo-blue/20 transition-all active:scale-95"
+                  className="w-14 h-14 rounded-full bg-[hsl(var(--pixo-blue))]/10 text-[hsl(var(--pixo-blue))] flex items-center justify-center hover:bg-[hsl(var(--pixo-blue))]/20 transition-all active:scale-95"
                 >
                   <Volume2 className={`h-6 w-6 ${isSpeaking ? 'animate-pulse' : ''}`} />
                 </button>
 
-                <button
-                  onClick={isRecording ? stopRecording : startRecording}
-                  disabled={isEvaluating}
-                  className={`w-20 h-20 rounded-full flex items-center justify-center transition-all active:scale-95 shadow-pixo-lg ${
-                    isRecording
-                      ? 'bg-destructive text-destructive-foreground animate-pulse'
-                      : 'bg-gradient-to-t from-primary to-primary/80 text-primary-foreground'
-                  }`}
-                >
-                  {isRecording ? <MicOff className="h-8 w-8" /> : <Mic className="h-8 w-8" />}
-                </button>
+                <div className="relative">
+                  {/* Pulse ring when recording */}
+                  {isRecording && (
+                    <div className="absolute inset-0 rounded-full bg-destructive/30 animate-mic-pulse-ring" />
+                  )}
+                  <button
+                    onClick={isRecording ? stopRecording : startRecording}
+                    disabled={isEvaluating}
+                    className={`relative w-20 h-20 rounded-full flex items-center justify-center transition-all active:scale-95 shadow-pixo-lg z-10 ${
+                      isRecording
+                        ? 'bg-destructive text-destructive-foreground'
+                        : 'bg-gradient-to-t from-primary to-primary/80 text-primary-foreground'
+                    }`}
+                  >
+                    {isRecording ? <MicOff className="h-8 w-8" /> : <Mic className="h-8 w-8" />}
+                  </button>
+                </div>
 
-                <div className="w-14 h-14" /> {/* spacer for symmetry */}
+                <div className="w-14 h-14" />
               </div>
               <p className="text-xs text-muted-foreground font-medium">
-                {isRecording ? 'Listening... Tap to stop' : 'Tap to Start'}
+                {isRecording ? '🔴 Listening... Tap to stop' : 'Tap to Start'}
               </p>
 
               {/* Evaluating indicator */}
@@ -937,9 +965,10 @@ export default function LessonSession() {
                         key={i}
                         className={`h-7 w-7 transition-all ${
                           i < (scores.vocabulary[currentIndex] >= 80 ? 3 : scores.vocabulary[currentIndex] >= 60 ? 2 : 1)
-                            ? 'text-accent fill-accent'
+                            ? 'text-accent fill-accent animate-bounce-gentle'
                             : 'text-muted'
                         }`}
+                        style={{ animationDelay: `${i * 200}ms` }}
                       />
                     ))}
                   </div>

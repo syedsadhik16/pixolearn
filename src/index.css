@@ -259,4 +259,35 @@
     25% { transform: translateX(-4px); }
     75% { transform: translateX(4px); }
   }
+  @keyframes confetti-fall {
+    0% { opacity: 1; transform: translateY(0) rotate(0deg); }
+    100% { opacity: 0; transform: translateY(80vh) rotate(720deg); }
+  }
+  .animate-confetti-fall {
+    animation: confetti-fall 2s ease-out forwards;
+  }
+
+  /* Voice waveform bars */
+  @keyframes wave-bar {
+    0%, 100% { height: 8px; }
+    50% { height: 24px; }
+  }
+  .animate-wave-bar {
+    animation: wave-bar 0.8s ease-in-out infinite;
+  }
+
+  /* Karaoke highlight */
+  @keyframes karaoke-highlight {
+    from { background-size: 0% 100%; }
+    to { background-size: 100% 100%; }
+  }
+
+  /* Mic pulse ring */
+  @keyframes mic-pulse-ring {
+    0% { transform: scale(1); opacity: 0.6; }
+    100% { transform: scale(2); opacity: 0; }
+  }
+  .animate-mic-pulse-ring {
+    animation: mic-pulse-ring 1.5s ease-out infinite;
+  }
 }
