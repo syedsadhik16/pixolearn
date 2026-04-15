@@ -262,7 +262,7 @@ export default function Auth() {
             <div className="flex justify-center gap-6 text-white/80">
               <div className="text-center">
                 <p className="text-3xl font-bold">180</p>
-                <p className="text-sm">Students</p>
+                <p className="text-sm">Days</p>
               </div>
               <div className="text-center">
                 <p className="text-3xl font-bold">500+</p>
