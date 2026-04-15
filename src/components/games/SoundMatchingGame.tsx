@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
+import { useState, useEffect, useCallback } from 'react';
 import { Volume2, Star, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -9,130 +8,180 @@ interface SoundMatchingGameProps {
 }
 
 export function SoundMatchingGame({ words, onComplete }: SoundMatchingGameProps) {
-  const [pairs, setPairs] = useState<{ id: number; text: string; type: 'word' | 'sound'; matched: boolean; selected: boolean; pairId: number }[]>([]);
-  const [selected, setSelected] = useState<number | null>(null);
-  const [matches, setMatches] = useState(0);
-  const [attempts, setAttempts] = useState(0);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [wrongPair, setWrongPair] = useState<number[]>([]);
-
-  useEffect(() => {
-    const gameWords = words.slice(0, Math.min(4, words.length));
-    const items: typeof pairs = [];
-    gameWords.forEach((w, i) => {
-      items.push({ id: i * 2, text: w.word, type: 'word', matched: false, selected: false, pairId: i });
-      items.push({ id: i * 2 + 1, text: w.phonetic || `/${w.word[0]}/`, type: 'sound', matched: false, selected: false, pairId: i });
-    });
-    // Shuffle
+  const gameWords = words.slice(0, Math.min(5, words.length));
+  const [leftItems] = useState(() => gameWords.map((w, i) => ({ id: i, text: w.word, matched: false })));
+  const [rightItems] = useState(() => {
+    const items = gameWords.map((w, i) => ({
+      id: i,
+      text: w.phonetic || `/${w.word[0]}/`,
+      matched: false,
+    }));
+    // Shuffle right side
     for (let i = items.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [items[i], items[j]] = [items[j], items[i]];
     }
-    setPairs(items);
-  }, [words]);
+    return items;
+  });
 
-  const speak = (text: string) => {
+  const [selectedLeft, setSelectedLeft] = useState<number | null>(null);
+  const [selectedRight, setSelectedRight] = useState<number | null>(null);
+  const [matchedPairs, setMatchedPairs] = useState<Set<number>>(new Set());
+  const [wrongFlash, setWrongFlash] = useState<{ left: number; right: number } | null>(null);
+  const [attempts, setAttempts] = useState(0);
+  const [showComplete, setShowComplete] = useState(false);
+  const [connections, setConnections] = useState<{ from: number; to: number; correct: boolean }[]>([]);
+
+  const speak = useCallback((text: string) => {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(text);
       u.rate = 0.8;
       window.speechSynthesis.speak(u);
     }
-  };
+  }, []);
 
-  // Auto-speak instruction when game loads
   useEffect(() => {
-    if (pairs.length > 0) {
-      setTimeout(() => speak('Tap the letter that makes the matching sound! Match each word with its sound.'), 400);
-    }
-  }, [pairs.length > 0]);
+    setTimeout(() => speak('Match each word with its sound! Tap a word, then tap its matching sound.'), 400);
+  }, []);
 
-  const handleSelect = (id: number) => {
-    const item = pairs.find(p => p.id === id);
-    if (!item || item.matched) return;
+  const tryMatch = useCallback((leftId: number, rightId: number) => {
+    setAttempts(a => a + 1);
 
-    if (selected === null) {
-      setSelected(id);
-      setPairs(prev => prev.map(p => p.id === id ? { ...p, selected: true } : p));
-      speak(item.text);
-    } else {
-      const first = pairs.find(p => p.id === selected)!;
-      setAttempts(a => a + 1);
+    if (leftId === rightId) {
+      // Correct match!
+      const newMatched = new Set(matchedPairs);
+      newMatched.add(leftId);
+      setMatchedPairs(newMatched);
+      setConnections(prev => [...prev, { from: leftId, to: rightId, correct: true }]);
+      speak('Great match!');
 
-      if (first.pairId === item.pairId && first.id !== item.id) {
-        // Match!
-        setPairs(prev => prev.map(p =>
-          p.pairId === item.pairId ? { ...p, matched: true, selected: false } : { ...p, selected: false }
-        ));
-        const newMatches = matches + 1;
-        setMatches(newMatches);
-        speak(item.text);
-
-        if (newMatches === Math.min(4, words.length)) {
-          setShowSuccess(true);
-          setTimeout(() => {
-            const score = Math.max(60, Math.round(100 - (attempts * 5)));
-            onComplete(score);
-          }, 2000);
-        }
-      } else {
-        // No match
-        setWrongPair([selected, id]);
-        setPairs(prev => prev.map(p => ({ ...p, selected: false })));
-        setTimeout(() => setWrongPair([]), 600);
+      if (newMatched.size === gameWords.length) {
+        setShowComplete(true);
+        const sc = Math.max(60, Math.round(100 - ((attempts - gameWords.length) * 8)));
+        setTimeout(() => onComplete(sc), 2000);
       }
-      setSelected(null);
+    } else {
+      // Wrong
+      setWrongFlash({ left: leftId, right: rightId });
+      setConnections(prev => [...prev, { from: leftId, to: rightId, correct: false }]);
+      setTimeout(() => {
+        setWrongFlash(null);
+        setConnections(prev => prev.filter(c => c.correct));
+      }, 700);
+    }
+
+    setSelectedLeft(null);
+    setSelectedRight(null);
+  }, [matchedPairs, attempts, gameWords.length, speak, onComplete]);
+
+  const handleLeftClick = (id: number) => {
+    if (matchedPairs.has(id)) return;
+    speak(leftItems[id].text);
+    setSelectedLeft(id);
+    if (selectedRight !== null) {
+      tryMatch(id, rightItems.find(r => r === rightItems[selectedRight])?.id ?? -1);
     }
   };
 
-  const totalPairs = Math.min(4, words.length);
+  const handleRightClick = (item: typeof rightItems[0], displayIndex: number) => {
+    if (matchedPairs.has(item.id)) return;
+    speak(item.text);
+    if (selectedLeft !== null) {
+      tryMatch(selectedLeft, item.id);
+    } else {
+      setSelectedRight(displayIndex);
+    }
+  };
+
+  if (showComplete) {
+    const stars = attempts <= gameWords.length + 1 ? 3 : attempts <= gameWords.length * 2 ? 2 : 1;
+    return (
+      <div className="flex flex-col items-center justify-center p-8 animate-scale-in">
+        <Sparkles className="h-12 w-12 text-accent mb-3 animate-glow-pulse" />
+        <h3 className="font-display font-bold text-xl text-secondary mb-1">All Matched! 🎵</h3>
+        <p className="text-sm text-muted-foreground">Great listening skills!</p>
+        <div className="flex gap-2 mt-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Star
+              key={i}
+              className={cn(
+                "h-8 w-8 transition-all duration-500",
+                i < stars ? "text-accent fill-accent animate-bounce-gentle" : "text-muted"
+              )}
+              style={{ animationDelay: `${i * 200}ms` }}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center p-4 animate-fade-in">
       <div className="flex items-center gap-2 mb-2">
-        <Volume2 className="h-5 w-5 text-pixo-purple" />
+        <Volume2 className="h-5 w-5 text-primary" />
         <h3 className="font-display font-bold text-lg">Sound Matching 🎵</h3>
       </div>
-      <p className="text-sm text-muted-foreground mb-1">Match each word with its sound!</p>
-      <button
-        onClick={() => speak('Match each word with its sound! Tap a word, then tap its matching sound.')}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium mb-4 hover:bg-primary/20 transition-colors mx-auto"
-      >
-        <Volume2 className="h-3.5 w-3.5" /> Hear Instructions
-      </button>
+      <p className="text-xs text-muted-foreground mb-1">Tap a word, then tap its matching sound!</p>
 
+      {/* Star progress */}
       <div className="flex items-center gap-1 mb-4">
-        {Array.from({ length: totalPairs }).map((_, i) => (
-          <Star key={i} className={cn("h-5 w-5 transition-all", i < matches ? "text-pixo-yellow fill-pixo-yellow scale-110" : "text-muted")} />
-        ))}
-      </div>
-
-      <div className="grid grid-cols-2 gap-3 w-full max-w-sm">
-        {pairs.map((item) => (
-          <button
-            key={item.id}
-            onClick={() => handleSelect(item.id)}
-            disabled={item.matched}
+        {gameWords.map((_, i) => (
+          <Star
+            key={i}
             className={cn(
-              "p-4 rounded-2xl border-2 text-center font-semibold text-sm transition-all min-h-[56px]",
-              item.matched && "bg-secondary/20 border-secondary text-secondary scale-95 opacity-70",
-              item.selected && !item.matched && "bg-primary/15 border-primary scale-105 shadow-lg",
-              wrongPair.includes(item.id) && "border-destructive/50 bg-destructive/5 animate-shake",
-              !item.matched && !item.selected && !wrongPair.includes(item.id) && "bg-card border-border hover:border-primary/40 hover:shadow-md active:scale-95"
+              "h-5 w-5 transition-all duration-300",
+              matchedPairs.has(i) ? "text-accent fill-accent scale-110" : "text-muted"
             )}
-          >
-            {item.matched ? '✅' : item.type === 'sound' ? `🔊 ${item.text}` : item.text}
-          </button>
+          />
         ))}
       </div>
 
-      {showSuccess && (
-        <div className="mt-6 text-center animate-scale-in">
-          <Sparkles className="h-8 w-8 text-pixo-yellow mx-auto mb-2" />
-          <p className="font-display font-bold text-lg text-pixo-green">All Matched! 🎉</p>
-          <p className="text-sm text-muted-foreground">Great listening skills!</p>
+      {/* Two columns */}
+      <div className="grid grid-cols-2 gap-4 w-full max-w-sm">
+        {/* Left — Words */}
+        <div className="space-y-3">
+          <p className="text-[10px] font-bold text-muted-foreground text-center uppercase tracking-wider">Words</p>
+          {leftItems.map((item) => (
+            <button
+              key={`l-${item.id}`}
+              onClick={() => handleLeftClick(item.id)}
+              disabled={matchedPairs.has(item.id)}
+              className={cn(
+                "w-full p-3.5 rounded-2xl border-2 text-sm font-bold text-center transition-all duration-300 tap-scale min-h-[48px]",
+                matchedPairs.has(item.id) && "bg-secondary/15 border-secondary/40 text-secondary scale-95",
+                selectedLeft === item.id && !matchedPairs.has(item.id) && "bg-primary/10 border-primary scale-105 shadow-pixo-md",
+                wrongFlash?.left === item.id && "border-destructive/50 bg-destructive/5 animate-shake",
+                !matchedPairs.has(item.id) && selectedLeft !== item.id && !wrongFlash && "bg-card border-border hover:border-primary/40 hover:shadow-pixo-sm active:scale-95"
+              )}
+            >
+              {matchedPairs.has(item.id) ? '✅' : item.text}
+            </button>
+          ))}
         </div>
-      )}
+
+        {/* Right — Sounds */}
+        <div className="space-y-3">
+          <p className="text-[10px] font-bold text-muted-foreground text-center uppercase tracking-wider">Sounds</p>
+          {rightItems.map((item, displayIdx) => (
+            <button
+              key={`r-${displayIdx}`}
+              onClick={() => handleRightClick(item, displayIdx)}
+              disabled={matchedPairs.has(item.id)}
+              className={cn(
+                "w-full p-3.5 rounded-2xl border-2 text-sm font-semibold text-center transition-all duration-300 tap-scale min-h-[48px]",
+                matchedPairs.has(item.id) && "bg-secondary/15 border-secondary/40 text-secondary scale-95",
+                selectedRight === displayIdx && !matchedPairs.has(item.id) && "bg-primary/10 border-primary scale-105 shadow-pixo-md",
+                wrongFlash && rightItems[wrongFlash.right] === item && "border-destructive/50 bg-destructive/5 animate-shake",
+                !matchedPairs.has(item.id) && selectedRight !== displayIdx && "bg-card border-border hover:border-primary/40 hover:shadow-pixo-sm active:scale-95"
+              )}
+            >
+              {matchedPairs.has(item.id) ? '✅' : `🔊 ${item.text}`}
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
