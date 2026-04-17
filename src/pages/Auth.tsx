@@ -27,6 +27,7 @@ const DEMO_ACCOUNTS = [
   { label: "Parent", email: "parent@pixolearn.test", password: "pixo1234", role: "parent" },
   { label: "Admin", email: "admin@pixolearn.test", password: "pixo1234", role: "admin" },
   { label: "Multi-Role", email: "multirole@pixolearn.test", password: "pixo1234", role: "multi" },
+  { label: "Admin (legacy)", email: "admin@pixo.test", password: "pixo1234", role: "admin" },
 ];
 
 export default function Auth() {
