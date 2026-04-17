@@ -59,18 +59,6 @@ export function ParentOverview({ children, selectedChild, onRefresh, userId }: P
   const overallAvgScore = totalChildren > 0 ? Math.round(children.reduce((s, c) => s + getAvgScore(c.completions), 0) / totalChildren) : 0;
   const bestStreak = totalChildren > 0 ? Math.max(...children.map(c => c.streak)) : 0;
 
-  const handleRemoveChild = async (childId: string) => {
-    setRemovingChildId(childId);
-    try {
-      await supabase.from('parent_children').delete().eq('parent_id', userId).eq('child_id', childId);
-      toast({ title: 'Child unlinked' });
-      onRefresh();
-    } catch {
-      toast({ title: 'Error', description: 'Failed to unlink', variant: 'destructive' });
-    } finally {
-      setRemovingChildId(null);
-    }
-  };
 
   if (children.length === 0) {
     return (
