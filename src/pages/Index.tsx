@@ -395,6 +395,23 @@ export default function Index() {
       {/* Footer */}
       <footer className="py-12 border-t border-border">
         <div className="container mx-auto px-4">
+          {/* Video Banner */}
+          <div className="mb-10">
+            <div className="relative mx-auto max-w-5xl overflow-hidden rounded-3xl shadow-lg border border-border bg-muted aspect-video">
+              <video
+                src="/footer-banner.mp4"
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="metadata"
+                poster={pixoLogo}
+                aria-label="PIXO Learn promotional banner"
+                className="h-full w-full object-cover"
+              />
+            </div>
+          </div>
+
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <img src={pixoLogo} alt="PIXO" className="h-8" />
