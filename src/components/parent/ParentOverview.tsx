@@ -4,13 +4,14 @@ import { StatCard } from '@/components/shared/StatCard';
 import { StreakDisplay } from '@/components/shared/StreakDisplay';
 import { ProgressRing } from '@/components/shared/ProgressRing';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Users, BookOpen, Trophy, TrendingUp, UserPlus, UserMinus, Sparkles, CheckCircle2, XCircle, Calendar } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Users, BookOpen, Trophy, TrendingUp, UserPlus, UserMinus, Sparkles, CheckCircle2, XCircle, Calendar, Crown } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { format, subDays } from 'date-fns';
+import { ChildLinkPanel } from '@/components/parent/ChildLinkPanel';
 
 interface ParentOverviewProps {
   children: ChildData[];
@@ -21,8 +22,6 @@ interface ParentOverviewProps {
 
 export function ParentOverview({ children, selectedChild, onRefresh, userId }: ParentOverviewProps) {
   const { toast } = useToast();
-  const [addChildEmail, setAddChildEmail] = useState('');
-  const [addingChild, setAddingChild] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [removingChildId, setRemovingChildId] = useState<string | null>(null);
 
@@ -31,23 +30,19 @@ export function ParentOverview({ children, selectedChild, onRefresh, userId }: P
     return scores.length === 0 ? 0 : Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
   };
 
-  const handleAddChild = async () => {
-    if (!addChildEmail.trim()) return;
-    setAddingChild(true);
-    try {
-      const { data: childProfile } = await supabase.from('profiles').select('id, role').eq('email', addChildEmail.trim()).maybeSingle();
-      if (!childProfile) { toast({ title: 'Not found', description: 'No student account found.', variant: 'destructive' }); return; }
-      if (childProfile.role !== 'student') { toast({ title: 'Invalid', description: 'Not a student account.', variant: 'destructive' }); return; }
-      const { error } = await supabase.from('parent_children').insert({ parent_id: userId, child_id: childProfile.id });
-      if (error) {
-        if (error.code === '23505') toast({ title: 'Already linked' });
-        else throw error;
-        return;
-      }
-      toast({ title: 'Success', description: 'Child linked!' });
-      setAddChildEmail(''); setDialogOpen(false); onRefresh();
-    } catch { toast({ title: 'Error', description: 'Failed to link child', variant: 'destructive' }); }
-    finally { setAddingChild(false); }
+  const formatPlanLabel = (e: ChildData['entitlement']) => {
+    if (!e) return 'No plan';
+    if (!e.is_paid) return 'Free';
+    if (e.entitlement_status !== 'active') return 'Inactive';
+    if (e.entitlement_expiry_date && new Date(e.entitlement_expiry_date) < new Date()) return 'Expired';
+    return e.selected_plan || 'Premium';
+  };
+
+  const planVariant = (e: ChildData['entitlement']): 'default' | 'secondary' | 'destructive' => {
+    if (!e || !e.is_paid) return 'secondary';
+    if (e.entitlement_expiry_date && new Date(e.entitlement_expiry_date) < new Date()) return 'destructive';
+    if (e.entitlement_status === 'active') return 'default';
+    return 'secondary';
   };
 
   const handleRemoveChild = async (childId: string) => {
@@ -64,21 +59,20 @@ export function ParentOverview({ children, selectedChild, onRefresh, userId }: P
   const overallAvgScore = totalChildren > 0 ? Math.round(children.reduce((s, c) => s + getAvgScore(c.completions), 0) / totalChildren) : 0;
   const bestStreak = totalChildren > 0 ? Math.max(...children.map(c => c.streak)) : 0;
 
+
   if (children.length === 0) {
     return (
-      <div className="text-center py-20">
+      <div className="text-center py-20 max-w-md mx-auto">
         <Users className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
         <h3 className="text-xl font-display font-bold mb-2">No Children Linked Yet</h3>
-        <p className="text-muted-foreground mb-6">Link your child's student account to start tracking their progress.</p>
+        <p className="text-muted-foreground mb-6">Link your child's account to see live progress, subscription status, and learning insights.</p>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button variant="default"><UserPlus className="h-5 w-5 mr-2" />Add Your First Child</Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader><DialogTitle>Link a Child Account</DialogTitle></DialogHeader>
-            <p className="text-sm text-muted-foreground mb-4">Enter the email of your child's student account.</p>
-            <Input placeholder="child@example.com" value={addChildEmail} onChange={e => setAddChildEmail(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleAddChild()} />
-            <Button onClick={handleAddChild} disabled={addingChild} className="mt-2">{addingChild ? 'Linking...' : 'Link Child'}</Button>
+            <ChildLinkPanel onLinked={onRefresh} onClose={() => setDialogOpen(false)} />
           </DialogContent>
         </Dialog>
       </div>
@@ -108,8 +102,7 @@ export function ParentOverview({ children, selectedChild, onRefresh, userId }: P
           </DialogTrigger>
           <DialogContent>
             <DialogHeader><DialogTitle>Link a Child Account</DialogTitle></DialogHeader>
-            <Input placeholder="child@example.com" value={addChildEmail} onChange={e => setAddChildEmail(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleAddChild()} />
-            <Button onClick={handleAddChild} disabled={addingChild} className="mt-2">{addingChild ? 'Linking...' : 'Link Child'}</Button>
+            <ChildLinkPanel onLinked={onRefresh} onClose={() => setDialogOpen(false)} />
           </DialogContent>
         </Dialog>
       </div>
@@ -134,9 +127,18 @@ export function ParentOverview({ children, selectedChild, onRefresh, userId }: P
                   {(child.profile.full_name || child.profile.email)[0].toUpperCase()}
                 </div>
                 <div>
-                  <h3 className="font-bold">{child.profile.full_name || child.profile.email}</h3>
+                  <h3 className="font-bold flex items-center gap-2">
+                    {child.profile.full_name || child.profile.email}
+                    <Badge variant={planVariant(child.entitlement)} className="text-[10px] gap-1">
+                      <Crown className="h-3 w-3" />
+                      {formatPlanLabel(child.entitlement)}
+                    </Badge>
+                  </h3>
                   <p className="text-xs text-muted-foreground">
                     {child.progress ? `${child.progress.current_level.charAt(0).toUpperCase() + child.progress.current_level.slice(1)} · Day ${child.progress.current_day}` : 'Not started'}
+                    {child.entitlement?.entitlement_expiry_date && child.entitlement.is_paid && (
+                      <span className="ml-1.5">· renews {format(new Date(child.entitlement.entitlement_expiry_date), 'MMM d, yyyy')}</span>
+                    )}
                   </p>
                 </div>
               </div>

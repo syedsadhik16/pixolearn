@@ -34,6 +34,14 @@ export interface ChildProfile {
   avatar_url: string | null;
 }
 
+export interface ChildEntitlement {
+  is_paid: boolean;
+  entitlement_status: string;
+  entitlement_expiry_date: string | null;
+  selected_plan: string | null;
+  selected_level: string | null;
+}
+
 export interface ChildData {
   profile: ChildProfile;
   progress: { current_level: string; current_day: number } | null;
@@ -61,6 +69,7 @@ export interface ChildData {
     started_at: string;
   }[];
   assessmentResult: { assigned_level: string; score: number; created_at: string } | null;
+  entitlement: ChildEntitlement | null;
 }
 
 export default function ParentDashboard() {
@@ -99,6 +108,30 @@ export default function ParentDashboard() {
     return () => { supabase.removeChannel(channel); };
   }, [user, pushEnabled]);
 
+  // Realtime: refetch children when any of their lessons/xp/attendance/progress changes
+  useEffect(() => {
+    if (!user || profile?.role !== 'parent') return;
+    const channel = supabase
+      .channel(`parent-live-${user.id}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'lesson_completions' }, () => fetchChildren())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'student_xp' }, () => fetchChildren())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'attendance' }, () => fetchChildren())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'learner_curriculum_progress' }, () => fetchChildren())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'parent_children', filter: `parent_id=eq.${user.id}` }, () => fetchChildren())
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, profile]);
+
+  // Refetch on tab focus (network-friendly fallback)
+  useEffect(() => {
+    if (!user || profile?.role !== 'parent') return;
+    const onFocus = () => fetchChildren();
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, profile]);
+
   const handleEnablePush = async () => {
     await requestPushPermission();
     setPushEnabled(isNotificationEnabled());
@@ -120,7 +153,7 @@ export default function ParentDashboard() {
 
       const childIds = links.map((l) => l.child_id);
       const childDataPromises = childIds.map(async (childId) => {
-        const [profileRes, progressRes, completionsRes, attendanceRes, xpRes, writingRes, sessionsRes, assessmentRes] = await Promise.all([
+        const [profileRes, progressRes, completionsRes, attendanceRes, xpRes, writingRes, sessionsRes, assessmentRes, entitlementRes] = await Promise.all([
           supabase.from('profiles').select('id, full_name, email, avatar_url').eq('id', childId).maybeSingle(),
           supabase.from('student_progress').select('current_level, current_day').eq('student_id', childId).maybeSingle(),
           supabase.from('lesson_completions').select('lesson_id, pronunciation_score, fluency_score, clarity_score, confidence_score, practice_count, completed_at').eq('student_id', childId).order('completed_at', { ascending: false }),
@@ -129,6 +162,7 @@ export default function ParentDashboard() {
           supabase.from('writing_submissions').select('score, xp_awarded, created_at, prompt_title').eq('student_id', childId).order('created_at', { ascending: false }),
           supabase.from('learning_sessions').select('duration_seconds, session_type, started_at').eq('student_id', childId).order('started_at', { ascending: false }),
           supabase.from('assessment_results').select('assigned_level, score, created_at').eq('student_id', childId).maybeSingle(),
+          supabase.from('user_entitlements').select('is_paid, entitlement_status, entitlement_expiry_date, selected_plan, selected_level').eq('user_id', childId).maybeSingle(),
         ]);
 
         let streak = 0;
@@ -152,6 +186,7 @@ export default function ParentDashboard() {
           writingSubmissions: writingRes.data || [],
           learningSessions: sessionsRes.data || [],
           assessmentResult: assessmentRes.data,
+          entitlement: entitlementRes.data as any,
         } as ChildData;
       });
 

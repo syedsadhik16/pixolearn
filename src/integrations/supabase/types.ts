@@ -1559,10 +1559,12 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          child_code: string | null
           created_at: string
           email: string
           full_name: string | null
           id: string
+          invite_token: string | null
           role: Database["public"]["Enums"]["user_role"]
           subscription_type: Database["public"]["Enums"]["subscription_type"]
           trial_expires_at: string | null
@@ -1571,10 +1573,12 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          child_code?: string | null
           created_at?: string
           email: string
           full_name?: string | null
           id: string
+          invite_token?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           subscription_type?: Database["public"]["Enums"]["subscription_type"]
           trial_expires_at?: string | null
@@ -1583,10 +1587,12 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          child_code?: string | null
           created_at?: string
           email?: string
           full_name?: string | null
           id?: string
+          invite_token?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           subscription_type?: Database["public"]["Enums"]["subscription_type"]
           trial_expires_at?: string | null
@@ -2152,6 +2158,7 @@ export type Database = {
         Args: { _badge_id: string; _student_id: string }
         Returns: boolean
       }
+      generate_child_code: { Args: never; Returns: string }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["user_role"]
@@ -2166,6 +2173,19 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      link_child_to_parent: {
+        Args: { _method: string; _value: string }
+        Returns: Json
+      }
+      lookup_child_for_linking: {
+        Args: { _method: string; _value: string }
+        Returns: {
+          child_email: string
+          child_id: string
+          child_name: string
+          child_role: string
+        }[]
       }
       purchase_shop_item: {
         Args: { _item_id: string; _student_id: string }

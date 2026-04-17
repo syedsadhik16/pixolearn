@@ -81,7 +81,7 @@ const App = () => (
             <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="/billing" element={<PremiumRoute><Billing /></PremiumRoute>} />
             <Route path="/trophy-room" element={<PremiumRoute><TrophyRoom /></PremiumRoute>} />
-            <Route path="/parent" element={<ProtectedRoute allowedRoles={['parent', 'admin']}><ParentDashboard /></ProtectedRoute>} />
+            <Route path="/parent" element={<ProtectedRoute allowedRoles={['parent']}><ParentDashboard /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/knowledge" element={<ProtectedRoute allowedRoles={['admin']}><AdminKnowledgeIngestion /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
