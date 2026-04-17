@@ -59,21 +59,32 @@ export function ParentOverview({ children, selectedChild, onRefresh, userId }: P
   const overallAvgScore = totalChildren > 0 ? Math.round(children.reduce((s, c) => s + getAvgScore(c.completions), 0) / totalChildren) : 0;
   const bestStreak = totalChildren > 0 ? Math.max(...children.map(c => c.streak)) : 0;
 
+  const handleRemoveChild = async (childId: string) => {
+    setRemovingChildId(childId);
+    try {
+      await supabase.from('parent_children').delete().eq('parent_id', userId).eq('child_id', childId);
+      toast({ title: 'Child unlinked' });
+      onRefresh();
+    } catch {
+      toast({ title: 'Error', description: 'Failed to unlink', variant: 'destructive' });
+    } finally {
+      setRemovingChildId(null);
+    }
+  };
+
   if (children.length === 0) {
     return (
-      <div className="text-center py-20">
+      <div className="text-center py-20 max-w-md mx-auto">
         <Users className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
         <h3 className="text-xl font-display font-bold mb-2">No Children Linked Yet</h3>
-        <p className="text-muted-foreground mb-6">Link your child's student account to start tracking their progress.</p>
+        <p className="text-muted-foreground mb-6">Link your child's account to see live progress, subscription status, and learning insights.</p>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button variant="default"><UserPlus className="h-5 w-5 mr-2" />Add Your First Child</Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader><DialogTitle>Link a Child Account</DialogTitle></DialogHeader>
-            <p className="text-sm text-muted-foreground mb-4">Enter the email of your child's student account.</p>
-            <Input placeholder="child@example.com" value={addChildEmail} onChange={e => setAddChildEmail(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleAddChild()} />
-            <Button onClick={handleAddChild} disabled={addingChild} className="mt-2">{addingChild ? 'Linking...' : 'Link Child'}</Button>
+            <ChildLinkPanel onLinked={onRefresh} onClose={() => setDialogOpen(false)} />
           </DialogContent>
         </Dialog>
       </div>
@@ -103,8 +114,7 @@ export function ParentOverview({ children, selectedChild, onRefresh, userId }: P
           </DialogTrigger>
           <DialogContent>
             <DialogHeader><DialogTitle>Link a Child Account</DialogTitle></DialogHeader>
-            <Input placeholder="child@example.com" value={addChildEmail} onChange={e => setAddChildEmail(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleAddChild()} />
-            <Button onClick={handleAddChild} disabled={addingChild} className="mt-2">{addingChild ? 'Linking...' : 'Link Child'}</Button>
+            <ChildLinkPanel onLinked={onRefresh} onClose={() => setDialogOpen(false)} />
           </DialogContent>
         </Dialog>
       </div>
@@ -129,9 +139,18 @@ export function ParentOverview({ children, selectedChild, onRefresh, userId }: P
                   {(child.profile.full_name || child.profile.email)[0].toUpperCase()}
                 </div>
                 <div>
-                  <h3 className="font-bold">{child.profile.full_name || child.profile.email}</h3>
+                  <h3 className="font-bold flex items-center gap-2">
+                    {child.profile.full_name || child.profile.email}
+                    <Badge variant={planVariant(child.entitlement)} className="text-[10px] gap-1">
+                      <Crown className="h-3 w-3" />
+                      {formatPlanLabel(child.entitlement)}
+                    </Badge>
+                  </h3>
                   <p className="text-xs text-muted-foreground">
                     {child.progress ? `${child.progress.current_level.charAt(0).toUpperCase() + child.progress.current_level.slice(1)} · Day ${child.progress.current_day}` : 'Not started'}
+                    {child.entitlement?.entitlement_expiry_date && child.entitlement.is_paid && (
+                      <span className="ml-1.5">· renews {format(new Date(child.entitlement.entitlement_expiry_date), 'MMM d, yyyy')}</span>
+                    )}
                   </p>
                 </div>
               </div>

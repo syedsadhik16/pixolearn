@@ -34,6 +34,14 @@ export interface ChildProfile {
   avatar_url: string | null;
 }
 
+export interface ChildEntitlement {
+  is_paid: boolean;
+  entitlement_status: string;
+  entitlement_expiry_date: string | null;
+  selected_plan: string | null;
+  selected_level: string | null;
+}
+
 export interface ChildData {
   profile: ChildProfile;
   progress: { current_level: string; current_day: number } | null;
@@ -61,6 +69,7 @@ export interface ChildData {
     started_at: string;
   }[];
   assessmentResult: { assigned_level: string; score: number; created_at: string } | null;
+  entitlement: ChildEntitlement | null;
 }
 
 export default function ParentDashboard() {
@@ -120,7 +129,7 @@ export default function ParentDashboard() {
 
       const childIds = links.map((l) => l.child_id);
       const childDataPromises = childIds.map(async (childId) => {
-        const [profileRes, progressRes, completionsRes, attendanceRes, xpRes, writingRes, sessionsRes, assessmentRes] = await Promise.all([
+        const [profileRes, progressRes, completionsRes, attendanceRes, xpRes, writingRes, sessionsRes, assessmentRes, entitlementRes] = await Promise.all([
           supabase.from('profiles').select('id, full_name, email, avatar_url').eq('id', childId).maybeSingle(),
           supabase.from('student_progress').select('current_level, current_day').eq('student_id', childId).maybeSingle(),
           supabase.from('lesson_completions').select('lesson_id, pronunciation_score, fluency_score, clarity_score, confidence_score, practice_count, completed_at').eq('student_id', childId).order('completed_at', { ascending: false }),
@@ -129,6 +138,7 @@ export default function ParentDashboard() {
           supabase.from('writing_submissions').select('score, xp_awarded, created_at, prompt_title').eq('student_id', childId).order('created_at', { ascending: false }),
           supabase.from('learning_sessions').select('duration_seconds, session_type, started_at').eq('student_id', childId).order('started_at', { ascending: false }),
           supabase.from('assessment_results').select('assigned_level, score, created_at').eq('student_id', childId).maybeSingle(),
+          supabase.from('user_entitlements').select('is_paid, entitlement_status, entitlement_expiry_date, selected_plan, selected_level').eq('user_id', childId).maybeSingle(),
         ]);
 
         let streak = 0;
@@ -152,6 +162,7 @@ export default function ParentDashboard() {
           writingSubmissions: writingRes.data || [],
           learningSessions: sessionsRes.data || [],
           assessmentResult: assessmentRes.data,
+          entitlement: entitlementRes.data as any,
         } as ChildData;
       });
 
