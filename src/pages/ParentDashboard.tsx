@@ -108,6 +108,30 @@ export default function ParentDashboard() {
     return () => { supabase.removeChannel(channel); };
   }, [user, pushEnabled]);
 
+  // Realtime: refetch children when any of their lessons/xp/attendance/progress changes
+  useEffect(() => {
+    if (!user || profile?.role !== 'parent') return;
+    const channel = supabase
+      .channel(`parent-live-${user.id}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'lesson_completions' }, () => fetchChildren())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'student_xp' }, () => fetchChildren())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'attendance' }, () => fetchChildren())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'learner_curriculum_progress' }, () => fetchChildren())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'parent_children', filter: `parent_id=eq.${user.id}` }, () => fetchChildren())
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, profile]);
+
+  // Refetch on tab focus (network-friendly fallback)
+  useEffect(() => {
+    if (!user || profile?.role !== 'parent') return;
+    const onFocus = () => fetchChildren();
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, profile]);
+
   const handleEnablePush = async () => {
     await requestPushPermission();
     setPushEnabled(isNotificationEnabled());
