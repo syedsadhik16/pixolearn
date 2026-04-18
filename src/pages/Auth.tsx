@@ -22,14 +22,19 @@ type UserRole = "student" | "parent";
 
 const IS_DEV = import.meta.env.DEV;
 
-const DEMO_PW = "PixoLearn!Demo2026#Strong";
-const DEMO_ACCOUNTS = [
-  { label: "Student", email: "student@pixolearn.test", password: DEMO_PW, role: "student" },
-  { label: "Parent", email: "parent@pixolearn.test", password: DEMO_PW, role: "parent" },
-  { label: "Admin", email: "admin@pixolearn.test", password: DEMO_PW, role: "admin" },
-  { label: "Multi-Role", email: "multirole@pixolearn.test", password: DEMO_PW, role: "multi" },
-  { label: "Admin (legacy)", email: "admin@pixo.test", password: DEMO_PW, role: "admin" },
-];
+// Demo credentials are NEVER hardcoded in source. They are only loaded from
+// local Vite env vars (VITE_DEMO_PW must be set in .env.local for dev quick-login).
+// In production builds VITE_DEMO_PW is undefined, so the dev panel hides itself.
+const DEMO_PW = (import.meta.env.VITE_DEMO_PW as string | undefined) ?? "";
+const DEMO_ACCOUNTS = DEMO_PW
+  ? [
+      { label: "Student", email: "student@pixolearn.test", password: DEMO_PW, role: "student" },
+      { label: "Parent", email: "parent@pixolearn.test", password: DEMO_PW, role: "parent" },
+      { label: "Admin", email: "admin@pixolearn.test", password: DEMO_PW, role: "admin" },
+      { label: "Multi-Role", email: "multirole@pixolearn.test", password: DEMO_PW, role: "multi" },
+      { label: "Admin (legacy)", email: "admin@pixo.test", password: DEMO_PW, role: "admin" },
+    ]
+  : [];
 
 export default function Auth() {
   const [searchParams] = useSearchParams();
@@ -438,8 +443,8 @@ export default function Auth() {
               )}
             </div>
 
-            {/* Dev Demo Login Helper */}
-            {IS_DEV && (
+            {/* Dev Demo Login Helper — only renders if VITE_DEMO_PW is set in local env */}
+            {IS_DEV && DEMO_ACCOUNTS.length > 0 && (
               <div className="border border-dashed border-primary/30 rounded-2xl p-4 bg-primary/5 space-y-3">
                 <p className="text-xs font-semibold text-primary text-center">🧪 Dev Quick Login</p>
                 <div className="grid grid-cols-2 gap-2">
