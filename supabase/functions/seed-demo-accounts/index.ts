@@ -63,7 +63,10 @@ Deno.serve(async (req) => {
             email_confirm: true,
             user_metadata: { full_name: acct.full_name, role: acct.role },
           });
-          if (createErr) throw createErr;
+          if (createErr) {
+            console.error('createUser error', acct.email, createErr);
+            throw createErr;
+          }
           userId = created.user.id;
           status = 'created';
         }
