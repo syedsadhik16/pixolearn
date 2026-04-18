@@ -22,12 +22,13 @@ type UserRole = "student" | "parent";
 
 const IS_DEV = import.meta.env.DEV;
 
+const DEMO_PW = "PixoLearn!Demo2026#Strong";
 const DEMO_ACCOUNTS = [
-  { label: "Student", email: "student@pixolearn.test", password: "pixo1234", role: "student" },
-  { label: "Parent", email: "parent@pixolearn.test", password: "pixo1234", role: "parent" },
-  { label: "Admin", email: "admin@pixolearn.test", password: "pixo1234", role: "admin" },
-  { label: "Multi-Role", email: "multirole@pixolearn.test", password: "pixo1234", role: "multi" },
-  { label: "Admin (legacy)", email: "admin@pixo.test", password: "pixo1234", role: "admin" },
+  { label: "Student", email: "student@pixolearn.test", password: DEMO_PW, role: "student" },
+  { label: "Parent", email: "parent@pixolearn.test", password: DEMO_PW, role: "parent" },
+  { label: "Admin", email: "admin@pixolearn.test", password: DEMO_PW, role: "admin" },
+  { label: "Multi-Role", email: "multirole@pixolearn.test", password: DEMO_PW, role: "multi" },
+  { label: "Admin (legacy)", email: "admin@pixo.test", password: DEMO_PW, role: "admin" },
 ];
 
 export default function Auth() {

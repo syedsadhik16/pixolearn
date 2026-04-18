@@ -1565,6 +1565,7 @@ export type Database = {
           full_name: string | null
           id: string
           invite_token: string | null
+          phone: string | null
           role: Database["public"]["Enums"]["user_role"]
           subscription_type: Database["public"]["Enums"]["subscription_type"]
           trial_expires_at: string | null
@@ -1579,6 +1580,7 @@ export type Database = {
           full_name?: string | null
           id: string
           invite_token?: string | null
+          phone?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           subscription_type?: Database["public"]["Enums"]["subscription_type"]
           trial_expires_at?: string | null
@@ -1593,6 +1595,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           invite_token?: string | null
+          phone?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           subscription_type?: Database["public"]["Enums"]["subscription_type"]
           trial_expires_at?: string | null

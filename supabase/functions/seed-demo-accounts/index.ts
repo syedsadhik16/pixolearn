@@ -15,11 +15,15 @@ interface DemoAccount {
   extra_roles?: ('student' | 'parent' | 'admin')[];
 }
 
+// Use a strong password that passes HIBP leaked-password check
+const DEMO_PW = 'PixoLearn!Demo2026#Strong';
+
 const DEMO_ACCOUNTS: DemoAccount[] = [
-  { email: 'student@pixolearn.test', password: 'pixo1234', full_name: 'Demo Student', role: 'student' },
-  { email: 'parent@pixolearn.test', password: 'pixo1234', full_name: 'Demo Parent', role: 'parent' },
-  { email: 'admin@pixolearn.test', password: 'pixo1234', full_name: 'Demo Admin', role: 'admin' },
-  { email: 'multirole@pixolearn.test', password: 'pixo1234', full_name: 'Demo Multi-Role', role: 'parent', extra_roles: ['student', 'admin'] },
+  { email: 'student@pixolearn.test', password: DEMO_PW, full_name: 'Demo Student', role: 'student' },
+  { email: 'parent@pixolearn.test', password: DEMO_PW, full_name: 'Demo Parent', role: 'parent' },
+  { email: 'admin@pixolearn.test', password: DEMO_PW, full_name: 'Demo Admin', role: 'admin' },
+  { email: 'multirole@pixolearn.test', password: DEMO_PW, full_name: 'Demo Multi-Role', role: 'parent', extra_roles: ['student', 'admin'] },
+  { email: 'admin@pixo.test', password: DEMO_PW, full_name: 'Admin Legacy', role: 'admin' }, // ensure legacy admin password is reset to known value
 ];
 
 Deno.serve(async (req) => {
@@ -59,7 +63,10 @@ Deno.serve(async (req) => {
             email_confirm: true,
             user_metadata: { full_name: acct.full_name, role: acct.role },
           });
-          if (createErr) throw createErr;
+          if (createErr) {
+            console.error('createUser error', acct.email, createErr);
+            throw createErr;
+          }
           userId = created.user.id;
           status = 'created';
         }
