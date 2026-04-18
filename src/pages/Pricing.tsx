@@ -249,18 +249,30 @@ export default function Pricing() {
         body: { user_id: user.id },
       });
 
-      if (error || !data?.success) {
-        // Extract message from various error shapes
-        let msg = data?.error || '';
-        if (!msg && error) {
-          try { msg = JSON.parse((error as any)?.context?.body || '{}')?.error || ''; } catch {}
-          if (!msg) msg = error.message || 'Failed to activate trial';
+      // Extract error message from any shape (FunctionsHttpError wraps the response)
+      let msg = '';
+      if (error) {
+        const ctx = (error as any)?.context;
+        if (ctx && typeof ctx.json === 'function') {
+          try { const j = await ctx.json(); msg = j?.error || ''; } catch {}
         }
-        if (msg.toLowerCase().includes('already been used')) {
+        if (!msg && ctx?.body) {
+          try { msg = JSON.parse(ctx.body)?.error || ''; } catch {}
+        }
+        if (!msg) msg = (error as any)?.message || '';
+      } else if (data && !data.success) {
+        msg = data.error || '';
+      }
+
+      if (msg) {
+        if (msg.toLowerCase().includes('already been used') || msg.toLowerCase().includes('already have a premium')) {
           toast({ title: 'Freemium Already Used', description: 'Your Freemium access has expired. Choose a plan below to upgrade to Premium!' });
           return;
         }
         throw new Error(msg);
+      }
+      if (!data?.success) {
+        throw new Error('Failed to activate trial');
       }
       toast({ title: '🎉 Freemium Access Activated!', description: 'Enjoy 24 hours of full Premium access.' });
       navigate('/student');
