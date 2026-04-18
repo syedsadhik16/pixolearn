@@ -265,7 +265,13 @@ export default function Pricing() {
       }
 
       if (msg) {
-        if (msg.toLowerCase().includes('already been used') || msg.toLowerCase().includes('already have a premium')) {
+        const lower = msg.toLowerCase();
+        if (lower.includes('already have a premium')) {
+          toast({ title: 'Already Premium', description: 'You already have premium access. Enjoy!' });
+          navigate('/student');
+          return;
+        }
+        if (lower.includes('already been used')) {
           toast({ title: 'Freemium Already Used', description: 'Your Freemium access has expired. Choose a plan below to upgrade to Premium!' });
           return;
         }
