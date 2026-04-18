@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-cron-secret',
 };
 
 serve(async (req) => {
@@ -14,9 +14,41 @@ serve(async (req) => {
   try {
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    const CRON_SECRET = Deno.env.get('CRON_SECRET');
 
     if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
       throw new Error('Supabase configuration missing');
+    }
+
+    if (!CRON_SECRET) {
+      console.error('CRON_SECRET is not configured; refusing to run.');
+      return new Response(JSON.stringify({ error: 'Server misconfigured' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Authenticate the call. Accept either:
+    //   - x-cron-secret header equal to CRON_SECRET, OR
+    //   - Authorization: Bearer <CRON_SECRET>  (compat with some schedulers)
+    const headerSecret = req.headers.get('x-cron-secret') ?? '';
+    const authHeader = req.headers.get('Authorization') ?? '';
+    const bearerSecret = authHeader.startsWith('Bearer ')
+      ? authHeader.replace('Bearer ', '').trim()
+      : '';
+
+    const provided = headerSecret || bearerSecret;
+    // Constant-time-ish compare
+    const ok =
+      provided.length === CRON_SECRET.length &&
+      provided.length > 0 &&
+      provided === CRON_SECRET;
+
+    if (!ok) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
@@ -62,8 +94,8 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error('Expire trials error:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    return new Response(JSON.stringify({ error: errorMessage }), {
+    // Return generic message to client; details stay in logs
+    return new Response(JSON.stringify({ error: 'Internal error' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
