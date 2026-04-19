@@ -867,134 +867,148 @@ export default function LessonSession() {
 
           {/* ==================== VOCABULARY / SOUND INTRO ==================== */}
           {phase === 'vocabulary' && lesson.vocabulary[currentIndex] && (
-            <div className="animate-fade-in flex flex-col items-center text-center space-y-6">
-              <p className="text-xs text-muted-foreground font-medium">
-                Sound {currentIndex + 1} of {lesson.vocabulary.length}
-              </p>
-
-              {/* Big animated sound badge */}
-              <div className="relative">
-                {/* Pulse ring behind */}
-                <div className="absolute inset-0 rounded-full bg-accent/20 animate-mic-pulse-ring" />
-                <div className="w-36 h-36 rounded-full bg-gradient-to-b from-accent to-accent/70 flex items-center justify-center shadow-pixo-lg animate-glow-pulse border-4 border-card cursor-pointer hover:scale-105 transition-transform active:scale-95"
-                  onClick={() => speakLesson(lesson.vocabulary[currentIndex].word)}
-                >
-                  <span className="text-5xl font-display font-extrabold text-accent-foreground">
-                    {lesson.vocabulary[currentIndex].phonetic || lesson.vocabulary[currentIndex].word}
-                  </span>
-                </div>
-                {/* Tap to replay hint */}
-                <p className="text-[10px] text-muted-foreground mt-2">Tap to replay</p>
-              </div>
-
-              <div>
-                <h2 className="font-display font-extrabold text-2xl text-foreground mb-1">Your turn!</h2>
-                <p className="text-muted-foreground text-sm">
-                  Can you make the {lesson.vocabulary[currentIndex].phonetic || lesson.vocabulary[currentIndex].word} sound like PIXO?
+            <div className="animate-fade-in flex flex-col items-center text-center space-y-5">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-card/80 backdrop-blur border border-border/40 shadow-pixo-sm">
+                <span className="w-2 h-2 rounded-full bg-pixo-orange animate-pulse" />
+                <p className="text-xs text-foreground font-semibold">
+                  Sound {currentIndex + 1} of {lesson.vocabulary.length}
                 </p>
               </div>
 
-              {/* Meaning card */}
+              {/* Big animated sound badge with sparkle decorations */}
+              <div className="relative">
+                <div className="absolute -inset-8 bg-accent/20 rounded-full blur-3xl" />
+                <Sparkles className="absolute -top-2 -left-4 h-6 w-6 text-pixo-orange animate-pulse z-20" />
+                <Sparkles className="absolute -bottom-2 -right-4 h-5 w-5 text-pixo-yellow animate-pulse z-20" style={{ animationDelay: '0.5s' }} />
+                <Star className="absolute top-2 -right-2 h-4 w-4 text-pixo-pink fill-pixo-pink animate-pulse z-20" style={{ animationDelay: '1s' }} />
+
+                <div className="absolute inset-0 rounded-full bg-accent/30 animate-mic-pulse-ring" />
+                <div className="relative w-44 h-44 rounded-full bg-gradient-to-br from-accent via-pixo-yellow to-pixo-orange flex items-center justify-center shadow-pixo-xl border-[6px] border-card cursor-pointer hover:scale-105 transition-transform active:scale-95"
+                  onClick={() => speakLesson(lesson.vocabulary[currentIndex].word)}
+                >
+                  <span className="text-4xl font-display font-extrabold text-accent-foreground drop-shadow-sm px-3 leading-tight">
+                    {lesson.vocabulary[currentIndex].phonetic || lesson.vocabulary[currentIndex].word}
+                  </span>
+                </div>
+                <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-card border border-border/40 shadow-pixo-sm">
+                  <Volume2 className="h-3 w-3 text-pixo-blue" />
+                  <p className="text-[10px] text-muted-foreground font-medium">Tap badge to hear</p>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <h2 className="font-display font-extrabold text-2xl text-foreground">Your turn! 🎤</h2>
+                <p className="text-muted-foreground text-sm max-w-xs">
+                  Can you make the <span className="font-bold text-primary">{lesson.vocabulary[currentIndex].phonetic || lesson.vocabulary[currentIndex].word}</span> sound like PIXO?
+                </p>
+              </div>
+
               {lesson.vocabulary[currentIndex].meaning && (
-                <div className="bg-card rounded-2xl p-4 border border-border/40 shadow-pixo-sm w-full">
-                  <p className="text-sm text-muted-foreground">{lesson.vocabulary[currentIndex].meaning}</p>
+                <div className="w-full bg-card rounded-2xl p-4 border border-border/40 shadow-pixo-md flex items-center gap-3 text-left">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pixo-sky to-pixo-blue/40 flex items-center justify-center shrink-0">
+                    <BookOpen className="h-5 w-5 text-pixo-blue" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-semibold">Today's theme</p>
+                    <p className="text-sm font-semibold text-foreground">{lesson.vocabulary[currentIndex].meaning}</p>
+                  </div>
                 </div>
               )}
 
-              {/* Waveform visualization when recording */}
               {isRecording && (
-                <div className="flex items-end gap-1 h-8 justify-center">
-                  {Array.from({ length: 12 }).map((_, i) => (
+                <div className="flex items-end gap-1 h-10 justify-center">
+                  {Array.from({ length: 14 }).map((_, i) => (
                     <div
                       key={i}
-                      className="w-1.5 bg-primary rounded-full animate-wave-bar"
+                      className="w-1.5 bg-gradient-to-t from-primary to-pixo-orange rounded-full animate-wave-bar"
                       style={{
-                        animationDelay: `${i * 0.1}s`,
-                        height: `${8 + Math.random() * 16}px`,
+                        animationDelay: `${i * 0.08}s`,
+                        height: `${10 + Math.random() * 20}px`,
                       }}
                     />
                   ))}
                 </div>
               )}
 
-              {/* Listen & Record buttons */}
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={() => speakLesson(lesson.vocabulary[currentIndex].word)}
-                  disabled={isSpeaking}
-                  className="w-14 h-14 rounded-full bg-[hsl(var(--pixo-blue))]/10 text-[hsl(var(--pixo-blue))] flex items-center justify-center hover:bg-[hsl(var(--pixo-blue))]/20 transition-all active:scale-95"
-                >
-                  <Volume2 className={`h-6 w-6 ${isSpeaking ? 'animate-pulse' : ''}`} />
-                </button>
-
-                <div className="relative">
-                  {/* Pulse ring when recording */}
-                  {isRecording && (
-                    <div className="absolute inset-0 rounded-full bg-destructive/30 animate-mic-pulse-ring" />
-                  )}
+              {/* Listen & Record buttons — BYJU style */}
+              <div className="flex items-end justify-center gap-6">
+                <div className="flex flex-col items-center gap-1.5">
                   <button
-                    onClick={isRecording ? stopRecording : startRecording}
-                    disabled={isEvaluating}
-                    className={`relative w-20 h-20 rounded-full flex items-center justify-center transition-all active:scale-95 shadow-pixo-lg z-10 ${
-                      isRecording
-                        ? 'bg-destructive text-destructive-foreground'
-                        : 'bg-gradient-to-t from-primary to-primary/80 text-primary-foreground'
-                    }`}
+                    onClick={() => speakLesson(lesson.vocabulary[currentIndex].word)}
+                    disabled={isSpeaking}
+                    className="w-14 h-14 rounded-2xl bg-card text-pixo-blue flex items-center justify-center shadow-pixo-md border border-border/40 hover:scale-105 transition-all active:scale-95"
                   >
-                    {isRecording ? <MicOff className="h-8 w-8" /> : <Mic className="h-8 w-8" />}
+                    <Volume2 className={`h-6 w-6 ${isSpeaking ? 'animate-pulse' : ''}`} />
                   </button>
+                  <p className="text-[9px] text-muted-foreground font-medium">Listen</p>
                 </div>
 
-                <div className="w-14 h-14" />
-              </div>
-              <p className="text-xs text-muted-foreground font-medium">
-                {isRecording ? '🔴 Listening... Tap to stop' : 'Tap to Start'}
-              </p>
+                <div className="flex flex-col items-center gap-1.5">
+                  <div className="relative">
+                    {isRecording && (
+                      <div className="absolute inset-0 rounded-full bg-destructive/30 animate-mic-pulse-ring" />
+                    )}
+                    <button
+                      onClick={isRecording ? stopRecording : startRecording}
+                      disabled={isEvaluating}
+                      className={`relative w-24 h-24 rounded-full flex items-center justify-center transition-all active:scale-95 shadow-pixo-xl z-10 border-[5px] border-card ${
+                        isRecording
+                          ? 'bg-gradient-to-b from-destructive to-destructive/80 text-destructive-foreground'
+                          : 'bg-gradient-to-b from-primary via-primary to-pixo-orange text-primary-foreground hover:scale-105'
+                      }`}
+                    >
+                      {isRecording ? <MicOff className="h-9 w-9" /> : <Mic className="h-9 w-9" />}
+                    </button>
+                  </div>
+                  <p className="text-xs text-foreground font-bold">
+                    {isRecording ? 'Tap to stop' : 'Tap to speak'}
+                  </p>
+                </div>
 
-              {/* Evaluating indicator */}
+                <div className="w-14 h-[68px]" />
+              </div>
+
               {isEvaluating && (
-                <div className="flex items-center gap-2 text-muted-foreground animate-pulse">
-                  <RefreshCw className="h-4 w-4 animate-spin" />
-                  <span className="text-sm">Analyzing your sound...</span>
+                <div className="flex items-center gap-2 text-muted-foreground animate-pulse bg-card px-4 py-2 rounded-full shadow-pixo-sm border border-border/40">
+                  <RefreshCw className="h-4 w-4 animate-spin text-primary" />
+                  <span className="text-sm font-medium">Analyzing your sound...</span>
                 </div>
               )}
 
-              {/* Score display */}
               {hasRecorded && scores.vocabulary[currentIndex] !== undefined && !isEvaluating && (
-                <div className="animate-scale-in bg-card rounded-2xl p-5 border border-border/40 shadow-pixo-md w-full">
+                <div className="animate-scale-in bg-gradient-to-br from-card to-pixo-cream rounded-3xl p-5 border-2 border-accent/30 shadow-pixo-lg w-full">
                   <div className="flex items-center justify-center gap-3 mb-3">
                     {[...Array(3)].map((_, i) => (
                       <Star
                         key={i}
-                        className={`h-7 w-7 transition-all ${
+                        className={`h-8 w-8 transition-all ${
                           i < (scores.vocabulary[currentIndex] >= 80 ? 3 : scores.vocabulary[currentIndex] >= 60 ? 2 : 1)
-                            ? 'text-accent fill-accent animate-bounce-gentle'
+                            ? 'text-accent fill-accent animate-bounce-gentle drop-shadow-sm'
                             : 'text-muted'
                         }`}
                         style={{ animationDelay: `${i * 200}ms` }}
                       />
                     ))}
                   </div>
-                  <p className="text-2xl font-bold text-secondary">{scores.vocabulary[currentIndex]}%</p>
+                  <p className="text-3xl font-display font-extrabold gradient-text">{scores.vocabulary[currentIndex]}%</p>
                   {currentFeedback && (
                     <p className="text-xs text-muted-foreground mt-2">{currentFeedback.feedback}</p>
                   )}
                 </div>
               )}
 
-              {/* Navigation */}
-              <div className="flex gap-3 w-full">
+              <div className="flex gap-3 w-full pt-2">
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="flex-1"
+                  className="flex-1 rounded-full"
                   onClick={() => { setHasRecorded(true); nextItem(true); }}
                 >
                   Skip
                 </Button>
                 <Button
                   variant="gradient"
-                  className="flex-1"
+                  className="flex-1 rounded-full shadow-pixo-md"
                   disabled={!hasRecorded || isEvaluating}
                   onClick={() => nextItem()}
                 >
