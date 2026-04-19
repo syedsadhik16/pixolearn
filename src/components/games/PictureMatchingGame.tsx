@@ -159,21 +159,43 @@ export function PictureMatchingGame({ words, onComplete }: PictureMatchingGamePr
   if (showComplete) {
     const stars = score >= totalRounds ? 3 : score >= totalRounds * 0.6 ? 2 : 1;
     return (
-      <div className="flex flex-col items-center justify-center p-8 animate-scale-in">
-        <Sparkles className="h-12 w-12 text-accent mb-3 animate-glow-pulse" />
-        <h3 className="font-display font-bold text-xl text-secondary mb-1">Picture Match Done! 🖼️</h3>
-        <p className="text-sm text-muted-foreground">You got {score} out of {totalRounds} right!</p>
-        <div className="flex gap-2 mt-4">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Star
-              key={i}
-              className={cn(
-                "h-8 w-8 transition-all duration-500",
-                i < stars ? "text-accent fill-accent animate-bounce-gentle" : "text-muted"
-              )}
-              style={{ animationDelay: `${i * 200}ms` }}
-            />
-          ))}
+      <div className="flex flex-col items-center justify-center p-6 animate-scale-in">
+        <div className="relative w-full max-w-sm bg-gradient-to-br from-card via-card to-pixo-cream rounded-3xl p-8 border-2 border-accent/30 shadow-pixo-xl text-center overflow-hidden">
+          {/* Decorative blobs */}
+          <div className="absolute -top-10 -left-10 w-32 h-32 bg-accent/30 rounded-full blur-3xl" />
+          <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-pixo-orange/30 rounded-full blur-3xl" />
+
+          {/* Trophy badge */}
+          <div className="relative mb-4 inline-block">
+            <div className="absolute inset-0 bg-accent/40 rounded-full blur-2xl animate-pulse" />
+            <div className="relative w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-accent via-pixo-yellow to-pixo-orange flex items-center justify-center shadow-pixo-lg border-4 border-card animate-bounce-gentle">
+              <Sparkles className="h-12 w-12 text-accent-foreground" />
+            </div>
+            <Star className="absolute -top-1 -right-1 h-6 w-6 text-pixo-pink fill-pixo-pink animate-pulse" />
+          </div>
+
+          <h3 className="font-display font-extrabold text-2xl gradient-text mb-2 relative">Picture Match Done! 🖼️</h3>
+          <p className="text-sm text-muted-foreground mb-4 relative">
+            You got <span className="font-bold text-secondary">{score}</span> out of <span className="font-bold text-secondary">{totalRounds}</span> right!
+          </p>
+
+          <div className="flex justify-center gap-3 mb-4 relative">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Star
+                key={i}
+                className={cn(
+                  "h-10 w-10 transition-all duration-500 drop-shadow-sm",
+                  i < stars ? "text-accent fill-accent animate-bounce-gentle" : "text-muted"
+                )}
+                style={{ animationDelay: `${i * 200}ms` }}
+              />
+            ))}
+          </div>
+
+          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary/15 border border-secondary/30 relative">
+            <span className="text-base">🎉</span>
+            <span className="text-xs font-bold text-secondary">Loading next adventure...</span>
+          </div>
         </div>
       </div>
     );
