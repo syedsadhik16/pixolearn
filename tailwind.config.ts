@@ -86,7 +86,15 @@ export default {
         "pixo-sm": "var(--shadow-sm)",
         "pixo-md": "var(--shadow-md)",
         "pixo-lg": "var(--shadow-lg)",
+        "pixo-xl": "var(--shadow-xl)",
+        "pixo-card": "var(--shadow-card)",
         "pixo-glow": "var(--shadow-glow)",
+      },
+      backgroundImage: {
+        "gradient-primary": "var(--gradient-primary)",
+        "gradient-hero": "var(--gradient-hero)",
+        "gradient-card": "var(--gradient-card)",
+        "gradient-success": "var(--gradient-success)",
       },
       spacing: {
         '18': '4.5rem',
