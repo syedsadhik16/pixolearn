@@ -735,13 +735,16 @@ export default function LessonSession() {
         icon="⭐"
       />
 
-      <div className="min-h-screen bg-background relative overflow-hidden">
-        {/* Decorative background dots (Stitch style) */}
-        <div className="absolute inset-0 opacity-[0.03] pointer-events-none"
-          style={{ backgroundImage: 'radial-gradient(hsl(var(--foreground)) 1px, transparent 1px)', backgroundSize: '40px 40px' }}
+      <div className="min-h-screen pixo-surface relative overflow-hidden">
+        {/* Decorative pastel blobs — BYJU-style ambient color */}
+        <div className="pixo-blob pixo-blob-coral w-72 h-72 -top-20 -left-20 opacity-40" />
+        <div className="pixo-blob pixo-blob-yellow w-80 h-80 top-40 -right-32 opacity-30" />
+        <div className="pixo-blob pixo-blob-sky w-64 h-64 bottom-20 -left-24 opacity-30" />
+        <div className="absolute inset-0 opacity-[0.025] pointer-events-none"
+          style={{ backgroundImage: 'radial-gradient(hsl(var(--foreground)) 1px, transparent 1px)', backgroundSize: '36px 36px' }}
         />
 
-        <div className="relative z-10 max-w-lg mx-auto px-4 pb-8 pt-4">
+        <div className="relative z-10 max-w-lg mx-auto px-4 pb-10 pt-4">
           {/* Top Header Bar */}
           <div className="flex items-center justify-between mb-4">
             <BackButton fallback="/student" label="" />
