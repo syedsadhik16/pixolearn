@@ -155,15 +155,35 @@
   }
   .pixo-card {
     @apply bg-card rounded-3xl p-6 border border-border/40;
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-card);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .pixo-card:hover {
     box-shadow: var(--shadow-lg);
     transform: translateY(-2px);
   }
+
+  /* BYJU-style elevated white card on tinted surface */
+  .pixo-card-premium {
+    @apply bg-white rounded-[2rem] p-8 border border-border/30;
+    box-shadow: var(--shadow-md);
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .pixo-card-premium:hover {
+    box-shadow: var(--shadow-xl);
+    transform: translateY(-4px);
+  }
+
+  /* Tinted background section (BYJU lavender vibe — using cream tint) */
+  .pixo-surface {
+    background: hsl(var(--surface-tinted));
+  }
+  .pixo-surface-soft {
+    background: hsl(var(--surface-soft));
+  }
+
   .pixo-button {
-    @apply font-semibold rounded-full px-6 py-3 transition-all duration-300;
+    @apply font-semibold rounded-full px-7 py-3.5 transition-all duration-300;
     box-shadow: var(--shadow-sm);
   }
   .pixo-button:hover {
@@ -185,6 +205,37 @@
   .pixo-badge-glow {
     @apply rounded-full flex items-center justify-center;
     box-shadow: 0 0 20px hsl(var(--pixo-yellow) / 0.4);
+  }
+
+  /* BYJU-style organic blob background — for behind illustrations */
+  .pixo-blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(40px);
+    opacity: 0.5;
+    pointer-events: none;
+  }
+  .pixo-blob-coral {
+    background: hsl(var(--pixo-pink));
+  }
+  .pixo-blob-yellow {
+    background: hsl(var(--pixo-yellow));
+  }
+  .pixo-blob-sky {
+    background: hsl(var(--pixo-sky));
+  }
+  .pixo-blob-green {
+    background: hsl(var(--pixo-green));
+  }
+
+  /* BYJU-style pastel category tile */
+  .pixo-tile {
+    @apply rounded-[1.5rem] p-5 border border-border/30 transition-all duration-300 cursor-pointer;
+    box-shadow: var(--shadow-sm);
+  }
+  .pixo-tile:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-3px);
   }
 }
 
