@@ -1020,98 +1020,117 @@ export default function LessonSession() {
 
           {/* ==================== SENTENCES / GUIDED PRACTICE ==================== */}
           {phase === 'sentences' && lesson.sentences[currentIndex] && (
-            <div className="animate-fade-in flex flex-col items-center text-center space-y-6">
-              <p className="text-xs text-muted-foreground font-medium">
-                Practice {currentIndex + 1} of {lesson.sentences.length}
-              </p>
+            <div className="animate-fade-in flex flex-col items-center text-center space-y-5">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-card/80 backdrop-blur border border-border/40 shadow-pixo-sm">
+                <span className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
+                <p className="text-xs text-foreground font-semibold">
+                  Practice {currentIndex + 1} of {lesson.sentences.length}
+                </p>
+              </div>
 
-              {/* Guided practice cards */}
-              <div className="w-full space-y-3">
+              {/* Guided practice cards — colorful BYJU style */}
+              <div className="w-full space-y-2.5">
                 {[
-                  { icon: '🗣️', title: 'Speak Clearly', desc: 'Open your mouth wide like PIXO' },
-                  { icon: '👂', title: 'Listen Back', desc: 'Hear how you sound and try again' },
-                  { icon: '⭐', title: 'Earn a Star', desc: 'Every try brings a sticker!' },
+                  { icon: '🗣️', title: 'Speak Clearly', desc: 'Open your mouth wide like PIXO', bg: 'from-pixo-pink/40 to-pixo-pink/10', iconBg: 'bg-pixo-pink/30', accent: 'text-primary' },
+                  { icon: '👂', title: 'Listen Back', desc: 'Hear how you sound and try again', bg: 'from-pixo-sky/40 to-pixo-sky/10', iconBg: 'bg-pixo-sky/40', accent: 'text-pixo-blue' },
+                  { icon: '⭐', title: 'Earn a Star', desc: 'Every try brings a sticker!', bg: 'from-pixo-yellow/40 to-pixo-yellow/10', iconBg: 'bg-pixo-yellow/40', accent: 'text-pixo-orange' },
                 ].map((card, i) => (
-                  <div key={i} className="bg-card rounded-2xl p-4 flex items-center gap-4 border border-border/40 shadow-pixo-sm hover-lift tap-scale">
-                    <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-lg shrink-0">
+                  <div key={i} className={`bg-gradient-to-r ${card.bg} backdrop-blur-sm rounded-2xl p-3.5 flex items-center gap-3 border border-card/60 shadow-pixo-sm hover-lift tap-scale`}>
+                    <div className={`w-11 h-11 rounded-2xl ${card.iconBg} flex items-center justify-center text-xl shrink-0 shadow-pixo-sm`}>
                       {card.icon}
                     </div>
-                    <div className="text-left">
-                      <p className="font-display font-bold text-sm">{card.title}</p>
-                      <p className="text-xs text-muted-foreground">{card.desc}</p>
+                    <div className="text-left flex-1">
+                      <p className={`font-display font-bold text-sm ${card.accent}`}>{card.title}</p>
+                      <p className="text-xs text-foreground/70">{card.desc}</p>
                     </div>
                   </div>
                 ))}
               </div>
 
-              {/* Sentence prompt */}
-              <div className="w-full bg-muted/60 rounded-2xl p-5 border-2 border-dashed border-border">
-                <p className="text-lg font-display font-bold text-foreground mb-2">
+              {/* Sentence prompt — premium card */}
+              <div className="w-full bg-gradient-to-br from-card to-pixo-cream rounded-3xl p-5 border-2 border-dashed border-primary/30 shadow-pixo-md relative overflow-hidden">
+                <div className="absolute -top-4 -right-4 w-16 h-16 bg-accent/20 rounded-full blur-2xl" />
+                <p className="text-lg font-display font-bold text-foreground mb-2 relative">
                   "{lesson.sentences[currentIndex].text}"
                 </p>
-                <p className="text-xs text-muted-foreground">
-                  💡 {lesson.sentences[currentIndex].tip}
-                </p>
+                <div className="inline-flex items-center gap-1.5 mt-1 px-2.5 py-1 rounded-full bg-accent/20 relative">
+                  <span className="text-xs">💡</span>
+                  <p className="text-xs font-medium text-foreground/80">{lesson.sentences[currentIndex].tip}</p>
+                </div>
               </div>
 
+              {isRecording && (
+                <div className="flex items-end gap-1 h-10 justify-center">
+                  {Array.from({ length: 14 }).map((_, i) => (
+                    <div key={i} className="w-1.5 bg-gradient-to-t from-primary to-pixo-orange rounded-full animate-wave-bar"
+                      style={{ animationDelay: `${i * 0.08}s`, height: `${10 + Math.random() * 20}px` }} />
+                  ))}
+                </div>
+              )}
+
               {/* Mic controls */}
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={() => speakLesson(lesson.sentences[currentIndex].text)}
-                  disabled={isSpeaking}
-                  className="w-14 h-14 rounded-full bg-pixo-blue/10 text-pixo-blue flex items-center justify-center hover:bg-pixo-blue/20 transition-all active:scale-95"
-                >
-                  <Headphones className={`h-6 w-6 ${isSpeaking ? 'animate-pulse' : ''}`} />
-                </button>
+              <div className="flex items-end justify-center gap-6">
+                <div className="flex flex-col items-center gap-1.5">
+                  <button
+                    onClick={() => speakLesson(lesson.sentences[currentIndex].text)}
+                    disabled={isSpeaking}
+                    className="w-14 h-14 rounded-2xl bg-card text-pixo-blue flex items-center justify-center shadow-pixo-md border border-border/40 hover:scale-105 transition-all active:scale-95"
+                  >
+                    <Headphones className={`h-6 w-6 ${isSpeaking ? 'animate-pulse' : ''}`} />
+                  </button>
+                  <p className="text-[9px] text-muted-foreground font-medium">Listen</p>
+                </div>
 
-                <button
-                  onClick={isRecording ? stopRecording : startRecording}
-                  disabled={isEvaluating}
-                  className={`w-20 h-20 rounded-full flex items-center justify-center transition-all active:scale-95 shadow-pixo-lg ${
-                    isRecording
-                      ? 'bg-destructive text-destructive-foreground animate-pulse'
-                      : 'bg-gradient-to-t from-primary to-primary/80 text-primary-foreground'
-                  }`}
-                >
-                  {isRecording ? <MicOff className="h-8 w-8" /> : <Mic className="h-8 w-8" />}
-                </button>
+                <div className="flex flex-col items-center gap-1.5">
+                  <div className="relative">
+                    {isRecording && <div className="absolute inset-0 rounded-full bg-destructive/30 animate-mic-pulse-ring" />}
+                    <button
+                      onClick={isRecording ? stopRecording : startRecording}
+                      disabled={isEvaluating}
+                      className={`relative w-24 h-24 rounded-full flex items-center justify-center transition-all active:scale-95 shadow-pixo-xl z-10 border-[5px] border-card ${
+                        isRecording
+                          ? 'bg-gradient-to-b from-destructive to-destructive/80 text-destructive-foreground'
+                          : 'bg-gradient-to-b from-primary via-primary to-pixo-orange text-primary-foreground hover:scale-105'
+                      }`}
+                    >
+                      {isRecording ? <MicOff className="h-9 w-9" /> : <Mic className="h-9 w-9" />}
+                    </button>
+                  </div>
+                  <p className="text-xs text-foreground font-bold">
+                    {isRecording ? 'Tap to stop' : 'Tap to speak'}
+                  </p>
+                </div>
 
-                <div className="w-14 h-14" />
+                <div className="w-14 h-[68px]" />
               </div>
 
               {isEvaluating && (
-                <div className="flex items-center gap-2 text-muted-foreground animate-pulse">
-                  <RefreshCw className="h-4 w-4 animate-spin" />
-                  <span className="text-sm">Listening to your voice...</span>
+                <div className="flex items-center gap-2 text-muted-foreground bg-card px-4 py-2 rounded-full shadow-pixo-sm border border-border/40">
+                  <RefreshCw className="h-4 w-4 animate-spin text-primary" />
+                  <span className="text-sm font-medium">Listening to your voice...</span>
                 </div>
               )}
 
               {hasRecorded && scores.sentences[currentIndex] !== undefined && !isEvaluating && (
-                <div className="animate-scale-in bg-card rounded-2xl p-5 border border-border/40 shadow-pixo-md w-full">
+                <div className="animate-scale-in bg-gradient-to-br from-card to-pixo-cream rounded-3xl p-5 border-2 border-accent/30 shadow-pixo-lg w-full">
                   <div className="flex items-center justify-center gap-3 mb-3">
                     {[...Array(3)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`h-7 w-7 ${
-                          i < (scores.sentences[currentIndex] >= 80 ? 3 : scores.sentences[currentIndex] >= 60 ? 2 : 1)
-                            ? 'text-accent fill-accent'
-                            : 'text-muted'
-                        }`}
-                      />
+                      <Star key={i} className={`h-8 w-8 ${
+                        i < (scores.sentences[currentIndex] >= 80 ? 3 : scores.sentences[currentIndex] >= 60 ? 2 : 1)
+                          ? 'text-accent fill-accent animate-bounce-gentle' : 'text-muted'
+                      }`} style={{ animationDelay: `${i * 200}ms` }} />
                     ))}
                   </div>
-                  <p className="text-2xl font-bold text-secondary">{scores.sentences[currentIndex]}%</p>
-                  {currentFeedback && (
-                    <p className="text-xs text-muted-foreground mt-2">{currentFeedback.feedback}</p>
-                  )}
+                  <p className="text-3xl font-display font-extrabold gradient-text">{scores.sentences[currentIndex]}%</p>
+                  {currentFeedback && <p className="text-xs text-muted-foreground mt-2">{currentFeedback.feedback}</p>}
                 </div>
               )}
 
-              <div className="flex gap-3 w-full">
-                <Button variant="ghost" size="sm" className="flex-1" onClick={() => { setHasRecorded(true); nextItem(true); }}>
+              <div className="flex gap-3 w-full pt-2">
+                <Button variant="ghost" size="sm" className="flex-1 rounded-full" onClick={() => { setHasRecorded(true); nextItem(true); }}>
                   Skip
                 </Button>
-                <Button variant="gradient" className="flex-1" disabled={!hasRecorded || isEvaluating} onClick={() => nextItem()}>
+                <Button variant="gradient" className="flex-1 rounded-full shadow-pixo-md" disabled={!hasRecorded || isEvaluating} onClick={() => nextItem()}>
                   Next <ArrowRight className="h-4 w-4 ml-1" />
                 </Button>
               </div>
