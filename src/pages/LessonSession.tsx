@@ -1139,74 +1139,98 @@ export default function LessonSession() {
 
           {/* ==================== READ ALOUD / SPEAK & RECORD ==================== */}
           {phase === 'read_aloud' && (
-            <div className="animate-fade-in flex flex-col items-center text-center space-y-6">
-              <div className="w-14 h-14 rounded-full bg-secondary/10 flex items-center justify-center">
-                <FileText className="h-7 w-7 text-secondary" />
+            <div className="animate-fade-in flex flex-col items-center text-center space-y-5">
+              <div className="relative">
+                <div className="absolute -inset-4 bg-secondary/20 rounded-full blur-2xl" />
+                <div className="relative w-20 h-20 rounded-3xl bg-gradient-to-br from-secondary to-pixo-green flex items-center justify-center shadow-pixo-lg border-4 border-card">
+                  <FileText className="h-9 w-9 text-secondary-foreground" />
+                </div>
+                <Sparkles className="absolute -top-1 -right-1 h-5 w-5 text-pixo-yellow animate-pulse" />
               </div>
 
-              <h2 className="font-display font-bold text-xl">Speak & Record</h2>
-              <p className="text-xs text-muted-foreground">Read along and record your voice</p>
-
-              <div className="w-full bg-card rounded-2xl p-6 border border-border/40 shadow-pixo-md">
-                <p className="text-base leading-relaxed">{lesson.read_aloud_text}</p>
+              <div className="space-y-1">
+                <h2 className="font-display font-extrabold text-2xl text-foreground">Speak & Record 📖</h2>
+                <p className="text-sm text-muted-foreground">Read along and record your voice</p>
               </div>
 
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={() => speakLesson(lesson.read_aloud_text || '')}
-                  disabled={isSpeaking}
-                  className="w-14 h-14 rounded-full bg-pixo-blue/10 text-pixo-blue flex items-center justify-center hover:bg-pixo-blue/20 transition-all active:scale-95"
-                >
-                  <Volume2 className={`h-6 w-6 ${isSpeaking ? 'animate-pulse' : ''}`} />
-                </button>
+              {/* Read aloud card — premium with gradient */}
+              <div className="w-full bg-gradient-to-br from-card via-card to-pixo-cream rounded-3xl p-6 border-2 border-secondary/20 shadow-pixo-lg relative overflow-hidden">
+                <div className="absolute -top-6 -left-6 w-24 h-24 bg-pixo-yellow/20 rounded-full blur-2xl" />
+                <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-secondary/20 rounded-full blur-2xl" />
+                <p className="text-base leading-relaxed font-medium relative">{lesson.read_aloud_text}</p>
+              </div>
 
-                <button
-                  onClick={isRecording ? stopRecording : startRecording}
-                  disabled={isEvaluating}
-                  className={`w-20 h-20 rounded-full flex items-center justify-center transition-all active:scale-95 shadow-pixo-lg ${
-                    isRecording
-                      ? 'bg-destructive text-destructive-foreground animate-pulse'
-                      : 'bg-gradient-to-t from-primary to-primary/80 text-primary-foreground'
-                  }`}
-                >
-                  {isRecording ? <MicOff className="h-8 w-8" /> : <Mic className="h-8 w-8" />}
-                </button>
-                <div className="w-14 h-14" />
+              {isRecording && (
+                <div className="flex items-end gap-1 h-10 justify-center">
+                  {Array.from({ length: 14 }).map((_, i) => (
+                    <div key={i} className="w-1.5 bg-gradient-to-t from-primary to-pixo-orange rounded-full animate-wave-bar"
+                      style={{ animationDelay: `${i * 0.08}s`, height: `${10 + Math.random() * 20}px` }} />
+                  ))}
+                </div>
+              )}
+
+              <div className="flex items-end justify-center gap-6">
+                <div className="flex flex-col items-center gap-1.5">
+                  <button
+                    onClick={() => speakLesson(lesson.read_aloud_text || '')}
+                    disabled={isSpeaking}
+                    className="w-14 h-14 rounded-2xl bg-card text-pixo-blue flex items-center justify-center shadow-pixo-md border border-border/40 hover:scale-105 transition-all active:scale-95"
+                  >
+                    <Volume2 className={`h-6 w-6 ${isSpeaking ? 'animate-pulse' : ''}`} />
+                  </button>
+                  <p className="text-[9px] text-muted-foreground font-medium">Listen</p>
+                </div>
+
+                <div className="flex flex-col items-center gap-1.5">
+                  <div className="relative">
+                    {isRecording && <div className="absolute inset-0 rounded-full bg-destructive/30 animate-mic-pulse-ring" />}
+                    <button
+                      onClick={isRecording ? stopRecording : startRecording}
+                      disabled={isEvaluating}
+                      className={`relative w-24 h-24 rounded-full flex items-center justify-center transition-all active:scale-95 shadow-pixo-xl z-10 border-[5px] border-card ${
+                        isRecording
+                          ? 'bg-gradient-to-b from-destructive to-destructive/80 text-destructive-foreground'
+                          : 'bg-gradient-to-b from-primary via-primary to-pixo-orange text-primary-foreground hover:scale-105'
+                      }`}
+                    >
+                      {isRecording ? <MicOff className="h-9 w-9" /> : <Mic className="h-9 w-9" />}
+                    </button>
+                  </div>
+                  <p className="text-xs text-foreground font-bold">
+                    {isRecording ? 'Tap to stop' : 'Tap to read'}
+                  </p>
+                </div>
+
+                <div className="w-14 h-[68px]" />
               </div>
 
               {isEvaluating && (
-                <div className="flex items-center gap-2 text-muted-foreground animate-pulse">
-                  <RefreshCw className="h-4 w-4 animate-spin" />
-                  <span className="text-sm">Analyzing...</span>
+                <div className="flex items-center gap-2 text-muted-foreground bg-card px-4 py-2 rounded-full shadow-pixo-sm border border-border/40">
+                  <RefreshCw className="h-4 w-4 animate-spin text-primary" />
+                  <span className="text-sm font-medium">Analyzing...</span>
                 </div>
               )}
 
               {hasRecorded && scores.readAloud !== null && !isEvaluating && (
-                <div className="animate-scale-in bg-card rounded-2xl p-5 border border-border/40 shadow-pixo-md w-full">
+                <div className="animate-scale-in bg-gradient-to-br from-card to-pixo-cream rounded-3xl p-5 border-2 border-accent/30 shadow-pixo-lg w-full">
                   <div className="flex items-center justify-center gap-3 mb-3">
                     {[...Array(3)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`h-7 w-7 ${
-                          i < (scores.readAloud! >= 80 ? 3 : scores.readAloud! >= 60 ? 2 : 1)
-                            ? 'text-accent fill-accent'
-                            : 'text-muted'
-                        }`}
-                      />
+                      <Star key={i} className={`h-8 w-8 ${
+                        i < (scores.readAloud! >= 80 ? 3 : scores.readAloud! >= 60 ? 2 : 1)
+                          ? 'text-accent fill-accent animate-bounce-gentle' : 'text-muted'
+                      }`} style={{ animationDelay: `${i * 200}ms` }} />
                     ))}
                   </div>
-                  <p className="text-2xl font-bold text-secondary">{scores.readAloud}%</p>
-                  {currentFeedback && (
-                    <p className="text-xs text-muted-foreground mt-2">{currentFeedback.feedback}</p>
-                  )}
+                  <p className="text-3xl font-display font-extrabold gradient-text">{scores.readAloud}%</p>
+                  {currentFeedback && <p className="text-xs text-muted-foreground mt-2">{currentFeedback.feedback}</p>}
                 </div>
               )}
 
-              <div className="flex gap-3 w-full">
-                <Button variant="ghost" size="sm" className="flex-1" onClick={() => { setHasRecorded(true); nextItem(true); }}>
+              <div className="flex gap-3 w-full pt-2">
+                <Button variant="ghost" size="sm" className="flex-1 rounded-full" onClick={() => { setHasRecorded(true); nextItem(true); }}>
                   Skip
                 </Button>
-                <Button variant="gradient" className="flex-1" disabled={!hasRecorded || isEvaluating} onClick={() => nextItem()}>
+                <Button variant="gradient" className="flex-1 rounded-full shadow-pixo-md" disabled={!hasRecorded || isEvaluating} onClick={() => nextItem()}>
                   Continue to Game <ArrowRight className="h-4 w-4 ml-1" />
                 </Button>
               </div>
