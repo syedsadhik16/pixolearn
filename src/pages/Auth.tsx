@@ -257,57 +257,63 @@ export default function Auth() {
 
   return (
     <Layout showNavbar={false}>
-      <div className="min-h-screen flex">
+      <div className="min-h-screen flex bg-background relative overflow-hidden">
+        {/* Decorative background blobs */}
+        <div className="pixo-blob pixo-blob-coral w-96 h-96 -top-20 -left-20 opacity-30" />
+        <div className="pixo-blob pixo-blob-yellow w-80 h-80 bottom-0 right-1/3 opacity-20" />
+
         {/* Left side - Branding */}
-        <div className="hidden lg:flex lg:w-1/2 gradient-bg items-center justify-center p-12">
-          <div className="text-center space-y-8 animate-fade-in">
-            <img src={pixoLogo} alt="PIXO" className="h-32 mx-auto animate-float" />
+        <div className="hidden lg:flex lg:w-1/2 gradient-bg items-center justify-center p-12 relative overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.15),transparent_60%)]" />
+          <div className="text-center space-y-8 animate-fade-in relative z-10 max-w-md">
+            <img src={pixoLogo} alt="PIXO" className="h-20 mx-auto animate-float" />
             <div className="space-y-4">
-              <h1 className="text-4xl font-display font-bold text-white">{t("energyLearnGrow")}</h1>
-              <p className="text-xl text-white/90 max-w-md">{t("heroDescription")}</p>
+              <h1 className="text-4xl font-display font-bold text-white leading-tight">{t("energyLearnGrow")}</h1>
+              <p className="text-lg text-white/90">{t("heroDescription")}</p>
             </div>
-            <div className="flex justify-center gap-6 text-white/80">
+            <div className="grid grid-cols-3 gap-4 bg-white/10 backdrop-blur rounded-3xl p-6 border border-white/20">
               <div className="text-center">
-                <p className="text-3xl font-bold">180</p>
-                <p className="text-sm">Days</p>
+                <p className="text-3xl font-display font-bold text-white">180</p>
+                <p className="text-xs text-white/80 mt-1">Days</p>
+              </div>
+              <div className="text-center border-x border-white/20">
+                <p className="text-3xl font-display font-bold text-white">500+</p>
+                <p className="text-xs text-white/80 mt-1">{t("lessons")}</p>
               </div>
               <div className="text-center">
-                <p className="text-3xl font-bold">500+</p>
-                <p className="text-sm">{t("lessons")}</p>
-              </div>
-              <div className="text-center">
-                <p className="text-3xl font-bold">95%</p>
-                <p className="text-sm">Success</p>
+                <p className="text-3xl font-display font-bold text-white">95%</p>
+                <p className="text-xs text-white/80 mt-1">Success</p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Right side - Auth Form */}
-        <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
-          <div className="w-full max-w-md space-y-8 animate-slide-up">
-            <div className="lg:hidden text-center mb-8">
-              <img src={pixoLogo} alt="PIXO" className="h-16 mx-auto" />
+        {/* Right side - Auth Form (premium card) */}
+        <div className="w-full lg:w-1/2 flex items-center justify-center p-6 md:p-8 relative z-10">
+          <div className="w-full max-w-md space-y-6 animate-slide-up">
+            <div className="lg:hidden text-center mb-4">
+              <img src={pixoLogo} alt="PIXO" className="h-14 mx-auto" />
             </div>
 
-            <div className="text-center space-y-2">
-              <h2 className="text-3xl font-display font-bold">
-                {isResetPassword ? t("resetPassword") : isSignUp ? t("createAccount") : t("welcomeBack")}
-              </h2>
-              <p className="text-muted-foreground">
-                {isResetPassword ? t("enterResetEmail") : isSignUp ? t("startJourneyToday") : t("continueJourney")}
-              </p>
-            </div>
-
-            {/* Account exists notice */}
-            {accountExistsNotice && !isSignUp && (
-              <div className="bg-primary/10 border border-primary/20 rounded-2xl p-4 text-center animate-fade-in">
-                <p className="text-sm font-semibold text-primary">{t("accountExists") || "Account already exists"}</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {t("accountExistsDesc") || "This email is already registered. Please enter your password to sign in."}
+            <div className="bg-white rounded-[2rem] p-8 shadow-pixo-lg border border-border/30 space-y-6">
+              <div className="text-center space-y-2">
+                <h2 className="text-3xl font-display font-bold">
+                  {isResetPassword ? t("resetPassword") : isSignUp ? t("createAccount") : t("welcomeBack")}
+                </h2>
+                <p className="text-muted-foreground text-sm">
+                  {isResetPassword ? t("enterResetEmail") : isSignUp ? t("startJourneyToday") : t("continueJourney")}
                 </p>
               </div>
-            )}
+
+              {/* Account exists notice */}
+              {accountExistsNotice && !isSignUp && (
+                <div className="bg-primary/10 border border-primary/20 rounded-2xl p-4 text-center animate-fade-in">
+                  <p className="text-sm font-semibold text-primary">{t("accountExists") || "Account already exists"}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {t("accountExistsDesc") || "This email is already registered. Please enter your password to sign in."}
+                  </p>
+                </div>
+              )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
               {isSignUp && !isResetPassword && (
