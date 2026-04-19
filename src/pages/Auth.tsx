@@ -473,8 +473,9 @@ export default function Auth() {
               </div>
             )}
 
-            {/* Organization note */}
-            <p className="text-center text-xs text-muted-foreground">PIXO Learn • Organization Access Only</p>
+              {/* Organization note */}
+              <p className="text-center text-xs text-muted-foreground">PIXO Learn • Organization Access Only</p>
+            </div>
           </div>
         </div>
       </div>
