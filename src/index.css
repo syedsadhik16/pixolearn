@@ -237,6 +237,51 @@
     box-shadow: var(--shadow-md);
     transform: translateY(-3px);
   }
+
+  /* Journey roadmap nodes */
+  .journey-node {
+    @apply relative flex items-center justify-center rounded-full font-display font-bold transition-all duration-300;
+    width: 64px;
+    height: 64px;
+    box-shadow: var(--shadow-md);
+  }
+  .journey-node-completed {
+    background: linear-gradient(135deg, hsl(var(--secondary)), hsl(150 60% 45%));
+    color: hsl(var(--secondary-foreground));
+  }
+  .journey-node-current {
+    background: var(--gradient-primary);
+    color: hsl(var(--primary-foreground));
+    transform: scale(1.15);
+    box-shadow: 0 0 0 6px hsl(var(--primary) / 0.15), var(--shadow-lg);
+  }
+  .journey-node-locked {
+    @apply bg-muted text-muted-foreground/60;
+  }
+  .journey-node-milestone {
+    box-shadow: 0 0 0 4px hsl(var(--accent) / 0.4), var(--shadow-md);
+  }
+  .journey-node-pulse-ring {
+    @apply absolute inset-0 rounded-full pointer-events-none;
+    box-shadow: 0 0 0 0 hsl(var(--primary) / 0.6);
+    animation: journey-pulse 2s ease-out infinite;
+  }
+  @keyframes journey-pulse {
+    0% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.5); }
+    100% { box-shadow: 0 0 0 18px hsl(var(--primary) / 0); }
+  }
+
+  /* Journey phase chip */
+  .journey-phase-chip {
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-display font-bold uppercase tracking-wide;
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* Floating current-lesson card */
+  .journey-current-card {
+    @apply bg-white rounded-3xl p-4 border border-border/30;
+    box-shadow: var(--shadow-lg);
+  }
 }
 
 @layer utilities {
