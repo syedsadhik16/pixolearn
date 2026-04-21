@@ -197,6 +197,6 @@ export async function saveResumeState(
 ) {
   await supabase
     .from('practice_sessions')
-    .update({ resume_state: resumeState, last_active_at: new Date().toISOString() })
+    .update({ resume_state: resumeState as never, last_active_at: new Date().toISOString() })
     .eq('id', sessionId);
 }
