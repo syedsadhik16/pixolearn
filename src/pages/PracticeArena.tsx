@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { Check, X, Lightbulb, Network, ArrowRight, PauseCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { PremiumLessonShell } from '@/components/lesson/PremiumLessonShell';
 import {
   STAGES,
   getOrCreateSession,
