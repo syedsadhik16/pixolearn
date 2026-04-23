@@ -167,14 +167,14 @@ export default function KnowledgeGraphPage() {
         )}
 
         {!isPremium && weeks.length > 2 && (
-          <Card className="p-5 rounded-3xl border-0 shadow-pixo-sm bg-gradient-to-br from-pixo-coral/15 to-card text-center mb-5">
-            <Lock className="h-7 w-7 mx-auto text-primary mb-2" />
-            <p className="text-sm font-semibold mb-1">{weeks.length - 2} more weeks locked</p>
-            <p className="text-xs text-muted-foreground mb-3">
-              Unlock the full Knowledge Graph with Premium
-            </p>
-            <Button size="sm" onClick={() => navigate('/pricing')}>Upgrade</Button>
-          </Card>
+          <div className="mb-5">
+            <PremiumUpgradeBanner
+              message={`${weeks.length - 2} more weeks of the Knowledge Graph are waiting.`}
+              modalTitle="Unlock the full Knowledge Graph"
+              modalDescription={`Premium reveals all ${weeks.length} weeks of curriculum mapping, mastery tracking, and concept connections.`}
+              source="knowledge_graph_locked_weeks"
+            />
+          </div>
         )}
 
         {/* Legend */}

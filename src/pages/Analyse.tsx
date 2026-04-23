@@ -292,15 +292,12 @@ function PerformanceTab({
             <h3 className="font-display font-bold text-base">Focus Areas</h3>
           </div>
           {!isPremium ? (
-            <div className="text-center py-3">
-              <Lock className="h-6 w-6 mx-auto text-muted-foreground mb-2" />
-              <p className="text-xs text-muted-foreground mb-3">
-                Unlock detailed weak-area insights with Premium
-              </p>
-              <Button size="sm" onClick={() => navigate('/pricing')}>
-                Upgrade
-              </Button>
-            </div>
+            <PremiumUpgradeBanner
+              message="See exactly which sounds and skills need more practice."
+              modalTitle="See your child's focus areas"
+              modalDescription="Premium unlocks AI-powered weak-area analysis, personalised recommendations, and the full Knowledge Graph."
+              source="analyse_focus_areas"
+            />
           ) : (
             <div className="space-y-2">
               {data.weak_skills.map((s) => (
