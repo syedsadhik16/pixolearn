@@ -269,15 +269,22 @@ export default function PracticeArena() {
               <ArrowRight className="h-4 w-4 ml-1" />
             </Button>
           )}
-        </div>
+        </PremiumLessonShell>
       </Layout>
     );
   }
 
   // Topic intro / stage flow
+  const stageOrder: PracticeStage[] = ['warmup', 'strides', 'sprint', 'laps'];
+  const introStageIdx = Math.max(0, stageOrder.indexOf(session?.current_stage ?? 'warmup'));
   return (
     <Layout>
-      <div className="min-h-screen pb-24 px-4 pt-4 max-w-2xl mx-auto">
+      <PremiumLessonShell
+        trail={STAGES.filter((s) => s.key !== 'complete').map((s) => ({ icon: s.emoji, label: s.label }))}
+        activeIndex={introStageIdx}
+        xpCurrent={(session?.correct_count ?? 0) * 10}
+        xpMax={Math.max(200, (session?.total_questions ?? 20) * 10)}
+      >
         <BackButton />
 
         <Card className="rounded-3xl border-0 shadow-pixo-md overflow-hidden mb-5 bg-gradient-to-br from-primary via-pixo-orange to-accent">
