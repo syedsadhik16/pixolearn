@@ -739,7 +739,7 @@ export default function LessonSession() {
       <PremiumLessonShell
         trail={phases.map((p) => ({ icon: PHASE_LABELS[p].icon, label: PHASE_LABELS[p].label }))}
         activeIndex={currentPhaseIdx}
-        xpCurrent={profile?.total_xp ?? 0}
+        xpCurrent={(profile as { total_xp?: number } | null)?.total_xp ?? 0}
         xpMax={2000}
       >
         {/* Top Header Bar */}
