@@ -18,7 +18,8 @@ export interface VoiceOption {
 }
 
 interface VoicePickerProps {
-  onVoiceChange: (voice: SpeechSynthesisVoice | null) => void;
+  /** Called with a SpeechSynthesisVoice for system voices, null for default, or a sample voice id string for pre-recorded narrators. */
+  onVoiceChange: (voice: SpeechSynthesisVoice | null, voiceURI?: string | null) => void;
   selectedVoiceURI?: string;
   compact?: boolean;
 }
@@ -63,8 +64,14 @@ export function VoicePicker({ onVoiceChange, selectedVoiceURI, compact = false }
   }, []);
 
   const previewVoice = (voiceURI: string) => {
+    if (isSampleVoice(voiceURI)) {
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      playSampleVoice(voiceURI, 1);
+      return;
+    }
     const voice = voices.find(v => v.voice.voiceURI === voiceURI)?.voice;
     if (!voice) return;
+    stopSampleVoice();
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance('Hello! This is how I sound.');
     u.voice = voice;
@@ -74,14 +81,17 @@ export function VoicePicker({ onVoiceChange, selectedVoiceURI, compact = false }
 
   const handleChange = (uri: string) => {
     if (uri === 'default') {
-      onVoiceChange(null);
+      onVoiceChange(null, null);
+    } else if (isSampleVoice(uri)) {
+      // Sample voices have no SpeechSynthesisVoice — pass null + the sample id.
+      onVoiceChange(null, uri);
     } else {
       const found = voices.find(v => v.voice.voiceURI === uri);
-      onVoiceChange(found?.voice ?? null);
+      onVoiceChange(found?.voice ?? null, found?.voice.voiceURI ?? null);
     }
   };
 
-  if (voices.length === 0) return null;
+  if (voices.length === 0 && SAMPLE_VOICES.length === 0) return null;
 
   return (
     <div className={compact ? "flex items-center gap-2" : "space-y-2"}>
@@ -93,6 +103,19 @@ export function VoicePicker({ onVoiceChange, selectedVoiceURI, compact = false }
           </SelectTrigger>
           <SelectContent className="max-h-60">
             <SelectItem value="default">Default Voice</SelectItem>
+            {SAMPLE_VOICES.length > 0 && (
+              <>
+                {SAMPLE_VOICES.map((sv) => (
+                  <SelectItem key={sv.id} value={sv.id}>
+                    <span className="flex items-center gap-1.5 text-xs">
+                      <Sparkles className="h-3 w-3 text-primary" />
+                      <span className="truncate max-w-[120px]">{sv.name}</span>
+                      <span className="text-muted-foreground">AI Narrator</span>
+                    </span>
+                  </SelectItem>
+                ))}
+              </>
+            )}
             {voices.map((v) => (
               <SelectItem key={v.voice.voiceURI} value={v.voice.voiceURI}>
                 <span className="flex items-center gap-1.5 text-xs">
