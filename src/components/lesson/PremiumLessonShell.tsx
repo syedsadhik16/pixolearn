@@ -1,5 +1,7 @@
 import { ReactNode } from 'react';
 import '@/styles/premium-lesson.css';
+import { VoicePicker } from '@/components/shared/VoicePicker';
+import { useSpeechSettings } from '@/hooks/useSpeechSettings';
 
 interface TrailStep {
   icon: string;
