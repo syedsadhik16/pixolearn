@@ -257,3 +257,18 @@
   .lp-trail-connector { max-width: 24px; }
   .lp-trail-label { font-size: 9px; }
 }
+
+/* ---- Voice picker on dark theme ---- */
+.lesson-premium-shell .lp-voice-picker [data-radix-select-trigger],
+.lesson-premium-shell .lp-voice-picker button {
+  background: var(--lp-surface);
+  border: 1px solid var(--lp-border);
+  color: var(--lp-text);
+  backdrop-filter: blur(8px);
+}
+.lesson-premium-shell .lp-voice-picker [data-radix-select-trigger]:hover,
+.lesson-premium-shell .lp-voice-picker button:hover {
+  background: var(--lp-surface2);
+  border-color: var(--lp-gold);
+  color: var(--lp-gold-light);
+}
