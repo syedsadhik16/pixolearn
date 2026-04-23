@@ -36,6 +36,7 @@ export function PremiumLessonShell({
   children,
 }: PremiumLessonShellProps) {
   const xpPct = Math.min(100, Math.max(0, (xpCurrent / Math.max(1, xpMax)) * 100));
+  const { settings, setVoiceURI } = useSpeechSettings();
 
   return (
     <div className="lesson-premium-shell">
@@ -47,7 +48,15 @@ export function PremiumLessonShell({
       <div className="lp-bg-grid" />
 
       <div className="lp-content max-w-lg mx-auto px-4 pb-10 pt-6">
-        {/* Progress trail */}
+        {/* Narrator voice picker */}
+        <div className="lp-voice-picker mb-3 flex justify-end">
+          <VoicePicker
+            compact
+            selectedVoiceURI={settings.voiceURI ?? undefined}
+            onVoiceChange={(_voice, uri) => setVoiceURI(uri ?? null)}
+          />
+        </div>
+
         {trail.length > 0 && (
           <div className="lp-trail">
             {trail.map((step, i) => {
