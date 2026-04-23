@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Network, Check, Lock, AlertCircle, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getKnowledgeGraph, type KnowledgeGraph, type GraphNode } from '@/lib/knowledgeGraph';
+import { PremiumUpgradeBanner } from '@/components/shared/PremiumUpgradeBanner';
 
 const NODE_STYLES: Record<
   GraphNode['mastery'],

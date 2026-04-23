@@ -15,6 +15,7 @@ import {
 import { Sparkles, TrendingUp, Target, Brain, Lock } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+import { PremiumUpgradeBanner } from '@/components/shared/PremiumUpgradeBanner';
 
 const LEVELS = [
   { no: 1, label: 'Level 1' },
