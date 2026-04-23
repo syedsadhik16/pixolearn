@@ -1334,8 +1334,7 @@ export default function LessonSession() {
               </div>
             </div>
           )}
-        </div>
-      </div>
+      </PremiumLessonShell>
     </Layout>
   );
 }
