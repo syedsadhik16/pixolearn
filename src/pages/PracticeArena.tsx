@@ -351,7 +351,7 @@ export default function PracticeArena() {
             </Button>
           </Card>
         )}
-      </div>
+      </PremiumLessonShell>
     </Layout>
   );
 }
