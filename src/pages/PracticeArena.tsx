@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { Check, X, Lightbulb, Network, ArrowRight, PauseCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { PremiumLessonShell } from '@/components/lesson/PremiumLessonShell';
 import {
   STAGES,
   getOrCreateSession,
@@ -172,12 +173,19 @@ export default function PracticeArena() {
   if (running && questions.length > 0) {
     const q = questions[qIndex];
     const isCorrect = selected === q.correct_answer;
+    const stageOrder: PracticeStage[] = ['warmup', 'strides', 'sprint', 'laps'];
+    const stageIdx = Math.max(0, stageOrder.indexOf(session?.current_stage ?? 'warmup'));
     return (
       <Layout>
-        <div className="min-h-screen p-4 max-w-2xl mx-auto pb-24">
+        <PremiumLessonShell
+          trail={STAGES.filter((s) => s.key !== 'complete').map((s) => ({ icon: s.emoji, label: s.label }))}
+          activeIndex={stageIdx}
+          xpCurrent={(session?.correct_count ?? 0) * 10}
+          xpMax={Math.max(200, (session?.total_questions ?? 20) * 10)}
+        >
           <div className="flex items-center justify-between mb-4">
             <BackButton />
-            <Button variant="ghost" size="sm" onClick={handlePause}>
+            <Button variant="ghost" size="sm" onClick={handlePause} style={{ color: 'var(--lp-text-muted)' }}>
               <PauseCircle className="h-4 w-4 mr-1" /> Pause
             </Button>
           </div>
@@ -261,15 +269,22 @@ export default function PracticeArena() {
               <ArrowRight className="h-4 w-4 ml-1" />
             </Button>
           )}
-        </div>
+        </PremiumLessonShell>
       </Layout>
     );
   }
 
   // Topic intro / stage flow
+  const stageOrder: PracticeStage[] = ['warmup', 'strides', 'sprint', 'laps'];
+  const introStageIdx = Math.max(0, stageOrder.indexOf(session?.current_stage ?? 'warmup'));
   return (
     <Layout>
-      <div className="min-h-screen pb-24 px-4 pt-4 max-w-2xl mx-auto">
+      <PremiumLessonShell
+        trail={STAGES.filter((s) => s.key !== 'complete').map((s) => ({ icon: s.emoji, label: s.label }))}
+        activeIndex={introStageIdx}
+        xpCurrent={(session?.correct_count ?? 0) * 10}
+        xpMax={Math.max(200, (session?.total_questions ?? 20) * 10)}
+      >
         <BackButton />
 
         <Card className="rounded-3xl border-0 shadow-pixo-md overflow-hidden mb-5 bg-gradient-to-br from-primary via-pixo-orange to-accent">
@@ -336,7 +351,7 @@ export default function PracticeArena() {
             </Button>
           </Card>
         )}
-      </div>
+      </PremiumLessonShell>
     </Layout>
   );
 }

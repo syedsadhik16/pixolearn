@@ -1,0 +1,259 @@
+/* ============================================================
+   PIXO Premium Lesson Theme — Dark navy + gold
+   Scoped under .lesson-premium-shell (does NOT change global PIXO colors).
+   Applied to LessonSession and PracticeArena only.
+   ============================================================ */
+
+.lesson-premium-shell {
+  --lp-deep: #0B0D1A;
+  --lp-deep2: #111526;
+  --lp-gold: #F5A623;
+  --lp-gold-light: #FFD580;
+  --lp-gold-glow: rgba(245, 166, 35, 0.35);
+  --lp-surface: rgba(255, 255, 255, 0.055);
+  --lp-surface2: rgba(255, 255, 255, 0.09);
+  --lp-border: rgba(255, 255, 255, 0.1);
+  --lp-border2: rgba(255, 255, 255, 0.18);
+  --lp-text: #F0EEF8;
+  --lp-text-muted: rgba(240, 238, 248, 0.55);
+  --lp-teal: #3ECFB2;
+  --lp-coral: #FF7A5C;
+  --lp-violet: #9B7FFF;
+  --lp-coral-deep: #E8402A;
+
+  position: relative;
+  min-height: 100vh;
+  background: var(--lp-deep);
+  color: var(--lp-text);
+  font-family: 'Nunito', sans-serif;
+  overflow-x: hidden;
+  isolation: isolate;
+}
+
+/* ---- Ambient orbs ---- */
+.lp-bg-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.lp-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.28;
+  animation: lp-drift 18s ease-in-out infinite alternate;
+}
+.lp-orb.o1 {
+  width: 640px; height: 640px;
+  background: radial-gradient(circle, #7C5CFF, transparent);
+  top: -180px; left: -160px;
+}
+.lp-orb.o2 {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, #F5A623, transparent);
+  top: 100px; right: -100px;
+  animation-delay: -6s;
+}
+.lp-orb.o3 {
+  width: 420px; height: 420px;
+  background: radial-gradient(circle, #3ECFB2, transparent);
+  bottom: -80px; left: 30%;
+  animation-delay: -12s;
+}
+@keyframes lp-drift {
+  from { transform: translate(0, 0) scale(1); }
+  to   { transform: translate(40px, 30px) scale(1.06); }
+}
+
+.lp-bg-grid {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 48px 48px;
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black, transparent);
+          mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black, transparent);
+}
+
+.lp-content {
+  position: relative;
+  z-index: 1;
+}
+
+/* ---- Progress trail (6 stages) ---- */
+.lp-trail {
+  width: 100%;
+  max-width: 780px;
+  margin: 0 auto 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: lp-fadeInDown 0.6s ease both;
+}
+.lp-trail-step {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+}
+.lp-trail-icon {
+  width: 44px; height: 44px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  border: 2px solid transparent;
+  transition: transform 0.3s;
+}
+.lp-trail-step.done .lp-trail-icon {
+  background: linear-gradient(135deg, #3ECFB2, #1FA88A);
+  border-color: rgba(62, 207, 178, 0.4);
+  box-shadow: 0 0 20px rgba(62, 207, 178, 0.3);
+  color: #fff;
+}
+.lp-trail-step.active .lp-trail-icon {
+  background: linear-gradient(135deg, #F5A623, #FF7A5C);
+  border-color: rgba(245, 166, 35, 0.5);
+  box-shadow: 0 0 24px rgba(245, 166, 35, 0.4);
+  animation: lp-bounce-icon 1.4s ease-in-out infinite;
+  color: #fff;
+}
+.lp-trail-step.locked .lp-trail-icon {
+  background: var(--lp-surface);
+  border-color: var(--lp-border);
+  opacity: 0.5;
+  color: var(--lp-text-muted);
+}
+.lp-trail-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--lp-text-muted);
+}
+.lp-trail-step.active .lp-trail-label { color: var(--lp-gold-light); }
+.lp-trail-connector {
+  flex: 1; height: 2px; max-width: 60px;
+  background: var(--lp-border);
+  margin: 0 4px 22px;
+}
+.lp-trail-connector.filled {
+  background: linear-gradient(90deg, #3ECFB2, #3ECFB2);
+}
+@keyframes lp-bounce-icon {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-5px); }
+}
+
+/* ---- Glass card ---- */
+.lp-card {
+  border-radius: 32px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  box-shadow: 0 40px 120px rgba(0, 0, 0, 0.5),
+              0 0 0 0.5px rgba(255, 255, 255, 0.08) inset;
+  color: var(--lp-text);
+}
+
+/* ---- Override common Tailwind/PIXO surfaces to dark inside the shell ---- */
+.lesson-premium-shell .pixo-surface,
+.lesson-premium-shell .pixo-surface-soft {
+  background: transparent !important;
+}
+.lesson-premium-shell .pixo-blob {
+  display: none !important;
+}
+.lesson-premium-shell .bg-background,
+.lesson-premium-shell .bg-card,
+.lesson-premium-shell .bg-muted,
+.lesson-premium-shell .bg-muted\/60,
+.lesson-premium-shell .bg-muted\/50,
+.lesson-premium-shell .bg-card\/80 {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+  color: var(--lp-text);
+}
+.lesson-premium-shell .text-muted-foreground {
+  color: var(--lp-text-muted) !important;
+}
+.lesson-premium-shell .text-foreground {
+  color: var(--lp-text) !important;
+}
+.lesson-premium-shell .border-border\/40,
+.lesson-premium-shell .border-border\/30,
+.lesson-premium-shell .border-border {
+  border-color: var(--lp-border2) !important;
+}
+.lesson-premium-shell .text-primary {
+  color: var(--lp-gold-light) !important;
+}
+.lesson-premium-shell .from-card,
+.lesson-premium-shell .to-card,
+.lesson-premium-shell .via-card {
+  --tw-gradient-from: rgba(255, 255, 255, 0.08) var(--tw-gradient-from-position) !important;
+  --tw-gradient-to:   rgba(255, 255, 255, 0.04) var(--tw-gradient-to-position) !important;
+}
+.lesson-premium-shell .to-pixo-cream,
+.lesson-premium-shell .from-pixo-cream {
+  --tw-gradient-to:   rgba(245, 166, 35, 0.08) var(--tw-gradient-to-position) !important;
+  --tw-gradient-from: rgba(245, 166, 35, 0.08) var(--tw-gradient-from-position) !important;
+}
+
+/* ---- XP bar ---- */
+.lp-xp-bar {
+  width: 100%;
+  max-width: 560px;
+  margin: 28px auto 0;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 4px;
+  animation: lp-fadeInUp 0.9s ease both;
+}
+.lp-xp-label {
+  font-size: 12px; font-weight: 800; min-width: 32px;
+  color: var(--lp-gold-light);
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+.lp-xp-track {
+  flex: 1; height: 8px; border-radius: 99px;
+  background: var(--lp-surface2);
+  border: 0.5px solid var(--lp-border);
+  overflow: hidden;
+}
+.lp-xp-fill {
+  height: 100%; border-radius: 99px;
+  background: linear-gradient(90deg, #F5A623, #FFD580);
+  box-shadow: 0 0 12px rgba(245, 166, 35, 0.5);
+  transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.lp-xp-pts {
+  font-size: 12px; font-weight: 800;
+  color: var(--lp-text-muted);
+}
+
+/* ---- Animations ---- */
+@keyframes lp-fadeInDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes lp-fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ---- Glow sphere (used in intro/vocabulary tweaks) ---- */
+.lp-sphere {
+  background: radial-gradient(circle at 35% 30%, #FFDA80, #F5A623 45%, #D4781A 75%, #8A4500) !important;
+  box-shadow:
+    0 0 0 1px rgba(255, 218, 128, 0.3),
+    0 0 40px rgba(245, 166, 35, 0.5),
+    0 0 80px rgba(245, 166, 35, 0.2),
+    inset -30px -20px 60px rgba(0, 0, 0, 0.4),
+    inset 20px 15px 40px rgba(255, 255, 255, 0.15) !important;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 600px) {
+  .lp-trail-icon { width: 38px; height: 38px; font-size: 16px; }
+  .lp-trail-connector { max-width: 24px; }
+  .lp-trail-label { font-size: 9px; }
+}

@@ -81,6 +81,7 @@ import { useSpeechSettings } from '@/hooks/useSpeechSettings';
 import { SpeechControls } from '@/components/shared/SpeechControls';
 import { BackButton } from '@/components/shared/BackButton';
 import { useLessonResume } from '@/hooks/useLessonResume';
+import { PremiumLessonShell } from '@/components/lesson/PremiumLessonShell';
 
 interface Lesson {
   id: string;
@@ -735,68 +736,26 @@ export default function LessonSession() {
         icon="⭐"
       />
 
-      <div className="min-h-screen pixo-surface relative overflow-hidden">
-        {/* Decorative pastel blobs — BYJU-style ambient color */}
-        <div className="pixo-blob pixo-blob-coral w-72 h-72 -top-20 -left-20 opacity-40" />
-        <div className="pixo-blob pixo-blob-yellow w-80 h-80 top-40 -right-32 opacity-30" />
-        <div className="pixo-blob pixo-blob-sky w-64 h-64 bottom-20 -left-24 opacity-30" />
-        <div className="absolute inset-0 opacity-[0.025] pointer-events-none"
-          style={{ backgroundImage: 'radial-gradient(hsl(var(--foreground)) 1px, transparent 1px)', backgroundSize: '36px 36px' }}
-        />
-
-        <div className="relative z-10 max-w-lg mx-auto px-4 pb-10 pt-4">
-          {/* Top Header Bar */}
-          <div className="flex items-center justify-between mb-4">
-            <BackButton fallback="/student" label="" />
-            <div className="text-center flex-1">
-              <p className="text-xs text-muted-foreground font-medium">Day {lesson.day_number}</p>
-              <h1 className="font-display font-bold text-sm truncate">{lesson.title}</h1>
-            </div>
-            <SpeechControls
-              rate={speechSettings.rate}
-              voiceURI={speechSettings.voiceURI}
-              onRateChange={setRate}
-              onVoiceChange={setVoiceURI}
-            />
+      <PremiumLessonShell
+        trail={phases.map((p) => ({ icon: PHASE_LABELS[p].icon, label: PHASE_LABELS[p].label }))}
+        activeIndex={currentPhaseIdx}
+        xpCurrent={(profile as { total_xp?: number } | null)?.total_xp ?? 0}
+        xpMax={2000}
+      >
+        {/* Top Header Bar */}
+        <div className="flex items-center justify-between mb-4">
+          <BackButton fallback="/student" label="" />
+          <div className="text-center flex-1">
+            <p className="text-xs lp-trail-label" style={{ color: 'var(--lp-text-muted)' }}>Day {lesson.day_number}</p>
+            <h1 className="font-display font-bold text-sm truncate" style={{ color: 'var(--lp-text)' }}>{lesson.title}</h1>
           </div>
-
-          {/* Progress Bar — rounded capsule style */}
-          <div className="mb-6">
-            <div className="h-3 w-full bg-muted rounded-full p-0.5 shadow-inner">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-primary to-accent transition-all duration-700 ease-out flex justify-end items-center px-1"
-                style={{ width: `${Math.max(getProgress(), 4)}%` }}
-              >
-                {getProgress() > 10 && <div className="w-1.5 h-1.5 bg-primary-foreground rounded-full" />}
-              </div>
-            </div>
-          </div>
-
-          {/* Phase Step Dots */}
-          <div className="flex justify-center gap-2 mb-6">
-            {phases.map((p, i) => (
-              <div key={p} className="flex items-center gap-2">
-                <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 ${
-                    phase === p
-                      ? 'bg-primary text-primary-foreground scale-110 shadow-pixo-md'
-                      : currentPhaseIdx > i
-                      ? 'bg-secondary text-secondary-foreground'
-                      : 'bg-muted text-muted-foreground'
-                  }`}
-                >
-                  {currentPhaseIdx > i ? (
-                    <CheckCircle2 className="h-4 w-4" />
-                  ) : (
-                    <span className="text-xs">{PHASE_LABELS[p].icon}</span>
-                  )}
-                </div>
-                {i < phases.length - 1 && (
-                  <div className={`w-4 h-0.5 rounded ${currentPhaseIdx > i ? 'bg-secondary' : 'bg-muted'}`} />
-                )}
-              </div>
-            ))}
-          </div>
+          <SpeechControls
+            rate={speechSettings.rate}
+            voiceURI={speechSettings.voiceURI}
+            onRateChange={setRate}
+            onVoiceChange={setVoiceURI}
+          />
+        </div>
 
           {/* ==================== INTRO / WELCOME ==================== */}
           {phase === 'intro' && (
@@ -1375,8 +1334,7 @@ export default function LessonSession() {
               </div>
             </div>
           )}
-        </div>
-      </div>
+      </PremiumLessonShell>
     </Layout>
   );
 }
