@@ -11,6 +11,8 @@ import { toast } from 'sonner';
 import { Check, X, Lightbulb, Network, ArrowRight, PauseCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { PremiumLessonShell } from '@/components/lesson/PremiumLessonShell';
+import { PremiumUpgradeDialog } from '@/components/shared/PremiumUpgradeDialog';
+import { PremiumUpgradeBanner } from '@/components/shared/PremiumUpgradeBanner';
 import {
   STAGES,
   getOrCreateSession,
@@ -44,6 +46,7 @@ export default function PracticeArena() {
   const [running, setRunning] = useState(false);
   const startTime = useRef<number>(Date.now());
   const freeAttemptsLeft = useRef(5);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
 
   const currentStageMeta =
     STAGES.find((s) => s.key === session?.current_stage) ?? STAGES[0];
@@ -63,8 +66,7 @@ export default function PracticeArena() {
   const loadStageQuestions = async () => {
     if (!session) return;
     if (!isPremium && freeAttemptsLeft.current <= 0) {
-      toast.error('Free practice limit reached. Upgrade for unlimited!');
-      navigate('/pricing');
+      setUpgradeOpen(true);
       return;
     }
     setLoading(true);
@@ -342,15 +344,22 @@ export default function PracticeArena() {
         </Button>
 
         {!isPremium && (
-          <Card className="p-4 rounded-2xl border-0 shadow-pixo-sm bg-gradient-to-br from-pixo-coral/15 to-card text-center">
-            <p className="text-xs text-muted-foreground mb-2">
-              Free plan: 5 practice questions per day
-            </p>
-            <Button size="sm" variant="outline" onClick={() => navigate('/pricing')}>
-              Unlock unlimited practice
-            </Button>
-          </Card>
+          <PremiumUpgradeBanner
+            variant="strip"
+            message="Free plan: 5 practice questions per day. Go unlimited."
+            modalTitle="Unlimited daily practice"
+            modalDescription="Premium gives you unlimited practice across all skills, with adaptive difficulty and full progress tracking."
+            source="practice_arena_intro"
+          />
         )}
+
+        <PremiumUpgradeDialog
+          open={upgradeOpen}
+          onOpenChange={setUpgradeOpen}
+          title="Daily practice limit reached"
+          description="You've used all 5 free practice questions for today. Upgrade to Premium for unlimited practice — no waiting."
+          source="practice_arena_limit"
+        />
       </PremiumLessonShell>
     </Layout>
   );
