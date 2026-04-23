@@ -7,7 +7,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Volume2 } from 'lucide-react';
+import { Volume2, Sparkles } from 'lucide-react';
+import { SAMPLE_VOICES, isSampleVoice, playSampleVoice, stopSampleVoice } from '@/lib/sampleVoices';
 
 export interface VoiceOption {
   voice: SpeechSynthesisVoice;

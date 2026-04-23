@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { isSampleVoice, playSampleVoice, stopSampleVoice } from '@/lib/sampleVoices';
 
 export interface SpeechSettings {
   rate: number;
@@ -39,8 +40,16 @@ export function useSpeechSettings() {
   }, []);
 
   const speak = useCallback((text: string, onStart?: () => void, onEnd?: () => void) => {
+    // Sample narrator voices play a pre-recorded clip instead of TTS.
+    if (isSampleVoice(settings.voiceURI)) {
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      playSampleVoice(settings.voiceURI as string, settings.rate, onStart, onEnd);
+      return;
+    }
+
     if (!('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
+    stopSampleVoice();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = settings.rate;
     utterance.pitch = 1;
