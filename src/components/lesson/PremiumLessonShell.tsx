@@ -37,7 +37,11 @@ export function PremiumLessonShell({
   children,
 }: PremiumLessonShellProps) {
   const xpPct = Math.min(100, Math.max(0, (xpCurrent / Math.max(1, xpMax)) * 100));
-  const { settings, setVoiceURI } = useSpeechSettings();
+  const { settings, setVoiceURI, pause, resume, replay, playbackState, hasSpoken } =
+    useSpeechSettings();
+  const isPlaying = playbackState === 'playing';
+  const isPaused = playbackState === 'paused';
+  const canControl = hasSpoken || isPlaying || isPaused;
 
   return (
     <div className="lesson-premium-shell">
@@ -49,8 +53,34 @@ export function PremiumLessonShell({
       <div className="lp-bg-grid" />
 
       <div className="lp-content max-w-lg mx-auto px-4 pb-10 pt-6">
-        {/* Narrator voice picker */}
-        <div className="lp-voice-picker mb-3 flex justify-end">
+        {/* Narrator voice picker + playback controls */}
+        <div className="lp-voice-picker mb-3 flex justify-end items-center gap-2">
+          <div
+            className="lp-playback-controls"
+            role="group"
+            aria-label="Narrator playback"
+          >
+            <button
+              type="button"
+              className="lp-pb-btn"
+              onClick={isPlaying ? pause : resume}
+              disabled={!canControl}
+              aria-label={isPlaying ? 'Pause narrator' : 'Resume narrator'}
+              title={isPlaying ? 'Pause' : 'Play'}
+            >
+              {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+            </button>
+            <button
+              type="button"
+              className="lp-pb-btn"
+              onClick={replay}
+              disabled={!canControl}
+              aria-label="Replay narrator"
+              title="Replay"
+            >
+              <RotateCcw className="h-4 w-4" />
+            </button>
+          </div>
           <VoicePicker
             compact
             selectedVoiceURI={settings.voiceURI ?? undefined}
