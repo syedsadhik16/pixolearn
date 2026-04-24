@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import '@/styles/premium-lesson.css';
 import { VoicePicker } from '@/components/shared/VoicePicker';
 import { useSpeechSettings } from '@/hooks/useSpeechSettings';
+import { Play, Pause, RotateCcw } from 'lucide-react';
 
 interface TrailStep {
   icon: string;
