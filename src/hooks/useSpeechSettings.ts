@@ -1,5 +1,13 @@
-import { useState, useEffect, useCallback } from 'react';
-import { isSampleVoice, playSampleVoice, stopSampleVoice } from '@/lib/sampleVoices';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import {
+  isSampleVoice,
+  playSampleVoice,
+  stopSampleVoice,
+  pauseSampleVoice,
+  resumeSampleVoice,
+  replaySampleVoice,
+  getSampleAudio,
+} from '@/lib/sampleVoices';
 
 export interface SpeechSettings {
   rate: number;
@@ -17,6 +25,17 @@ const NAMED_VOICES: Record<string, string[]> = {
   'Meke': ['google', 'cortana', 'microsoft'],
 };
 
+// Module-level state so playback controls stay in sync across hook instances
+// (e.g. the screen that calls speak() and the shell that renders controls).
+type SpeechState = 'idle' | 'playing' | 'paused';
+let currentState: SpeechState = 'idle';
+let lastText: string | null = null;
+const listeners = new Set<(s: SpeechState) => void>();
+const setGlobalState = (s: SpeechState) => {
+  currentState = s;
+  listeners.forEach((l) => l(s));
+};
+
 export function useSpeechSettings() {
   const [settings, setSettings] = useState<SpeechSettings>(() => {
     try {
@@ -26,6 +45,14 @@ export function useSpeechSettings() {
       return { rate: 1, voiceURI: null };
     }
   });
+  const [playbackState, setPlaybackState] = useState<SpeechState>(currentState);
+  const settingsRef = useRef(settings);
+  settingsRef.current = settings;
+
+  useEffect(() => {
+    listeners.add(setPlaybackState);
+    return () => { listeners.delete(setPlaybackState); };
+  }, []);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
@@ -40,10 +67,14 @@ export function useSpeechSettings() {
   }, []);
 
   const speak = useCallback((text: string, onStart?: () => void, onEnd?: () => void) => {
+    lastText = text;
+    const handleStart = () => { setGlobalState('playing'); onStart?.(); };
+    const handleEnd = () => { setGlobalState('idle'); onEnd?.(); };
+
     // Sample narrator voices play a pre-recorded clip instead of TTS.
     if (isSampleVoice(settings.voiceURI)) {
       if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-      playSampleVoice(settings.voiceURI as string, settings.rate, onStart, onEnd);
+      playSampleVoice(settings.voiceURI as string, settings.rate, handleStart, handleEnd);
       return;
     }
 
@@ -61,12 +92,64 @@ export function useSpeechSettings() {
       if (found) utterance.voice = found;
     }
 
-    if (onStart) utterance.onstart = onStart;
-    if (onEnd) utterance.onend = onEnd;
+    utterance.onstart = handleStart;
+    utterance.onend = handleEnd;
+    utterance.onerror = handleEnd;
     window.speechSynthesis.speak(utterance);
   }, [settings.rate, settings.voiceURI]);
 
-  return { settings, setRate, setVoiceURI, speak };
+  const pause = useCallback(() => {
+    if (isSampleVoice(settingsRef.current.voiceURI)) {
+      pauseSampleVoice();
+    } else if ('speechSynthesis' in window) {
+      window.speechSynthesis.pause();
+    }
+    setGlobalState('paused');
+  }, []);
+
+  const resume = useCallback(() => {
+    if (isSampleVoice(settingsRef.current.voiceURI)) {
+      const audio = getSampleAudio();
+      if (audio && audio.paused) {
+        resumeSampleVoice();
+        setGlobalState('playing');
+      }
+    } else if ('speechSynthesis' in window && window.speechSynthesis.paused) {
+      window.speechSynthesis.resume();
+      setGlobalState('playing');
+    }
+  }, []);
+
+  const replay = useCallback(() => {
+    if (isSampleVoice(settingsRef.current.voiceURI)) {
+      const audio = getSampleAudio();
+      if (audio) {
+        replaySampleVoice();
+        setGlobalState('playing');
+        return;
+      }
+    }
+    if (lastText) speak(lastText);
+  }, [speak]);
+
+  const stop = useCallback(() => {
+    stopSampleVoice();
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    setGlobalState('idle');
+  }, []);
+
+  return {
+    settings,
+    setRate,
+    setVoiceURI,
+    speak,
+    pause,
+    resume,
+    replay,
+    stop,
+    playbackState,
+    hasSpoken: lastText !== null,
+  };
 }
 
 export function getNamedVoices(): { name: string; emoji: string; voiceURI: string | null }[] {

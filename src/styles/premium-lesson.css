@@ -272,3 +272,39 @@
   border-color: var(--lp-gold);
   color: var(--lp-gold-light);
 }
+
+/* ---- Narrator playback controls ---- */
+.lesson-premium-shell .lp-playback-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px;
+  background: var(--lp-surface);
+  border: 1px solid var(--lp-border);
+  border-radius: 999px;
+  backdrop-filter: blur(8px);
+}
+.lesson-premium-shell .lp-pb-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  background: transparent;
+  border: none;
+  color: var(--lp-text);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+.lesson-premium-shell .lp-pb-btn:hover:not(:disabled) {
+  background: var(--lp-surface2);
+  color: var(--lp-gold-light);
+}
+.lesson-premium-shell .lp-pb-btn:active:not(:disabled) {
+  transform: scale(0.92);
+}
+.lesson-premium-shell .lp-pb-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

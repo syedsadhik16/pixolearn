@@ -66,6 +66,27 @@ export function playSampleVoice(
   void audio.play().catch(() => onEnd?.());
 }
 
+export function pauseSampleVoice(): void {
+  if (sharedAudio && !sharedAudio.paused) sharedAudio.pause();
+}
+
+export function resumeSampleVoice(): void {
+  if (sharedAudio && sharedAudio.paused) {
+    void sharedAudio.play().catch(() => {});
+  }
+}
+
+export function replaySampleVoice(): void {
+  if (sharedAudio) {
+    sharedAudio.currentTime = 0;
+    void sharedAudio.play().catch(() => {});
+  }
+}
+
+export function getSampleAudio(): HTMLAudioElement | null {
+  return sharedAudio;
+}
+
 export function stopSampleVoice(): void {
   if (sharedAudio) {
     sharedAudio.pause();
