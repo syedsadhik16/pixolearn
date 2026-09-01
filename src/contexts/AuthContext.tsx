@@ -144,7 +144,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUp = async (email: string, password: string, fullName: string, role: UserRole) => {
     const redirectUrl = `${window.location.origin}/`;
     
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -156,7 +156,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
     });
 
-    return { error: error as Error | null };
+    if (error) {
+      return { error: error as Error };
+    }
+
+    // Hosted Supabase projects typically require email confirmation. In that
+    // flow signUp succeeds, a confirmation email is sent, but session is null.
+    // Convert that state into the confirmation signal Auth.tsx already handles
+    // so the user is explicitly told to verify their email before signing in.
+    if (!data.session) {
+      return {
+        error: new Error('Email confirmation required. Please check your email to confirm your account before signing in.'),
+      };
+    }
+
+    return { error: null };
   };
 
   const signIn = async (email: string, password: string) => {
